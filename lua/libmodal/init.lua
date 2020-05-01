@@ -3,10 +3,10 @@
 	 * MODULE
 	 */
 ]]
-local libmodal  = require('src.libmodal')
-libmodal.mode   = require('src.mode')
-libmodal.prompt = require('src.prompt')
-libmodal.utils  = require('src.utils')
+local libmodal  = require('libmodal/src')
+libmodal.mode   = require('libmodal/src/mode')
+libmodal.prompt = require('libmodal/src/prompt')
+libmodal.utils  = require('libmodal/src/utils')
 
 --[[
 	/*

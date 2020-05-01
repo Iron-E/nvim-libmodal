@@ -3,7 +3,7 @@
 	 * IMPORTS
 	 */
 ]]
-local libmodal = require('src.libmodal')
+local libmodal = require('libmodal/src')
 
 --[[
 	/*
