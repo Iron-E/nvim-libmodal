@@ -2,7 +2,7 @@
 	/*
 	 * MODULE
 	 */
-]]
+--]]
 local libmodal = {}
 
 -- TODO
@@ -11,5 +11,5 @@ local libmodal = {}
 	/*
 	 * PUBLICIZE MODULE
 	 */
-]]
+--]]
 return libmodal
