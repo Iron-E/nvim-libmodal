@@ -1,16 +1,9 @@
 --[[
 	/*
-	 * IMPORTS
-	 */
---]]
-local libmodal = require('libmodal/src')
-
---[[
-	/*
 	 * MODULE
 	 */
 --]]
-libmodal.prompt = {}
+local prompt = {}
 
 ----------------------------------
 --[[ SUMMARY:
@@ -22,7 +15,7 @@ libmodal.prompt = {}
 	* `args[2]` => the prompt callback, or mode command table.
 ]]
 ----------------------------------
-function libmodal.prompt.enter(...)
+function prompt.enter(...)
 	local args = {...}
 end
 
@@ -31,4 +24,5 @@ end
 	 * PUBLICIZE MODULE
 	 */
 --]]
-return libmodal.prompt
+return prompt
+
