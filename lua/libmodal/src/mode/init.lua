@@ -4,9 +4,12 @@
 	 */
 --]]
 
-local globals = require('libmodal/src/base/globals')
-local utils   = require('libmodal/src/utils')
-local api     = utils.api
+local globals    = require('libmodal/src/base/globals')
+local ParseTable = require('libmodal/src/mode/ParseTable')
+local utils      = require('libmodal/src/utils')
+
+local api  = utils.api
+local vars = utils.vars
 
 --[[
 	/*
@@ -16,7 +19,7 @@ local api     = utils.api
 
 local mode = {}
 
---------------------------------
+------------------------
 --[[ SUMMARY:
 	* Enter a mode.
 ]]
@@ -26,7 +29,7 @@ local mode = {}
 	* `args[2]` => the mode callback, or mode combo table.
 	* `args[3]` => optional exit supresion flag.
 ]]
---------------------------------
+------------------------
 function mode.enter(...)
 	local args = {...}
 
@@ -43,14 +46,21 @@ function mode.enter(...)
 		handleExitEvents = true
 	end
 	-- Determine whether a callback was specified, or a combo table.
-	local doTimeout = nil
 	if type(args[2]) == 'table' then
-		if api.nvim_exists('g', utils.vars.timeout.name(modeName)) then
-			doTimeout = utils.vars.get(vars.timeout, modeName)
+		-- Placeholder for timeout value.
+		local doTimeout = nil
+
+		-- Read the correct timeout variable.
+		if api.nvim_exists('g', vars.timeout.name(modeName)) then
+			doTimeout = vars.nvim_get(vars.timeout, modeName)
 		else
-			doTimeout = utils.vars.libmodalTimeout
+			doTimeout = vars.libmodalTimeout
 		end
-		print(doTimeout)
+
+
+		vars.timeout.instances[modeName] = doTimeout
+
+		vars.combos.instances[modeName] = ParseTable:new(a[2])
 	end
 end
 
@@ -60,5 +70,6 @@ end
 	 */
 --]]
 mode.enter('test', {})
+print(tostring(string.gmatch('testing', '.')))
 return mode
 
