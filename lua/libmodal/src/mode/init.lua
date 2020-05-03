@@ -5,7 +5,6 @@
 --]]
 
 local globals    = require('libmodal/src/base/globals')
-local ParseTable = require('libmodal/src/mode/ParseTable')
 local utils      = require('libmodal/src/utils')
 
 local api  = utils.api
@@ -18,6 +17,7 @@ local vars = utils.vars
 --]]
 
 local mode = {}
+mode.ParseTable = require('libmodal/src/mode/ParseTable')
 
 ------------------------
 --[[ SUMMARY:
@@ -33,7 +33,7 @@ local mode = {}
 function mode.enter(...)
 	local args = {...}
 
-	--[[ VAR INIT ]]
+	--[[ SETUP. ]]
 
 	-- Create the indicator for the mode.
 	local indicator = utils.Indicator:new(args[1])
@@ -56,12 +56,42 @@ function mode.enter(...)
 		else
 			doTimeout = vars.libmodalTimeout
 		end
-
-
 		vars.timeout.instances[modeName] = doTimeout
 
-		vars.combos.instances[modeName] = ParseTable:new(a[2])
+		-- Build the parse tree.
+		vars.combos.instances[modeName] = mode.ParseTable:new(args[2])
+
+		-- Initialize the input history variable.
+		vars.input.instances[modeName] = {}
 	end
+
+	--[[ MODE LOOP. ]]
+
+	while true do
+		-- Try (using pcall) to use the mode.
+		local noErrors = pcall(function()
+			-- TODO: write main loop.
+		end)()
+
+		-- If there were errors, handle them.
+		if not noErrors then
+			api.nvim_bell()
+			api.nvim_show_err( 'vim-libmodal error',
+				api.nvim_get_vvar('throwpoint')
+				.. '\n' ..
+				api.nvim_get_vvar('exception')
+			)
+			break
+		end
+	end
+
+	--[[ TEARDOWN. ]]
+
+	--[[ TODO: translate these:
+	call s:Restore(l:winState)
+	mode | echo ''
+	call garbagecollect()
+	]]
 end
 
 --[[
@@ -70,6 +100,5 @@ end
 	 */
 --]]
 mode.enter('test', {})
-print(tostring(string.gmatch('testing', '.')))
 return mode
 

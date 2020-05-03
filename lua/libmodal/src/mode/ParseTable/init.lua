@@ -21,7 +21,8 @@ local strings    = {} -- not to be returned.
 	 */
 --]]
 
-ParseTable.EXE = 'exe'
+-- The number corresponding to <CR> in vim.
+ParseTable.CR = 13
 
 --[[
 	/*
@@ -34,7 +35,7 @@ function strings.split(str, pattern)
 	for char in string.gmatch(str, pattern) do
 		table.insert(split, char)
 	end
-	return table.concat(split, '')
+	return split
 end
 
 -------------------------
@@ -46,69 +47,68 @@ end
 ]]
 -------------------------
 function ParseTable:new(userTable)
-	local userTable = {
-		-------------------------------
-		--[[ SUMMARY:
-			* Put `value` into the parse tree as `key`.
-		]]
-		--[[ PARAMS:
-			* `key` => the key that `value` is reffered to by.
-			* `value` => the value to store as `key`.
-		]]
-		-------------------------------
-		_put = function(__self, key, value)
-			-- Iterate to get the next dictionaries.
-			local function _access(dict, splitKey)
-				-- Get the next character in the table.
-				local char = api.nvim_eval('char2nr(' .. table.remove(splitKey) .. ')')
+	local parseTable = {}
 
-				-- If there are still items in the table.
-				if #splitKey > 0 then
-					if not dict[char] then
-						dict[char] = {}
-					-- If there is a previous command mapping in place
-					elseif type(dict[char]) == 'string' then
-						-- Swap the mapping to an s:EX_KEY.
-						dict[char] = {[ParseTable.EXE] = dict[char]}
-					end
+	-------------------------------
+	--[[ SUMMARY:
+		* Put `value` into the parse tree as `key`.
+	]]
+	--[[ PARAMS:
+		* `key` => the key that `value` is reffered to by.
+		* `value` => the value to store as `key`.
+	]]
+	-------------------------------
+	function parseTable:parsePut(key, value)
+		-- Internal recursion function.
+		local function update(dict, splitKey) -- †
+			-- Get the next character in the table.
+			local k = api.nvim_eval("char2nr('" .. table.remove(splitKey) .. "')")
 
-					dict[char] = _access(dict, key)
-				elseif dict[key] then
-					dict[key][char] = value
-				else
-					dict[key] = value
+			-- If there are still kacters left in the key.
+			if #splitKey > 0 then
+				if not dict[k] then
+					dict[k] = {}
+				-- If there is a previous command mapping in place
+				elseif type(dict[k]) == 'string' then
+					-- Swap the mapping to a `CR`
+					dict[k] = {[ParseTable.CR] = dict[k]}
 				end
 
-				return dict
+				-- run update() again
+				update(dict[k], splitKey)
+			-- If dict[k] is a pre-existing table, don't clobber the table— clobber the `CR` value.
+			elseif type(dict[k]) == 'table' then
+				dict[k][ParseTable.CR] = value
+			-- If dict[k] is not a table, go ahead and clobber the value.
+			else
+				dict[k] = value
 			end
+		end -- ‡
 
-			-- Iterate over ther eturn from access.
-			for k, v in pairs(_access(
-				__self, strings.split(string.reverse(key), '.')
-			)) do
-				table.insert(parsedDict, k, v)
-			end
-		end,
+		-- Run the recursive function.
+		update(self, strings.split(
+			string.reverse(key), '.'
+		))
+	end
 
-		-------------------------------
-		--[[ SUMMARY:
-			* Create the union of `self` and `tableToUnite`
-		]]
-		--[[ PARAMS:
-			* `tableToUnite` => the table to unite with `self.`
-		]]
-		-------------------------------
-		union = function(__self, tableToUnite)
-			for k, v in pairs(tableToUnite) do
-				if not __self[k] then
-					__self:_put(k, v)
-				end
-			end
+	-------------------------------
+	--[[ SUMMARY:
+		* Create the union of `self` and `tableToUnite`
+	]]
+	--[[ PARAMS:
+		* `tableToUnite` => the table to unite with `self.`
+	]]
+	-------------------------------
+	function parseTable:parsePutAll(tableToUnite)
+		for k, v in pairs(tableToUnite) do
+			self:parsePut(k, v)
 		end
-	}
+	end
 
-
-	return userTable:_union(userTable)
+	-- Parse the passed in table.
+	parseTable:parsePutAll(userTable)
+	-- Return the new `ParseTable`.
+	return parseTable
 end
 
 --[[

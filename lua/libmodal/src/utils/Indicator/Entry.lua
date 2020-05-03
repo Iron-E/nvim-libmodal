@@ -22,7 +22,10 @@ local Entry = {}
 ]]
 --------------------------------------------------------
 function Entry.new(hlgroup, str)
-	return {hlgroup, str}
+	return {
+		['hl'] = hlgroup,
+		['str'] = str
+	}
 end
 
 --[[
