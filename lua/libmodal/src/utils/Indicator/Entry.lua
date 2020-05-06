@@ -7,7 +7,7 @@ local Entry = {}
 
 --[[
 	/*
-	 * STRUCT `Entry`
+	 * CLASS `Entry`
 	 */
 --]]
 

@@ -4,7 +4,8 @@
 	 */
 --]]
 
-local api = vim.api
+local api     = vim.api
+local globals = require('libmodal/src/base/globals')
 
 --[[
 	/*
@@ -13,7 +14,7 @@ local api = vim.api
 --]]
 
 local ParseTable = {}
-local strings    = {} -- not to be returned.
+local strings    = {} -- not to be returned. Used for split() function.
 
 --[[
 	/*
@@ -29,7 +30,6 @@ ParseTable.CR = 13
 	 * f(x)
 	 */
 --]]
-
 function strings.split(str, pattern)
 	local split = {}
 	for char in string.gmatch(str, pattern) do
@@ -77,7 +77,7 @@ function ParseTable:new(userTable)
 				-- run update() again
 				update(dict[k], splitKey)
 			-- If dict[k] is a pre-existing table, don't clobber the table— clobber the `CR` value.
-			elseif type(dict[k]) == 'table' then
+			elseif type(dict[k]) == globals.TYPE_TBL then
 				dict[k][ParseTable.CR] = value
 			-- If dict[k] is not a table, go ahead and clobber the value.
 			else

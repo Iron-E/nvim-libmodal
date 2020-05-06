@@ -14,7 +14,7 @@ local Indicator = {}
 
 --[[
 	/*
-	 * STRUCT `Indicator`
+	 * CLASS `Indicator`
 	 */
 --]]
 

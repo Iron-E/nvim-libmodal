@@ -25,6 +25,18 @@ function api.nvim_bell()
 	api.nvim_command('normal ' .. escape)
 end
 
+---------------------------
+--[[ SUMMARY:
+	* Echo a string to Vim.
+]]
+--[[ PARAMS:
+	* `str` => the string to echo.
+]]
+---------------------------
+function api.nvim_echo(str)
+	api.nvim_command("echo " .. tostring(str))
+end
+
 -----------------------------------
 --[[ SUMMARY:
 	* Check whether or not some variable exists.
@@ -36,6 +48,15 @@ end
 -----------------------------------
 function api.nvim_exists(scope, var)
 	return api.nvim_eval("exists('" .. scope .. ":" .. var .. "')") ~= globals.VIM_FALSE
+end
+
+-------------------------
+--[[ SUMMARY:
+	* Gets one character of user input, as a number.
+]]
+-------------------------
+function api.nvim_input()
+	return api.nvim_eval('getchar()')
 end
 
 ------------------------

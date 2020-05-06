@@ -64,7 +64,11 @@ end
 ]]
 ------------------------------------
 function vars.nvim_get(var, modeName)
-	return api.nvim_get_vars(var.name(modeName))
+	return api.nvim_get_var(var.name(modeName))
+end
+
+function vars.nvim_set(var, modeName, val)
+	api.nvim_set_var(var.name(modeName), val)
 end
 
 --[[
@@ -73,6 +77,7 @@ end
 	 */
 --]]
 new('combos'  , 'ModeCombos')
+new('exit'    , 'ModeExit')
 new('input'   , 'ModeInput')
 new('timeout' , 'ModeTimeout')
 
