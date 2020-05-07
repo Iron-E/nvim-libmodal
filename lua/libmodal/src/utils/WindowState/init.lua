@@ -3,6 +3,7 @@
 	 * IMPORTS
 	 */
 --]]
+
 local api = vim.api
 
 --[[
@@ -10,6 +11,7 @@ local api = vim.api
 	 * MODULE
 	 */
 --]]
+
 local WindowState = {}
 
 local height = 'winheight'
@@ -43,4 +45,5 @@ end
 	 * PUBLICIZE MODULE
 	 */
 --]]
+
 return WindowState

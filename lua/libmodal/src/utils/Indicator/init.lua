@@ -3,6 +3,7 @@
 	 * IMPORTS
 	 */
 --]]
+
 local Entry = require('libmodal/src/utils/Indicator/Entry')
 
 --[[
@@ -10,6 +11,7 @@ local Entry = require('libmodal/src/utils/Indicator/Entry')
 	 * MODULE
 	 */
 --]]
+
 local Indicator = {}
 
 --[[
@@ -18,15 +20,14 @@ local Indicator = {}
 	 */
 --]]
 
------------------------------------------------
+--------------------------------
 --[[ SUMMARY:
 	* Create a new `Indicator`.
 ]]
-
 --[[ PARAMS:
 	* `modeName` => the name of the mode that this `Indicator` is for.
 ]]
------------------------------------------------
+--------------------------------
 function Indicator:new(modeName)
 	return {
 		Entry.new('LibmodalStar', '*'),
@@ -41,4 +42,5 @@ end
 	 * PUBLICIZE MODULE
 	 */
 --]]
+
 return Indicator

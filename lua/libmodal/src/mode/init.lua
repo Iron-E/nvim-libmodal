@@ -4,8 +4,8 @@
 	 */
 --]]
 
-local globals    = require('libmodal/src/base/globals')
-local utils      = require('libmodal/src/utils')
+local globals = require('libmodal/src/base/globals')
+local utils   = require('libmodal/src/utils')
 
 local api  = utils.api
 local vars = utils.vars
@@ -19,6 +19,12 @@ local vars = utils.vars
 local mode = {}
 mode.ParseTable = require('libmodal/src/mode/ParseTable')
 
+--[[
+	/*
+	 * LIBRARY `mode`
+	 */
+--]]
+
 ------------------------------------
 --[[ SUMMARY:
 	* Parse the `comboDict` and see if there is any command to execute.
@@ -28,8 +34,20 @@ mode.ParseTable = require('libmodal/src/mode/ParseTable')
 ]]
 ------------------------------------
 function mode._comboSelect(modeName)
-	local comboDict = vars.combos.instances[modeName]
-	-- TODO translate `LibmodalEnterWithCombos`
+	-- Stop any running timers
+	if vars.timers.instances[modeName] then
+		vars.timers.instances[modeName]:stop()
+		vars.timers.instances[modeName] = nil
+	end
+
+	-- Append the latest input to the locally stored input history.
+	table.insert(
+		vars.input.instances[modeName],
+		vars.nvim_get(vars.input, modeName)
+	)
+
+	-- Get the combo dict.
+	local comboTable = vars.combos.instances[modeName]
 end
 
 ------------------------
@@ -64,17 +82,19 @@ function mode.enter(...)
 
 	-- Determine whether a callback was specified, or a combo table.
 	if type(args[2]) == globals.TYPE_TBL then
-		mode._initTimeouts(modeName)
+		mode._initTimeouts(modeName, args[2])
 	end
 
 	--[[ MODE LOOP. ]]
 
-	while true do
+	local continueMode = true
+	while continueMode do
 		-- Try (using pcall) to use the mode.
 		local noErrors = pcall(function()
 			-- If the mode is not handling exit events automatically and the global exit var is true.
 			if not handleExitEvents and var.nvim_get(vars.exit, modeName) then
-				break
+				continueMode = false
+				return
 			end
 
 			-- Echo the indicator.
@@ -86,7 +106,8 @@ function mode.enter(...)
 
 			-- Make sure that the user doesn't want to exit.
 			if handleExitEvents and uinput == globals.ESC_NR then
-				break
+				continueMode = false
+				return
 			-- If the second argument was a dict, parse it.
 			elseif type(args[2]) == globals.TYPE_TBL then
 				mode._comboSelect(modeName)
@@ -95,12 +116,12 @@ function mode.enter(...)
 				args[2]()
 			end
 
-		end)()
+		end)
 
 		-- If there were errors, handle them.
 		if not noErrors then
 			mode._showError()
-			break
+			continueMode = false
 		end
 	end
 
@@ -111,7 +132,7 @@ function mode.enter(...)
 	winState:restore()
 end
 
-function mode._initTimeouts(modeName)
+function mode._initTimeouts(modeName, comboTable)
 	-- Placeholder for timeout value.
 	local doTimeout = nil
 
@@ -124,7 +145,7 @@ function mode._initTimeouts(modeName)
 	vars.timeout.instances[modeName] = doTimeout
 
 	-- Build the parse tree.
-	vars.combos.instances[modeName] = mode.ParseTable:new(args[2])
+	vars.combos.instances[modeName] = mode.ParseTable.new(comboTable)
 
 	-- Initialize the input history variable.
 	vars.input.instances[modeName] = {}
@@ -144,6 +165,7 @@ end
 	 * PUBLICIZE MODULE
 	 */
 --]]
+
 mode.enter('test', {})
 return mode
 

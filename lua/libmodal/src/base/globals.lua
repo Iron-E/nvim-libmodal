@@ -3,7 +3,14 @@
 	 * MODULE
 	 */
 --]]
+
 local globals = {}
+
+--[[
+	/*
+	 * TABLE `globals`
+	 */
+--]]
 
 globals.ESC_NR = 27
 globals.TYPE_FUNC = 'function'
@@ -19,5 +26,5 @@ globals.VIM_TRUE  = 1
 	 * PUBLICIZE MODULE
 	 */
 --]]
-return globals
 
+return globals

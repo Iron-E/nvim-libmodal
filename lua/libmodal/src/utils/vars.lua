@@ -76,10 +76,12 @@ end
 	 * VARS
 	 */
 --]]
-new('combos'  , 'ModeCombos')
-new('exit'    , 'ModeExit')
-new('input'   , 'ModeInput')
+
+new('combos'  , 'ModeCombos' )
+new('exit'    , 'ModeExit'   )
+new('input'   , 'ModeInput'  )
 new('timeout' , 'ModeTimeout')
+new('timer'   , 'ModeTimer'  )
 
 --[[
 	/*
