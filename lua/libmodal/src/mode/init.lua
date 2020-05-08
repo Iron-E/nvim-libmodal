@@ -18,12 +18,17 @@ local vars = utils.vars
 
 local mode = {}
 mode.ParseTable = require('libmodal/src/mode/ParseTable')
+mode.TIMEOUT = 'TIMEOUT'
 
 --[[
 	/*
 	 * LIBRARY `mode`
 	 */
 --]]
+
+function mode._clearLocalInput(modeName)
+	vars.input.instances[modeName] = {}
+end
 
 ------------------------------------
 --[[ SUMMARY:
@@ -48,6 +53,46 @@ function mode._comboSelect(modeName)
 
 	-- Get the combo dict.
 	local comboTable = vars.combos.instances[modeName]
+	-- Get the command based on the users input.
+	local cmd = comboTable:get(
+		table.concat(vars.input.instance[modeName])
+	)
+
+	-- Get the type of the command.
+	local commandType = type(cmd)
+	local clearInput = false
+
+	-- if there was no matching command
+	if commandType == false then clearInput = true
+	-- The command was a table, meaning that it MIGHT match.
+	elseif commandType == globals.TYPE_TBL then
+		-- Create a new timer
+		vars.timers.instances[modeName] = vim.loop.new_timer()
+		-- Get the `&timeoutlen` variable.
+		local timeoutlen = api.nvim_get_option('timeoutlen')
+
+		-- start the timer
+		vars.timers.instances[modeName]:start(timeoutlen, 0,
+			vim.schedule_wrap(function()
+				-- Send input to interrupt a blocking `getchar`
+				vim.api.nvim_feedkeys(mode.TIMEOUT, '', false)
+				-- if there is a command, execute it.
+				if cmd[mode.ParseTable.CR] then
+					api.nvim_command(cmd[mode.ParseTable.CR])
+				end
+				-- clear input
+				mode._clearLocalInput(modeName)
+			end)
+		)
+	-- The command was an actual vim command.
+	else
+		api.nvim_command(cmd)
+		clearInput = true
+	end
+
+	if clearInput then
+		mode._clearLocalInput(modeName)
+	end
 end
 
 ------------------------
@@ -102,6 +147,9 @@ function mode.enter(...)
 
 			-- Capture input.
 			local uinput = api.nvim_input()
+			-- Return if there was a timeout event.
+			if uinput == mode.TIMEOUT then return end
+			-- Otherwise set the input variable to the new input.
 			vars.nvim_set(vars.input, modeName, uinput)
 
 			-- Make sure that the user doesn't want to exit.
@@ -148,7 +196,7 @@ function mode._initTimeouts(modeName, comboTable)
 	vars.combos.instances[modeName] = mode.ParseTable.new(comboTable)
 
 	-- Initialize the input history variable.
-	vars.input.instances[modeName] = {}
+	mode._clearLocalInput(modeName)
 end
 
 function mode._showError()
