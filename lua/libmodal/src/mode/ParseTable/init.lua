@@ -14,7 +14,6 @@ local globals = require('libmodal/src/base/globals')
 --]]
 
 local ParseTable = {}
-local strings    = {} -- not to be returned. Used for split() function.
 
 --[[
 	/*
@@ -22,21 +21,45 @@ local strings    = {} -- not to be returned. Used for split() function.
 	 */
 --]]
 
-------------------------------------
+----------------------------------------
 --[[ SUMMARY:
 	* Split some `str` using a regex `pattern`.
 ]]
---[[
+--[[ PARAMS:
 	* `str` => the string to split.
 	* `pattern` => the regex pattern to split `str` with.
 ]]
-------------------------------------
-function strings.split(str, pattern)
+----------------------------------------
+local function stringSplit(str, pattern)
 	local split = {}
 	for char in string.gmatch(str, pattern) do
 		table.insert(split, char)
 	end
 	return split
+end
+
+--------------------------------
+--[[ SUMMARY:
+	* Reverse the elements of some table.
+]]
+--[[ PARAMS:
+	* `tbl` => the table to reverse.
+]]
+--------------------------------
+local function tableReverse(tbl)
+	local i = 1
+	local halfway = math.floor(#tbl / 2)
+	while i <= halfway do
+		-- get the other end of the dict
+		local j = #tbl + 1 - i
+		-- copy the value to a placeholder
+		local placeholder = tbl[j]
+		-- swap the values
+		tbl[j] = tbl[i]
+		tbl[i] = placeholder
+		-- increment
+		i = i + 1
+	end
 end
 
 --[[
@@ -72,13 +95,13 @@ function ParseTable.new(userTable)
 		* `false`    => when `key` is not ANYWHERE.
 	]]
 	----------------------------
-	function parseTable:get(key)
+	function parseTable:get(keyDict)
 		local function parseGet(dict, splitKey)
 			--[[ Get the next character in the combo string. ]]
 
 			local k = ''
 			if #splitKey > 0 then -- There is more input to parse
-				k = api.nvim_eval("char2nr('" .. table.remove(splitKey) .. "')")
+				k = table.remove(splitKey) -- the dict should already be `char2nr()`'d
 			else -- The user input has run out, but there is more in the dictionary.
 				return dict
 			end
@@ -103,10 +126,12 @@ function ParseTable.new(userTable)
 			return false
 		end
 
+		--[[ Reverse the dict. ]]
+		tableReverse(keyDict)
+
+		--[[ Get return value. ]]
 		-- run the inner recursive function in order to return the desired result
-		return parseGet(self, strings.split(
-			string.reverse(key), '.'
-		))
+		return parseGet(self, keyDict)
 	end
 
 	----------------------------------------
@@ -146,7 +171,7 @@ function ParseTable.new(userTable)
 		end -- ‡
 
 		-- Run the recursive function.
-		update(self, strings.split(
+		update(self, stringSplit(
 			string.reverse(key), '.'
 		))
 	end

@@ -13,6 +13,21 @@ utils.vars        = require('libmodal/src/utils/vars')
 
 --[[
 	/*
+	 * FUNCTIONS
+	 */
+--]]
+
+function utils.showError()
+	utils.api.nvim_bell()
+	utils.api.nvim_show_err( 'vim-libmodal error',
+		utils.api.nvim_get_vvar('throwpoint')
+		.. '\n' ..
+		utils.api.nvim_get_vvar('exception')
+	)
+end
+
+--[[
+	/*
 	 * PUBLICIZE MODULE
 	 */
 --]]

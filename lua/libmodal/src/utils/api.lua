@@ -73,10 +73,10 @@ function api.nvim_lecho(hlTables)
 	for _, hlTable in ipairs(hlTables) do
 		api.nvim_command(
 			-- `:echohl` the hlgroup and then `:echon` the string.
-			"echon execute(['echohl \"" .. hlTable.hl .. "\"', 'echon \"" .. hlTable.str .. "\"'])"
+			"echohl " .. hlTable.hl .. " | echon '" .. hlTable.str .. "'"
 		)
 	end
-	api.nvim_command('echohl None')
+	-- api.nvim_command('echohl None')
 end
 
 --------------------------

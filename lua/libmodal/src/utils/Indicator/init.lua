@@ -28,10 +28,10 @@ local Indicator = {}
 	* `modeName` => the name of the mode that this `Indicator` is for.
 ]]
 --------------------------------
-function Indicator:new(modeName)
+function Indicator.new(modeName)
 	return {
 		Entry.new('LibmodalStar', '*'),
-		Entry.new( 'None', '*' ),
+		Entry.new( 'None', ' ' ),
 		Entry.new( 'LibmodalPrompt', tostring(modeName) ),
 		Entry.new('None', ' > '),
 	}
