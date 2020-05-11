@@ -1,6 +1,5 @@
 local api = vim.api
 local libmodal = require('libmodal')
-
 local barModeInputHistory = {}
 
 local function clearHistory(indexToCheck)
@@ -9,11 +8,10 @@ local function clearHistory(indexToCheck)
 	end
 end
 
-barMode = function()
-	table.insert(
-		barModeInputHistory,
-		api.nvim_eval('nr2char(g:barModeInput)')
-	)
+function barMode()
+	table.insert(barModeInputHistory, string.char(
+		api.nvim_get_var('barModeInput')
+	))
 
 	local index = 1
 	if barModeInputHistory[1] == 'z' then

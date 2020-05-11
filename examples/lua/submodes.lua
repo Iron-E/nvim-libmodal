@@ -1,12 +1,20 @@
-let s:barModeRecurse = 0
+local libmodal = require('libmodal')
+local barModeRecurse = 0
 
-function! s:BarMode()
-	if g:bar{s:barModeRecurse}ModeInput ==# 'z'
-		let s:barModeRecurse += 1
-		execute 'BarModeEnter'
-		let s:barModeRecurse -= 1
-	endif
-endfunction
+function barMode()
+	local uinput = string.char(vim.api.nvim_get_var(
+		'bar' .. tostring(barModeRecurse) .. 'ModeInput'
+	))
 
-command! BarModeEnter call libmodal#Enter('BAR' . s:barModeRecurse, funcref('s:BarMode'))
-execute 'BarModeEnter'
+	if uinput == 'z' then
+		barModeRecurse = barModeRecurse + 1
+		enter()
+		barModeRecurse = barModeRecurse - 1
+	end
+end
+
+function enter()
+	libmodal.mode.enter('BAR' .. barModeRecurse, barMode)
+end
+
+enter()

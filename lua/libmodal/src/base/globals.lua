@@ -20,6 +20,13 @@ globals.TYPE_TBL = 'table'
 globals.VIM_FALSE = 0
 globals.VIM_TRUE  = 1
 
+function globals.isFalse(val)
+	return val == false or val == globals.VIM_FALSE
+end
+
+function globals.isTrue(val)
+	return val == true or val == globals.VIM_TRUE
+end
 
 --[[
 	/*

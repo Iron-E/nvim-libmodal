@@ -21,7 +21,7 @@ local ParseTable = {}
 	 */
 --]]
 
-----------------------------------------
+-----------------------------------------
 --[[ SUMMARY:
 	* Split some `str` using a regex `pattern`.
 ]]
@@ -29,8 +29,8 @@ local ParseTable = {}
 	* `str` => the string to split.
 	* `pattern` => the regex pattern to split `str` with.
 ]]
-----------------------------------------
-local function stringSplit(str, pattern)
+-----------------------------------------
+local function _stringSplit(str, pattern)
 	local split = {}
 	for char in string.gmatch(str, pattern) do
 		table.insert(split, char)
@@ -38,28 +38,22 @@ local function stringSplit(str, pattern)
 	return split
 end
 
---------------------------------
+---------------------------------
 --[[ SUMMARY:
 	* Reverse the elements of some table.
 ]]
 --[[ PARAMS:
 	* `tbl` => the table to reverse.
 ]]
---------------------------------
-local function tableReverse(tbl)
-	local i = 1
-	local halfway = math.floor(#tbl / 2)
-	while i <= halfway do
-		-- get the other end of the dict
-		local j = #tbl + 1 - i
-		-- copy the value to a placeholder
-		local placeholder = tbl[j]
-		-- swap the values
-		tbl[j] = tbl[i]
-		tbl[i] = placeholder
-		-- increment
-		i = i + 1
+---------------------------------
+local function _tableReverse(tbl)
+	local reversed = {}
+	local i = #tbl
+	while i > 0 do
+		table.insert(reversed, tbl[i])
+		i = i - 1
 	end
+	return reversed
 end
 
 --[[
@@ -82,7 +76,7 @@ ParseTable.CR = 13
 function ParseTable.new(userTable)
 	local parseTable = {}
 
-	----------------------------
+	--------------------------------
 	--[[ SUMMARY:
 		* Get a value from this `ParseTable`.
 	]]
@@ -94,9 +88,9 @@ function ParseTable.new(userTable)
 		* `table`    => when the `key` partially mathes.
 		* `false`    => when `key` is not ANYWHERE.
 	]]
-	----------------------------
+	--------------------------------
 	function parseTable:get(keyDict)
-		local function parseGet(dict, splitKey)
+		local function _parseGet(dict, splitKey)
 			--[[ Get the next character in the combo string. ]]
 
 			local k = ''
@@ -117,7 +111,7 @@ function ParseTable.new(userTable)
 					if val[ParseTable.CR] and #splitKey < 1 then
 						return val
 					else
-						return parseGet(val, splitKey)
+						return _parseGet(val, splitKey)
 					end
 				elseif valType == globals.TYPE_STR and #splitKey < 1 then
 					return val
@@ -127,11 +121,11 @@ function ParseTable.new(userTable)
 		end
 
 		--[[ Reverse the dict. ]]
-		tableReverse(keyDict)
+		local reversed = _tableReverse(keyDict)
 
 		--[[ Get return value. ]]
 		-- run the inner recursive function in order to return the desired result
-		return parseGet(self, keyDict)
+		return _parseGet(self, reversed)
 	end
 
 	----------------------------------------
@@ -145,9 +139,9 @@ function ParseTable.new(userTable)
 	----------------------------------------
 	function parseTable:parsePut(key, value)
 		-- Internal recursion function.
-		local function update(dict, splitKey) -- †
+		local function _update(dict, splitKey) -- †
 			-- Get the next character in the table.
-			local k = api.nvim_eval("char2nr('" .. table.remove(splitKey) .. "')")
+			local k = string.byte(table.remove(splitKey))
 
 			-- If there are still kacters left in the key.
 			if #splitKey > 0 then
@@ -159,8 +153,8 @@ function ParseTable.new(userTable)
 					dict[k] = {[ParseTable.CR] = dict[k]}
 				end
 
-				-- run update() again
-				update(dict[k], splitKey)
+				-- run _update() again
+				_update(dict[k], splitKey)
 			-- If dict[k] is a pre-existing table, don't clobber the table— clobber the `CR` value.
 			elseif type(dict[k]) == globals.TYPE_TBL then
 				dict[k][ParseTable.CR] = value
@@ -171,7 +165,7 @@ function ParseTable.new(userTable)
 		end -- ‡
 
 		-- Run the recursive function.
-		update(self, stringSplit(
+		_update(self, _stringSplit(
 			string.reverse(key), '.'
 		))
 	end

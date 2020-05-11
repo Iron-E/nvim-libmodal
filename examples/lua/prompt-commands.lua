@@ -1,7 +1,8 @@
-let s:commands = {
-\	'new': 'tabnew',
-\	'close': 'tabclose',
-\	'last': 'tablast'
-\}
+local libmodal = require('libmodal')
+local commands = {
+	['new'] = 'tabnew',
+	['close'] = 'tabclose',
+	['last'] = 'tablast'
+}
 
-call libmodal#Prompt('TAB', s:commands)
+libmodal.prompt.enter('BAR', commands)

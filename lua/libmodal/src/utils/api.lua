@@ -21,8 +21,7 @@ local api = vim.api
 ]]
 ------------------------
 function api.nvim_bell()
-	local escape = api.nvim_eval("nr2char('" .. 27 .. "')")
-	api.nvim_command('normal ' .. escape)
+	api.nvim_command('normal ' .. string.char(27)) -- escape char
 end
 
 ---------------------------
@@ -47,12 +46,33 @@ end
 ]]
 -----------------------------------
 function api.nvim_exists(scope, var)
-	return api.nvim_eval("exists('" .. scope .. ":" .. var .. "')") ~= globals.VIM_FALSE
+	return api.nvim_eval("exists('" .. scope .. ":" .. var .. "')") == globals.VIM_TRUE
 end
 
 -------------------------
 --[[ SUMMARY:
 	* Gets one character of user input, as a number.
+]]
+--[[ REMARKS:
+	* This could also be:
+	```lua
+	local cmd = {
+		'"while 1"',
+			'"let c = getchar(0)"',
+			'"if empty(c)"',
+				'"sleep 20m"',
+			'"else"',
+				'"echo c"',
+				'"break"',
+			'"endif"',
+		'"endwhile"'
+	}
+
+	return tonumber(vim.api.nvim_eval(
+		"execute([" ..  table.concat(cmd, ',') .. "])"
+	))
+	```
+	However, I'm not sure if it would accidentally affect text.
 ]]
 -------------------------
 function api.nvim_input()
@@ -68,15 +88,16 @@ end
 	* `hlTables` => the tables to echo with highlights.
 ]]
 ---------------------------------
+local resetHighlight = Entry.new('None', '')
 function api.nvim_lecho(hlTables)
 	api.nvim_redraw()
+	table.insert(hlTables, resetHighlight)
 	for _, hlTable in ipairs(hlTables) do
 		api.nvim_command(
 			-- `:echohl` the hlgroup and then `:echon` the string.
 			"echohl " .. hlTable.hl .. " | echon '" .. hlTable.str .. "'"
 		)
 	end
-	-- api.nvim_command('echohl None')
 end
 
 --------------------------
@@ -104,6 +125,7 @@ function api.nvim_show_err(title, msg)
 		Entry.new('Error', msg),
 		Entry.new('Question', '\n[Press any key to return]')
 	})
+	api.nvim_command('call getchar()')
 end
 
 --[[

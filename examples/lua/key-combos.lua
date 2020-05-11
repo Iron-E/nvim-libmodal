@@ -1,7 +1,8 @@
-let s:barModeCombos = {
-\	'zf': 'split',
-\	'zfo': 'vsplit',
-\	'zfc': 'tabnew'
-\}
+local libmodal = require('libmodal')
+local barModeCombos = {
+	['zf'] = 'split',
+	['zfo'] = 'vsplit',
+	['zfc'] = 'tabnew'
+}
 
-call libmodal#Enter('BAR', s:barModeCombos)
+libmodal.mode.enter('BAR', barModeCombos)

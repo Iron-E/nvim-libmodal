@@ -30,10 +30,9 @@ local Indicator = {}
 --------------------------------
 function Indicator.new(modeName)
 	return {
-		Entry.new('LibmodalStar', '*'),
-		Entry.new( 'None', ' ' ),
+		Entry.new('LibmodalPrompt', '-- '),
 		Entry.new( 'LibmodalPrompt', tostring(modeName) ),
-		Entry.new('None', ' > '),
+		Entry.new('LibmodalPrompt', ' --'),
 	}
 end
 

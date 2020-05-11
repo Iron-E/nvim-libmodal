@@ -1,13 +1,15 @@
-let s:commandList = ['new', 'close', 'last']
+local libmodal = require('libmodal')
+local commandList = {'new', 'close', 'last'}
 
-function! s:BarMode() abort
-	if g:tabModeInput ==# 'new'
+function barMode()
+	local uinput = vim.api.nvim_get_var('tabModeInput')
+	if uinput == 'new' then
 		execute 'tabnew'
-	elseif g:tabModeInput ==# 'close'
+	elseif uinput == 'close' then
 		execute 'tabclose'
-	elseif g:tabModeInput ==# 'last'
+	elseif uinput == 'last' then
 		execute 'tablast'
-	endif
-endfunction
+	end
+end
 
-call libmodal#Prompt('TAB', funcref('s:BarMode'), s:commandList)
+libmodal.prompt.enter('BAR', barMode, commandList)
