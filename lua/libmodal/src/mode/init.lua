@@ -203,7 +203,6 @@ local function _modeLoop(handleExitEvents, indicator, modeInstruction, modeName)
 		vars.nvim_get(vars.exit, modeName)
 	) then return false end
 
-
 	-- Echo the indicator.
 	api.nvim_lecho(indicator)
 
@@ -246,7 +245,7 @@ function mode.enter(...)
 	--[[ SETUP. ]]
 
 	-- Create the indicator for the mode.
-	local indicator = utils.Indicator.new(args[1])
+	local indicator = utils.Indicator.mode(args[1])
 
 	-- Grab the state of the window.
 	local winState = utils.WindowState.new()

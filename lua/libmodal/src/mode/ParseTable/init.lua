@@ -6,6 +6,7 @@
 
 local api     = vim.api
 local globals = require('libmodal/src/base/globals')
+local strings = require('libmodal/src/utils/strings')
 
 --[[
 	/*
@@ -20,23 +21,6 @@ local ParseTable = {}
 	 * CLASS `ParseTable`
 	 */
 --]]
-
------------------------------------------
---[[ SUMMARY:
-	* Split some `str` using a regex `pattern`.
-]]
---[[ PARAMS:
-	* `str` => the string to split.
-	* `pattern` => the regex pattern to split `str` with.
-]]
------------------------------------------
-local function _stringSplit(str, pattern)
-	local split = {}
-	for char in string.gmatch(str, pattern) do
-		table.insert(split, char)
-	end
-	return split
-end
 
 ---------------------------------
 --[[ SUMMARY:
@@ -90,7 +74,7 @@ function ParseTable.new(userTable)
 	]]
 	--------------------------------
 	function parseTable:get(keyDict)
-		local function _parseGet(dict, splitKey)
+		local function parseGet(dict, splitKey)
 			--[[ Get the next character in the combo string. ]]
 
 			local k = ''
@@ -111,7 +95,7 @@ function ParseTable.new(userTable)
 					if val[ParseTable.CR] and #splitKey < 1 then
 						return val
 					else
-						return _parseGet(val, splitKey)
+						return parseGet(val, splitKey)
 					end
 				elseif valType == globals.TYPE_STR and #splitKey < 1 then
 					return val
@@ -125,7 +109,7 @@ function ParseTable.new(userTable)
 
 		--[[ Get return value. ]]
 		-- run the inner recursive function in order to return the desired result
-		return _parseGet(self, reversed)
+		return parseGet(self, reversed)
 	end
 
 	----------------------------------------
@@ -139,7 +123,7 @@ function ParseTable.new(userTable)
 	----------------------------------------
 	function parseTable:parsePut(key, value)
 		-- Internal recursion function.
-		local function _update(dict, splitKey) -- †
+		local function update(dict, splitKey) -- †
 			-- Get the next character in the table.
 			local k = string.byte(table.remove(splitKey))
 
@@ -148,13 +132,13 @@ function ParseTable.new(userTable)
 				if not dict[k] then
 					dict[k] = {}
 				-- If there is a previous command mapping in place
-				elseif type(dict[k]) == 'string' then
+				elseif type(dict[k]) == globals.TYPE_STR then
 					-- Swap the mapping to a `CR`
 					dict[k] = {[ParseTable.CR] = dict[k]}
 				end
 
-				-- run _update() again
-				_update(dict[k], splitKey)
+				-- run update() again
+				update(dict[k], splitKey)
 			-- If dict[k] is a pre-existing table, don't clobber the table— clobber the `CR` value.
 			elseif type(dict[k]) == globals.TYPE_TBL then
 				dict[k][ParseTable.CR] = value
@@ -165,7 +149,7 @@ function ParseTable.new(userTable)
 		end -- ‡
 
 		-- Run the recursive function.
-		_update(self, _stringSplit(
+		update(self, strings.split(
 			string.reverse(key), '.'
 		))
 	end
