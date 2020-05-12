@@ -36,7 +36,7 @@ function api.nvim_echo(str)
 	api.nvim_command("echo " .. tostring(str))
 end
 
------------------------------------
+------------------------------------
 --[[ SUMMARY:
 	* Check whether or not some variable exists.
 ]]
@@ -44,9 +44,9 @@ end
 	* `scope` => The scope of the variable (i.e. `g`, `l`, etc.)
 	* `var` => the variable to check for.
 ]]
------------------------------------
+------------------------------------
 function api.nvim_exists(scope, var)
-	return api.nvim_eval("exists('" .. scope .. ":" .. var .. "')") == globals.VIM_TRUE
+	return api.nvim_call_function('exists', {scope .. ':' .. var}) == globals.VIM_TRUE
 end
 
 -------------------------
@@ -68,15 +68,13 @@ end
 		'"endwhile"'
 	}
 
-	return tonumber(vim.api.nvim_eval(
-		"execute([" ..  table.concat(cmd, ',') .. "])"
-	))
+	return tonumber(vim.api.nvim_call_function("execute",cmd))
 	```
 	However, I'm not sure if it would accidentally affect text.
 ]]
 -------------------------
 function api.nvim_input()
-	return api.nvim_eval('getchar()')
+	return api.nvim_call_function('getchar', {})
 end
 
 ---------------------------------
@@ -91,11 +89,11 @@ end
 local resetHighlight = Entry.new('None', '')
 function api.nvim_lecho(hlTables)
 	api.nvim_redraw()
-	table.insert(hlTables, resetHighlight)
+	hlTables[#hlTables+1] = resetHighlight
 	for _, hlTable in ipairs(hlTables) do
 		api.nvim_command(
 			-- `:echohl` the hlgroup and then `:echon` the string.
-			"echohl " .. hlTable.hl .. " | echon '" .. hlTable.str .. "'"
+			"echohl " .. tostring(hlTable.hl) .. " | echon '" .. tostring(hlTable.str) .. "'"
 		)
 	end
 end
@@ -119,13 +117,14 @@ end
 	* `msg` => the message of the error.
 ]]
 --------------------------------------
+local returnEntry = Entry.new('Question', '\nPress any key to return.')
 function api.nvim_show_err(title, msg)
 	api.nvim_lecho({
-		Entry.new('Title', title .. '\n'),
-		Entry.new('Error', msg),
-		Entry.new('Question', '\n[Press any key to return]')
+		Entry.new('Title', tostring(title) .. '\n'),
+		Entry.new('Error', tostring(msg)),
+		returnEntry
 	})
-	api.nvim_command('call getchar()')
+	api.nvim_call_function('getchar', {})
 end
 
 --[[

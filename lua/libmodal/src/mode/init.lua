@@ -147,9 +147,7 @@ local function _initCombos(modeName, comboTable)
 	-- create a floating window
 	local buf = api.nvim_create_buf(false, true)
 	vars.buffers.instances[modeName] = buf
-	vars.windows.instances[modeName] = api.nvim_eval(
-		'libmodal#WinOpen(' .. buf .. ')'
-	)
+	vars.windows.instances[modeName] = api.nvim_call_function('libmodal#WinOpen', {buf})
 
 	-- Build the parse tree.
 	vars.combos.instances[modeName] = mode.ParseTable.new(comboTable)

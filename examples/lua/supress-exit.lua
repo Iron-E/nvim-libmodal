@@ -6,7 +6,7 @@ function barMode()
 	)
 
 	if uinput == '' then
-		vim.api.nvim_command("echo 'You cant leave using <Esc>.'")
+		vim.api.nvim_command("echom 'You cant leave using <Esc>.'")
 	elseif uinput == 'q' then
 		vim.api.nvim_set_var('barModeExit', true)
 	end
