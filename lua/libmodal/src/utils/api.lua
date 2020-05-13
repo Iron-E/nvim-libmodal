@@ -89,7 +89,7 @@ end
 local resetHighlight = Entry.new('None', '')
 function api.nvim_lecho(hlTables)
 	api.nvim_redraw()
-	hlTables[#hlTables+1] = resetHighlight
+	hlTables[#hlTables + 1] = resetHighlight
 	for _, hlTable in ipairs(hlTables) do
 		-- `:echohl` the hlgroup and then `:echon` the string
 		api.nvim_command(

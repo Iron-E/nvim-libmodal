@@ -1,13 +1,13 @@
 local libmodal = require('libmodal')
 
 function barMode()
-	local uinput = string.char(
+	local userInput = string.char(
 		vim.api.nvim_get_var('barModeInput')
 	)
 
-	if uinput == '' then
+	if userInput == '' then
 		vim.api.nvim_command("echom 'You cant leave using <Esc>.'")
-	elseif uinput == 'q' then
+	elseif userInput == 'q' then
 		vim.api.nvim_set_var('barModeExit', true)
 	end
 end

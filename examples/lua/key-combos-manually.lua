@@ -9,9 +9,9 @@ local function clearHistory(indexToCheck)
 end
 
 function barMode()
-	table.insert(barModeInputHistory, string.char(
+	barModeInputHistory[#barModeInputHistory + 1] = string.char(
 		api.nvim_get_var('barModeInput')
-	))
+	)
 
 	local index = 1
 	if barModeInputHistory[1] == 'z' then

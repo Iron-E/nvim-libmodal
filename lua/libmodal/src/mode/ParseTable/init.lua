@@ -17,9 +17,26 @@ local ParseTable = {}
 
 --[[
 	/*
-	 * CLASS `ParseTable`
+	 * Utils for `ParseTable`
 	 */
 --]]
+
+--------------------------------------
+--[[ SUMMARY:
+	* Split some `str` over a `regex`.
+]]
+--[[ PARAMS:
+	* `str` => the string to split.
+	* `regex` => the regex to split `str` with.
+]]
+--------------------------------------
+local function _stringSplit(str, regex)
+	local split = {}
+	for char in string.gmatch(str, regex) do
+		split[#split + 1] = char
+	end
+	return split
+end
 
 ---------------------------------
 --[[ SUMMARY:
@@ -33,7 +50,7 @@ local function _tableReverse(tbl)
 	local reversed = {}
 	local i = #tbl
 	while i > 0 do
-		table.insert(reversed, tbl[i])
+		reversed[#reversed + 1] = tbl[i]
 		i = i - 1
 	end
 	return reversed
@@ -79,7 +96,7 @@ function ParseTable.new(userTable)
 			local k = ''
 			if #splitKey > 0 then -- There is more input to parse
 				k = table.remove(splitKey) -- the dict should already be `char2nr()`'d
-			else -- The user input has run out, but there is more in the dictionary.
+			else -- the user input has run out, but there is more in the dictionary.
 				return dict
 			end
 
@@ -123,13 +140,11 @@ function ParseTable.new(userTable)
 	function parseTable:parsePut(key, value)
 		-- Internal recursion function.
 		local function update(dict, splitKey) -- †
-			-- Get the next character in the table.
+			--[[ Get the next character in the table. ]]
 			local k = string.byte(table.remove(splitKey))
 
-			-- If there are still kacters left in the key.
-			if #splitKey > 0 then
-				if not dict[k] then
-					dict[k] = {}
+			if #splitKey > 0 then -- there are still kacters left in the key.
+				if not dict[k] then dict[k] = {}
 				-- If there is a previous command mapping in place
 				elseif type(dict[k]) == globals.TYPE_STR then
 					-- Swap the mapping to a `CR`
@@ -141,16 +156,14 @@ function ParseTable.new(userTable)
 			-- If dict[k] is a pre-existing table, don't clobber the table— clobber the `CR` value.
 			elseif type(dict[k]) == globals.TYPE_TBL then
 				dict[k][ParseTable.CR] = value
-			-- If dict[k] is not a table, go ahead and clobber the value.
-			else
-				dict[k] = value
+			else dict[k] = value -- dict[k] is not a table, go ahead and clobber the value.
 			end
 		end -- ‡
 
 		-- Run the recursive function.
-		update(self, vim.split(
-			string.reverse(key), '.', false
-		))
+		update(self, _stringSplit(
+			string.reverse(key), '.')
+		)
 	end
 
 	---------------------------------------------

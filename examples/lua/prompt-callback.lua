@@ -3,12 +3,12 @@ local api = vim.api
 local commandList = {'new', 'close', 'last'}
 
 function barMode()
-	local uinput = vim.api.nvim_get_var('barModeInput')
-	if uinput == 'new' then
+	local userInput = vim.api.nvim_get_var('barModeInput')
+	if userInput == 'new' then
 		api.nvim_command('tabnew')
-	elseif uinput == 'close' then
+	elseif userInput == 'close' then
 		api.nvim_command('tabclose')
-	elseif uinput == 'last' then
+	elseif userInput == 'last' then
 		api.nvim_command('tablast')
 	end
 end

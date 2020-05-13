@@ -34,7 +34,7 @@ local _TIMEOUT_LEN = api.nvim_get_option('timeoutlen')
 	* Reset libmodal's internal counter of user input to default.
 ]]
 ----------------------------------------
-local function _clearLocalInput(modeName)
+local function _clearUserInput(modeName)
 	vars.input.instances[modeName] = {}
 end
 
@@ -47,24 +47,24 @@ end
 ]]
 ----------------------------------------------
 local function _updateFloatingWindow(modeName)
-	local uinput = {}
+	local userInput = {}
 	for _, v in ipairs(vars.input.instances[modeName]) do
-		table.insert(uinput, string.char(v))
+		userInput[#userInput + 1] = string.char(v)
 	end
 	api.nvim_buf_set_lines(
 		vars.buffers.instances[modeName],
-		0, 1, true, {table.concat(uinput)}
+		0, 1, true, {table.concat(userInput)}
 	)
 end
 
-------------------------------------
+-------------------------------------
 --[[ SUMMARY:
 	* Parse the `comboDict` and see if there is any command to execute.
 ]]
 --[[ PARAMS:
 	* `modeName` => the name of the mode that is currently active.
 ]]
-------------------------------------
+-------------------------------------
 local function _comboSelect(modeName)
 	-- Stop any running timers
 	if vars.timer.instances[modeName] then
@@ -73,25 +73,23 @@ local function _comboSelect(modeName)
 	end
 
 	-- Append the latest input to the locally stored input history.
-	table.insert(
-		vars.input.instances[modeName],
-		vars.nvim_get(vars.input, modeName)
+	local userInputHistory = vars.input.instances[modeName]
+	userInputHistory[#userInputHistory + 1] = vars.nvim_get(
+		vars.input, modeName
 	)
 
 	-- Get the combo dict.
 	local comboTable = vars.combos.instances[modeName]
 
 	-- Get the command based on the users input.
-	local cmd = comboTable:get(
-		vars.input.instances[modeName]
-	)
+	local cmd = comboTable:get(userInputHistory)
 
 	-- Get the type of the command.
 	local commandType = type(cmd)
-	local clearInput = false
+	local clearUserInput = false
 
 	-- if there was no matching command
-	if cmd == false then clearInput = true
+	if cmd == false then clearUserInput = true
 	-- The command was a table, meaning that it MIGHT match.
 	elseif commandType == globals.TYPE_TBL then
 		-- Create a new timer
@@ -107,18 +105,18 @@ local function _comboSelect(modeName)
 					api.nvim_command(cmd[mode.ParseTable.CR])
 				end
 				-- clear input
-				_clearLocalInput(modeName)
+				_clearUserInput(modeName)
 				_updateFloatingWindow(modeName)
 			end)
 		)
 	-- The command was an actual vim command.
 	else
 		api.nvim_command(cmd)
-		clearInput = true
+		clearUserInput = true
 	end
 
-	if clearInput then
-		_clearLocalInput(modeName)
+	if clearUserInput then
+		_clearUserInput(modeName)
 	end
 	_updateFloatingWindow(modeName)
 end
@@ -153,7 +151,7 @@ local function _initCombos(modeName, comboTable)
 	vars.combos.instances[modeName] = mode.ParseTable.new(comboTable)
 
 	-- Initialize the input history variable.
-	_clearLocalInput(modeName)
+	_clearUserInput(modeName)
 end
 
 -----------------------------------------------------
@@ -201,18 +199,18 @@ local function _modeLoop(handleExitEvents, indicator, modeInstruction, modeName)
 	api.nvim_lecho(indicator)
 
 	-- Capture input.
-	local uinput = api.nvim_input()
+	local userInput = api.nvim_input()
 
 	-- Return if there was a timeout event.
-	if uinput == _TIMEOUT_NR then
+	if userInput == _TIMEOUT_NR then
 		return true
 	end
 
 	-- Set the global input variable to the new input.
-	vars.nvim_set(vars.input, modeName, uinput)
+	vars.nvim_set(vars.input, modeName, userInput)
 
 	-- Make sure that the user doesn't want to exit.
-	if handleExitEvents and uinput == globals.ESC_NR then
+	if handleExitEvents and userInput == globals.ESC_NR then
 		return false
 	-- If the second argument was a dict, parse it.
 	elseif type(modeInstruction) == globals.TYPE_TBL then

@@ -24,6 +24,8 @@ local prompt = {}
 	 */
 --]]
 
+local _HELP = 'help'
+
 local _replacements = {
 	'(', ')', '[', ']', '{', '}',
 	'=', '+', '<', '>', '^',
@@ -47,6 +49,10 @@ local _replacements = {
 -------------------------------------------------------
 function prompt._createCompletionsProvider(completions)
 	return function(argLead, cmdLine, cursorPos)
+		if string.len(cmdLine) < 1 then
+			return completions
+		end
+
 		-- replace conjoining characters with spaces.
 		local spacedArgLead = argLead
 		for _, v in ipairs(_replacements) do
@@ -62,16 +68,15 @@ function prompt._createCompletionsProvider(completions)
 			return nil
 		end
 
-		-- get the word selected by the user.
-		local word = splitArgLead[1]
+		-- get the word selected by the user. (don't compare case)
+		local word = string.upper(splitArgLead[1])
 
 		-- get all matches from the completions list.
 		local matches = {}
-		local i = 1
 		for _, v in ipairs(completions) do
-			if string.match(vim.pesc(v), word) then
-				matches[i] = v
-				i = i + 1
+			-- test if `word` is inside of `completions`:`v`, ignoring case.
+			if string.match(vim.pesc(string.upper(v)), word) then
+				matches[#matches + 1] = v -- preserve case when providing completions.
 			end
 		end
 		return matches
@@ -103,10 +108,8 @@ function prompt.enter(...)
 	if type(args[2]) == globals.TYPE_TBL then
 		-- unload the keys of the mode command table.
 		completions = {}
-		local i = 1
 		for k, _ in pairs(args[2]) do
-			completions[i] = k
-			i = i + 1
+			completions[#completions + 1] = k
 		end
 	-- assign completions as the custom completions table provided.
 	elseif #args > 2 then
@@ -119,22 +122,24 @@ function prompt.enter(...)
 			-- echo the indicator
 			api.nvim_redraw()
 
-			local uinput = ''
+			local userInput = ''
 			if completions then
-				uinput = api.nvim_call_function(
+				userInput = api.nvim_call_function(
 					'libmodal#_inputWith', {indicator, completions}
 				)
 			else
-				uinput = api.nvim_call_function('input', {indicator})
+				userInput = api.nvim_call_function('input', {indicator})
 			end
 
 			-- if a:2 is a function then call it.
-			if string.len(uinput) > 0 then
-				vars.nvim_set(vars.input, modeName, uinput)
+			if string.len(userInput) > 0 then
+				vars.nvim_set(vars.input, modeName, userInput)
 				if type(args[2]) == globals.TYPE_TBL then
-					if args[2][uinput] then
-						api.nvim_command(args[2][uinput])
-					else
+					if args[2][userInput] then -- there is a defined command for the input.
+						api.nvim_command(args[2][userInput])
+					elseif userInput == _HELP then -- the user did not define a 'help' command, so use the default.
+						utils.commandHelp(args[2])
+					else -- show an error.
 						api.nvim_show_err(globals.DEFAULT_ERROR_MESSAGE, 'Unknown command')
 					end
 				else

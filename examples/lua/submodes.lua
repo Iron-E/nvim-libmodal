@@ -2,11 +2,11 @@ local libmodal = require('libmodal')
 local barModeRecurse = 0
 
 function barMode()
-	local uinput = string.char(vim.api.nvim_get_var(
+	local userInput = string.char(vim.api.nvim_get_var(
 		'bar' .. tostring(barModeRecurse) .. 'ModeInput'
 	))
 
-	if uinput == 'z' then
+	if userInput == 'z' then
 		barModeRecurse = barModeRecurse + 1
 		enter()
 		barModeRecurse = barModeRecurse - 1
