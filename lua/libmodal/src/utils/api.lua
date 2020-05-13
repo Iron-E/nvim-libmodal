@@ -91,9 +91,10 @@ function api.nvim_lecho(hlTables)
 	api.nvim_redraw()
 	hlTables[#hlTables+1] = resetHighlight
 	for _, hlTable in ipairs(hlTables) do
+		-- `:echohl` the hlgroup and then `:echon` the string
 		api.nvim_command(
-			-- `:echohl` the hlgroup and then `:echon` the string.
-			"echohl " .. tostring(hlTable.hl) .. " | echon '" .. tostring(hlTable.str) .. "'"
+			"echohl " .. tostring(hlTable['hl'])
+			.. " | echon '" .. tostring(hlTable['str']) .. "'"
 		)
 	end
 end

@@ -6,7 +6,6 @@
 
 local api     = vim.api
 local globals = require('libmodal/src/base/globals')
-local strings = require('libmodal/src/utils/strings')
 
 --[[
 	/*
@@ -149,8 +148,8 @@ function ParseTable.new(userTable)
 		end -- ‡
 
 		-- Run the recursive function.
-		update(self, strings.split(
-			string.reverse(key), '.'
+		update(self, vim.split(
+			string.reverse(key), '.', false
 		))
 	end
 

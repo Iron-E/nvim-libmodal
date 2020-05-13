@@ -24,6 +24,12 @@ local prompt = {}
 	 */
 --]]
 
+local _replacements = {
+	'(', ')', '[', ']', '{', '}',
+	'=', '+', '<', '>', '^',
+	',', '/', ':', '?', '@', '!', '$', '*', '.', '%', '&', '\\',
+}
+
 -------------------------------------------------------
 --[[ SUMMARY:
 	* Provide completions for a `libmodal.prompt`.
@@ -44,15 +50,17 @@ function prompt._createCompletionsProvider(completions)
 		-- replace conjoining characters with spaces.
 		local spacedArgLead = argLead
 		for _, v in ipairs(_replacements) do
-			spacedArgLead = string.gsub(spacedArgLead, v, ' ')
+			spacedArgLead, _ = string.gsub(spacedArgLead, vim.pesc(v), ' ')
 		end
 
 		-- split the spaced version of `argLead`.
-		local splitArgLead = utils.strings.split(splitArgLead, ' ')
+		local splitArgLead = vim.split(spacedArgLead, ' ', true)
 
 		-- make sure the user is in a position were this function
 		--     will provide accurate completions.
-		if #splitArgLead > 1 then return nil end
+		if #splitArgLead > 1 then
+			return nil
+		end
 
 		-- get the word selected by the user.
 		local word = splitArgLead[1]
@@ -61,8 +69,8 @@ function prompt._createCompletionsProvider(completions)
 		local matches = {}
 		local i = 1
 		for _, v in ipairs(completions) do
-			if string.match(word, completion) then
-				matches[i] = completion
+			if string.match(vim.pesc(v), word) then
+				matches[i] = v
 				i = i + 1
 			end
 		end
@@ -101,11 +109,8 @@ function prompt.enter(...)
 			i = i + 1
 		end
 	-- assign completions as the custom completions table provided.
-	elseif #args > 2 then completions = args[3] end
-
-	-- make the completions dict vim-compatable
-	if completions then completions =
-		'[' .. table.concat(completions, ',') .. ']'
+	elseif #args > 2 then
+		completions = args[3]
 	end
 
 	local continueMode = true
@@ -114,21 +119,14 @@ function prompt.enter(...)
 			-- echo the indicator
 			api.nvim_redraw()
 
-			-- compose prompt command
-			--[[ TODO: completions won't work until neovim 0.5
-					   look into v:lua when it drops.
-
-				local cmd = "input('" .. indicator .. "', ''"
-				if completions then cmd =
-					cmd .. ", 'customlist,funcref(\"libmodal#CreateCompletionsProvider\", ["
-						.. completions ..
-					"])'"
-				end
-				-- get input from prompt
-				local uinput = api.nvim_eval(cmd .. ')') -- closing bracket ends beginning 'input('
-			--]]
-
-			local uinput = api.nvim_call_function('input', {indicator})
+			local uinput = ''
+			if completions then
+				uinput = api.nvim_call_function(
+					'libmodal#_inputWith', {indicator, completions}
+				)
+			else
+				uinput = api.nvim_call_function('input', {indicator})
+			end
 
 			-- if a:2 is a function then call it.
 			if string.len(uinput) > 0 then
@@ -152,6 +150,8 @@ function prompt.enter(...)
 			continueMode = false
 		end
 	end
+
+	vars:tearDown(modeName)
 end
 
 --[[

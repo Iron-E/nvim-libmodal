@@ -147,7 +147,7 @@ local function _initCombos(modeName, comboTable)
 	-- create a floating window
 	local buf = api.nvim_create_buf(false, true)
 	vars.buffers.instances[modeName] = buf
-	vars.windows.instances[modeName] = api.nvim_call_function('libmodal#WinOpen', {buf})
+	vars.windows.instances[modeName] = api.nvim_call_function('libmodal#_winOpen', {buf})
 
 	-- Build the parse tree.
 	vars.combos.instances[modeName] = mode.ParseTable.new(comboTable)
@@ -172,11 +172,7 @@ local function _modeEnterTeardown(modeName, winState)
 		)
 	end
 
-	for _, v in pairs(vars) do
-		if type(v) == globals.TYPE_TBL and v.instances[modeName] then
-			v.instances[modeName] = nil
-		end
-	end
+	vars:tearDown(modeName)
 	api.nvim_command("mode | echo '' | call garbagecollect()")
 	winState:restore()
 end

@@ -4,6 +4,7 @@
 	 */
 --]]
 
+local globals = require('libmodal/src/base/globals')
 local api = vim.api
 
 --[[
@@ -12,12 +13,8 @@ local api = vim.api
 	 */
 --]]
 
-local vars = {
-	combos          = {},
-	input           = {},
-	libmodalTimeout = api.nvim_get_var('libmodalTimeouts'),
-	timeout         = {}
-}
+local vars = {}
+vars.libmodalTimeout = api.nvim_get_var('libmodalTimeouts')
 
 --[[
 	/*
@@ -73,19 +70,28 @@ function vars.nvim_set(var, modeName, val)
 	api.nvim_set_var(var:name(modeName), val)
 end
 
+function vars:tearDown(modeName)
+	for _, v in pairs(self) do
+		if type(v) == globals.TYPE_TBL and v.instances[modeName] then
+			v.instances[modeName] = nil
+		end
+	end
+end
+
 --[[
 	/*
 	 * VARS
 	 */
 --]]
 
-new('buffers')
-new('combos' )
-new('exit'   )
-new('input'  )
-new('timeout')
-new('timer'  )
-new('windows')
+new('buffers'     )
+new('combos'      )
+new('completions' )
+new('exit'        )
+new('input'       )
+new('timeout'     )
+new('timer'       )
+new('windows'     )
 
 --[[
 	/*

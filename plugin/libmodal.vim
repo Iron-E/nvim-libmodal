@@ -14,4 +14,4 @@ endif
 " The default highlight groups (for colors) are specified below.
 " Change these default colors by defining or linking the corresponding highlight group.
 highlight default link LibmodalPrompt ModeMsg
-highlight default link LibmodalStar StatusLine
+highlight default LibmodalStar cterm=underline ctermfg=Cyan ctermbg=NONE gui=underline guifg=#55CCFF guibg=NONE guisp=#FFFFFF

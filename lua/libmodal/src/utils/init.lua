@@ -16,7 +16,6 @@ local utils       = {}
 utils.api         = require('libmodal/src/utils/api')
 utils.DateTime    = require('libmodal/src/utils/DateTime')
 utils.Indicator   = require('libmodal/src/utils/Indicator')
-utils.strings     = require('libmodal/src/utils/strings')
 utils.vars        = require('libmodal/src/utils/vars')
 utils.WindowState = require('libmodal/src/utils/WindowState')
 
