@@ -101,34 +101,40 @@ function prompt.enter(...)
 	-- create an indicator
 	local indicator = utils.Indicator.prompt(args[1])
 
+	-- lowercase of the passed mode name.
 	local modeName = string.lower(args[1])
 
 	-- get the completion list.
 	local completions = nil
-	if type(args[2]) == globals.TYPE_TBL then
-		-- unload the keys of the mode command table.
+	if type(args[2]) == globals.TYPE_TBL then -- unload the keys of the mode command table.
 		completions = {}
+		local containedHelp = false
 		for k, _ in pairs(args[2]) do
 			completions[#completions + 1] = k
+			if k == _HELP then containedHelp = true
+			end
 		end
-	-- assign completions as the custom completions table provided.
-	elseif #args > 2 then
+		if not containedHelp then -- assign it.
+			completions[#completions + 1] = _HELP
+		end
+	elseif #args > 2 then -- assign completions as the custom completions table provided.
 		completions = args[3]
 	end
 
-	local continueMode = true
+
+	-- enter the mode using a loop.
+	local continueMode =  true
 	while continueMode == true do
 		local noErrors, err = pcall(function()
-			-- echo the indicator
+			-- clear previous `echo`s.
 			api.nvim_redraw()
 
+			-- get user input based on `args[2]`.
 			local userInput = ''
-			if completions then
-				userInput = api.nvim_call_function(
-					'libmodal#_inputWith', {indicator, completions}
-				)
-			else
-				userInput = api.nvim_call_function('input', {indicator})
+			if completions then userInput =
+				api.nvim_call_function('libmodal#_inputWith', {indicator, completions})
+			else userInput =
+				api.nvim_call_function('input', {indicator})
 			end
 
 			-- if a:2 is a function then call it.
@@ -150,12 +156,14 @@ function prompt.enter(...)
 			end
 		end)
 
+		-- if there were errors.
 		if noErrors == false then
 			utils.showError(err)
 			continueMode = false
 		end
 	end
 
+	-- delete temporary variables created for this mode.
 	vars:tearDown(modeName)
 end
 
