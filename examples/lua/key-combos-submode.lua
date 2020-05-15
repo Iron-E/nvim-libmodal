@@ -1,13 +1,13 @@
 local libmodal = require('libmodal')
-local barModeRecurse = 0
-local barModeCombos = {
-	['z'] = 'lua barMode()'
+local fooModeRecurse = 0
+local fooModeCombos = {
+	['z'] = 'lua fooMode()'
 }
 
-function barMode()
-	barModeRecurse = barModeRecurse + 1
-	libmodal.mode.enter('BAR' .. barModeRecurse, barModeCombos)
-	barModeRecurse = barModeRecurse - 1
+function fooMode()
+	fooModeRecurse = fooModeRecurse + 1
+	libmodal.mode.enter('FOO' .. fooModeRecurse, fooModeCombos)
+	fooModeRecurse = fooModeRecurse - 1
 end
 
-barMode()
+fooMode()

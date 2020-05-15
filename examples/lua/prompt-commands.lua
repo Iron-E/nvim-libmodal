@@ -1,8 +1,8 @@
 local libmodal = require('libmodal')
 local commands = {
-	['new'] = 'tabnew',
+	['new']   = 'tabnew',
 	['close'] = 'tabclose',
-	['last'] = 'tablast'
+	['last']  = 'tablast'
 }
 
-libmodal.prompt.enter('BAR', commands)
+libmodal.prompt.enter('FOO', commands)

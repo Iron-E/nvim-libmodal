@@ -1,8 +1,8 @@
 local libmodal = require('libmodal')
-local barModeCombos = {
+local fooModeCombos = {
 	['zf'] = 'split',
 	['zfo'] = 'vsplit',
 	['zfc'] = 'tabnew'
 }
 
-libmodal.mode.enter('BAR', barModeCombos)
+libmodal.mode.enter('FOO', fooModeCombos)

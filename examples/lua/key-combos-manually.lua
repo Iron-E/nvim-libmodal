@@ -1,22 +1,22 @@
 local api = vim.api
 local libmodal = require('libmodal')
-local barModeInputHistory = {}
+local fooModeInputHistory = {}
 
 local function clearHistory(indexToCheck)
-	if #barModeInputHistory >= indexToCheck then
-		barModeInputHistory = {}
+	if #fooModeInputHistory >= indexToCheck then
+		fooModeInputHistory = {}
 	end
 end
 
-function barMode()
-	barModeInputHistory[#barModeInputHistory + 1] = string.char(
-		api.nvim_get_var('barModeInput')
+function fooMode()
+	fooModeInputHistory[#fooModeInputHistory + 1] = string.char(
+		api.nvim_get_var('fooModeInput')
 	)
 
 	local index = 1
-	if barModeInputHistory[1] == 'z' then
-		if barModeInputHistory[2] == 'f' then
-			if barModeInputHistory[3] == 'o' then
+	if fooModeInputHistory[1] == 'z' then
+		if fooModeInputHistory[2] == 'f' then
+			if fooModeInputHistory[3] == 'o' then
 				api.nvim_command("echom 'It works!'")
 			else index = 3 end
 		else index = 2 end
@@ -25,4 +25,4 @@ function barMode()
 	clearHistory(index)
 end
 
-libmodal.mode.enter('BAR', barMode)
+libmodal.mode.enter('FOO', fooMode)

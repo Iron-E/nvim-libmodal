@@ -1,0 +1,117 @@
+local api = vim.api
+local libmodal = require('libmodal')
+local barModeInputHistory = {}
+
+local function clearHistory(indexToCheck)
+	if #barModeInputHistory >= indexToCheck then
+		barModeInputHistory = {}
+	end
+end
+
+function barMode()
+	barModeInputHistory[#barModeInputHistory + 1] = string.char(
+		api.nvim_get_var('barModeInput')
+	)
+
+	local index = 1
+	if barModeInputHistory[1] == 'z' then
+		if barModeInputHistory[2] == 'f' then
+			if barModeInputHistory[3] == 'o' then
+				api.nvim_command("echom 'It works!'")
+			else index = 3 end
+		else index = 2 end
+	end
+
+	clearHistory(index)
+end
+
+libmodal.mode.enter('BAR', barMode)
+local libmodal = require('libmodal')
+local barModeRecurse = 0
+local barModeCombos = {
+	['z'] = 'lua barMode()'
+}
+
+function barMode()
+	barModeRecurse = barModeRecurse + 1
+	libmodal.mode.enter('BAR' .. barModeRecurse, barModeCombos)
+	barModeRecurse = barModeRecurse - 1
+end
+
+barMode()
+local libmodal = require('libmodal')
+local barModeCombos = {
+	[''] = 'echom "You cant exit using escape."',
+	['q'] = 'let g:barModeExit = 1'
+}
+
+vim.api.nvim_set_var('barModeExit', 0)
+libmodal.mode.enter('BAR', barModeCombos, true)
+local libmodal = require('libmodal')
+local barModeCombos = {
+	['zf'] = 'split',
+	['zfo'] = 'vsplit',
+	['zfc'] = 'tabnew'
+}
+
+libmodal.mode.enter('BAR', barModeCombos)
+local libmodal = require('libmodal')
+local api = vim.api
+local commandList = {'new', 'close', 'last'}
+
+function barMode()
+	local userInput = vim.api.nvim_get_var('barModeInput')
+	if userInput == 'new' then
+		api.nvim_command('tabnew')
+	elseif userInput == 'close' then
+		api.nvim_command('tabclose')
+	elseif userInput == 'last' then
+		api.nvim_command('tablast')
+	end
+end
+
+libmodal.prompt.enter('BAR', barMode, commandList)
+local libmodal = require('libmodal')
+local commands = {
+	['new'] = 'tabnew',
+	['close'] = 'tabclose',
+	['last'] = 'tablast'
+}
+
+libmodal.prompt.enter('BAR', commands)
+local libmodal = require('libmodal')
+local barModeRecurse = 0
+
+function barMode()
+	local userInput = string.char(vim.api.nvim_get_var(
+		'bar' .. tostring(barModeRecurse) .. 'ModeInput'
+	))
+
+	if userInput == 'z' then
+		barModeRecurse = barModeRecurse + 1
+		enter()
+		barModeRecurse = barModeRecurse - 1
+	end
+end
+
+function enter()
+	libmodal.mode.enter('BAR' .. barModeRecurse, barMode)
+end
+
+enter()
+local libmodal = require('libmodal')
+
+function barMode()
+	local userInput = string.char(
+		vim.api.nvim_get_var('barModeInput')
+	)
+
+	if userInput == '' then
+		vim.api.nvim_command("echom 'You cant leave using <Esc>.'")
+	elseif userInput == 'q' then
+		vim.api.nvim_set_var('barModeExit', true)
+	end
+end
+
+vim.api.nvim_set_var('barModeExit', 0)
+libmodal.mode.enter('BAR', barMode, true)

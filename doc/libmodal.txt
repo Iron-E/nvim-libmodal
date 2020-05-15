@@ -2,18 +2,21 @@
 *libmodal*
 *nvim-libmodal*
 
+=============================================================================
+0. Table of Contents                                           *libmodal-toc*
+
 1. About ................ |libmodal-about|
 2. Usage ................ |libmodal-usage|
-3. Configuration ........ |libmodal-configuration|
-4. License .............. |libmodal-license|
-5. Bugs ................. |libmodal-bugs|
-6. Contributing ......... |libmodal-contributing|
-7. Changelog ............ |libmodal-changelog|
-8. Credits .............. |libmodal-credits|
+3. Examples ............. |libmodal-examples|
+4. Configuration ........ |libmodal-configuration|
+5. License .............. |libmodal-license|
+6. Bugs ................. |libmodal-bugs|
+7. Contributing ......... |libmodal-contributing|
+8. Changelog ............ |libmodal-changelog|
+9. Credits .............. |libmodal-credits|
 
-
-============================================================================
-1. About                                          *libmodal-about*
+==============================================================================
+1. About                                                      *libmodal-about*
 
 |nvim-libmodal|:
 - Author, Iron-E @ https://github.com/Iron-E & https://gitlab.com/Iron_E
@@ -30,13 +33,64 @@ modes is also creator-defined, and is outlined in |libmodal-usage|.
 
 See: |vim-modes|
 
-============================================================================
-2. Usage                                   *libmodal-usage*
+Use Case ~
+                                                   *libmodal-use-case-example*
+
+As an |init.vim| configuration grows, it becomes harder to create keybindings
+that alphabetically represent the action that they perform. To get around
+this, |libmodal| allows users to create a new "layer" of keybindings contained
+within a pseudo-|vim-mode|. This layer of keybindings can be bound to a
+command which executes `libmodal.mode.enter()` or `libmodal.prompt.enter()`,
+and any settings outside of these commands are preserved.
+
+For example, say that a user of Neovim regularly converts between spaces and
+tabs. They may define an "INDENT" mode that only requires pressing <Space>
+or <Tab> to swap between 'expandtab' and 'shiftwidth' settings as well as
+execute `retab`. This could be defined as a |user-function|, but the
+keybindings are easier to remember as <Space> and <Tab>.
+
+<Space> and <Tab>, however, are commonly mapped to. Rather than defining a
+longer mapping to perform this operation, one may define a |user-command| to
+enter "INDENT" mode where any mapping can be defined without affecting
+mappings in other |vim-modes|.
+
+Here is what that might look like:
+>
+	--[[ .config/lua/indent_mode.lua ]]
+
+	local libmodal = require('libmodal')
+	local indent_mode = {}
+
+	local _combos = {
+		-- tabs to spaces
+		[' '] = 'set expandtab | %retab'
+		-- spaces to tabs
+		['	'] = 'set noexpandtab | %retab!'
+	}
+
+	function indent_mode.enter()
+		libmodal.mode.enter('INDENT', _combos)
+	end
+
+	return indent_mode
+<
+>
+	--[[  .config/nvim/init.vim ]]
+	command! IndentModeEnter lua requre('indent_mode').enter()
+	nnoremap <leader>i IndentModeEnter
+<
+
+Then this user could press `<leader>i` and have access to the <Space> and
+<Tab> mappings that were defined, without affecting any other mappings.
+
+See: |libmodal-usage|
+
+==============================================================================
+2. Usage                                                      *libmodal-usage*
 
 The |libmodal| interface is designed completely in |Lua|. It is incompatable
-with Vimscript until Neovim 0.5 releases (as
-https://github.com/neovim/neovim/issues/11306 will merge). Because of this
-timed incompatability, the following must be done:
+with Vimscript until Neovim 0.5 releases (as `neovim/neovim#11306` will
+merge). Because of this timed incompatability, the following must be done:
 
 1. Define a |Lua| interface for your mode.
 2. Use |lua-require| as a |user-command|.
@@ -46,337 +100,518 @@ timed incompatability, the following must be done:
 this. See below for a link to the repository where the source code may be
 viewed.
 
-See: |api|, |libmodal-lua|, |lua-api|, https://github.com/Iron-E/nvim-tabmode
+The following is a reference for high-level functions meant to be used by mode
+creators. For those who wish to see a low-level specification of |libmodal|,
+see |libmodal-lua|.
+
+Note: Examples for all topics covered here can be found in the "examples"
+      folder at the root of the repository.
+
+See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode
 
 Functions ~
-                                                            *libmodal-mode-enter*
 
-%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO continue here %%
-%%%%%%%%%%%%%%%%%%%%%%%%
+                                       *libmodal-mode* *libmodal.mode.enter()*
+libmodal.mode.enter({name}, {instruction} [, {handleExit}])
 
-|libmodal#Enter| takes three parameters. These parameters are not formally named
-by the editor (as |libmodal#Enter| is declared `libmodal#Enter(`|...|`)` ).
-However, the names of these parameters will be used throughout the document to
-describe the index of the parameter (see |E740|).
+	Enter a new |vim-mode| using {instruction} to determine what actions will
+	be taken upon specific user inputs.
 
-Arg            Index Use
----            ----- ---
-`modeName`       0     The name for the mode when prompting the user.
-`modeCallback`   1     The function used to control the mode.
-`modeCombos`     1     A dictionary of |libmodal-key-combinations|.
-`supressExit`    2     A flag to enable |libmodal-exit-supression|.
+	User input is taken one character at a time using |getchar()|. It is
+	passed through a |g:var| determined by the {name} of the mode. For
+	example, if {name} is "FOO" then the |g:var| is `g:fooModeInput`.
+	Additionally, this input is reported as a |char2nr| number, and as such
+	should be decoded with `string.char()` (|nr2char| in |Lua|) if working
+	with raw characters is desired.
 
-- NOTE: either `modeCallback` OR `modeCombos` may be specified, not both.
+	To take input on a line-by-line basis, see |libmodal-prompt|.
 
-                                                           *libmodal#Prompt*
+	Note: `libmodal.mode.enter()` may be called from inside itself. See
+	      |libmodal-examples-submodes| for an example.
 
-|libmodal#Prompt| takes two parameters. These parameters are not formally named
-by the editor (as |libmodal#Prompt| is declared `libmodal#Prompt(`|...|`)` ).
-However, the names of these parameters will be used throughout the document to
-describe the index of the parameter (see |E740|).
+	Parameters: ~
+		{name}         The name of the mode (e.g. |INSERT|).
 
-Arg            Index Use
----            ----- ---
-`modeName`     0     The name for the mode when prompting the user.
-`modeCallback` 1     The function used to control the mode.
-`modeCommands` 1     A dictionary of commands→strings to execute.
-`commandList`  2     A list of the commands in a `modeCallback`.
+			- Case-sensitive. Caps are recommended.
 
-- NOTE: either `modeCallback` OR `modeCommands` may be specified, not both.
-- NOTE: `commandList` is an optional parameter.
-        - It is used as a completion source for when `modeCallback` is
-		  specified.
-        - Additionally, `commandList` is IGNORED when `modeCommands` is
-		  specified since completions can be created from the dictionary keys.
-        - If `commandList` is not specified when `modeCallback` is, no
-		  completions will be provided for the prompt.
+		{instruction}  What to do when accepting user input.
 
-
-Receiving Input ~
-                                                  *libmodal-receiving-input*
-
-When mode creators call |libmodal#Enter| or |libmodal#Prompt|, the
-`modeName` parameter is used to generate a unique |global-variable| for the
-specific purpose of receiving said input. The |variable| is generated as
-follows:
-
->
-	let g:{tolower(a:modeName)}ModeInput = …
+			- If {instruction} is a `table`, then it is treated as
+			  a map of user key-chord to Vim |command|s. Example: >
+			      local modeInstruction = {
+			          ['zf'] = 'split',
+			          ['zfo'] = 'vsplit',
+			          ['zfc'] = 'tabnew'
+			      }
 <
 
-For example, if `modeName` is 'FOO', then the |variable| that is created is
-`g:fooModeInput`.
+			Note: If no `?` key is defined, one will be created
+			      automatically.
 
-Creating Modes ~
-                                                   *libmodal-creating-modes*
+			- If {instruction} is a `function`, then it is called
+			  every time that |getchar()| completes. The user input
+			  is received through `g:{name}ModeInput` (see above).
 
-For an example of a plugin that uses |libmodal|, see
-https://github.com/Iron-E/vim-tabmode.
+			Note: Some QoL features are available by default when
+			      specifying a `table` value for {instruction} that
+			      would otherwise have to be programmed manually if
+			      a `function` is specified.
 
-To define a new mode, you must first create a |user-function| to pass into
-|libmodal#Enter|. Example:
+			      - A user's typed characters will show in the
+			        lower right corner when {instruction} is a table.
+			      - If `g:libmodalTimeouts` is enabled, then user input will be
+			       subjected to the |timeoutlen|.
 
->
-	function! s:FooMode()
-		if g:fooModeInput ==# "a"
-			execute 'tabnew'
-		elseif g:fooModeInput ==# "d"
-			execute 'tabclose'
-		endif
-	endfunction
+		{supressExit}  Whether or not to automatically exit the mode upon an
+                       <Esc> press.
+
+			- If `false`, then <Esc> is automatically mapped to
+              exiting.
+			- If `true`, then <Esc> is ignored unless specified by
+			  the user. In such cases, the user should set the
+			  `g:`{name}`ModeExit` variable to `true` when exiting is
+			  desired. See |libmodal-examples-supress-exit|.
+
+	See also: ~
+		|lua-eval|                For type conversions between Vimscript to |Lua|.
+		|libmodal-examples-mode|  For examples of this function.
+
+
+                                   *libmodal-prompt* *libmodal.prompt.enter()*
+libmodal.prompt.enter({name}, {instruction} [, {completions}])
+
+	Besides accepting user input like keys in |Normal-mode|, |libmodal| is
+	also capable of prompting the user for |input| like |Cmdline-mode|. To
+	define a |Cmdline-mode|-like prompt, use this function rather than
+	`libmodal.mode.enter()`.
+
+	User input is taken using |input()|. It is passed through a |g:var|
+	determined by the {name} of the mode. For example, if {name} is "FOO"
+	then the |g:var| is `g:fooModeInput`.
+
+	Parameters: ~
+		{name}         The name of the mode (e.g. |INSERT|).
+
+			- Case-sensitive. Caps are recommended.
+
+		{instruction}  What to do when accepting user input.
+
+			- If {instruction} is a `table`, then it is treated as
+			  a map of user inputs to Vim |command|s. Example: >
+		          local modeInstruction = {
+		              ['new']   = 'tabnew',
+		              ['close'] = 'tabclose',
+		              ['last']  = 'tablast'
+		          }
+<
+			- If {instruction} is a `function`, then it is called
+			  every time that |input()| completes. The user input
+			  is received through `g:{name}ModeInput` (see above).
+
+			Note: If you want to create commands with arguments, you will
+			      need to use a `function`.
+
+		{completions}  An array-like `table` of commands that are offered by
+		               the prompt.
+
+			- Automatically generated when {instruction} is a `table`.
+			- Used to provide auto-completion when the user is typing.
+			- If unspecified, and {instruction} is not a `table`, then no
+			  completions will be provided.
+
+			Note: If no `help` command is defined, one will be created
+			      automatically.
+
+	See also: ~
+		|lua-eval|                  For type conversions between Vimscript to |Lua|.
+		|libmodal-examples-prompt|  For examples of this function.
+
+
+==============================================================================
+3. Examples                                                *libmodal-examples*
+
+Below are examples written in |Lua| to help show how specific features of
+|libmodal| may be implemented. In each example, the name of the mode is
+defined as "FOO". Additionally, each category of example has one example for
+both `function` and `table` {instruction}s.
+
+The source code can be either copied from here or downloaded from the
+repository's `examples/lua` folder. Assuming |libmodal| is installed, they can
+all be tested using the |luafile| |command|.
+
+See: |libmodal-usage|, |libmodal-use-case|, |lua-require-example|.
+
+libmodal.mode.enter() ~
+                                                      *libmodal-examples-mode*
+
+Using a callback `function`: >
+	local api = vim.api
+	local libmodal = require('libmodal')
+	local fooModeInputHistory = {}
+
+	local function clearHistory(indexToCheck)
+		if #fooModeInputHistory >= indexToCheck then
+			fooModeInputHistory = {}
+		end
+	end
+
+	function fooMode()
+		fooModeInputHistory[#fooModeInputHistory + 1] = string.char(
+			api.nvim_get_var('fooModeInput')
+		)
+
+		local index = 1
+		if fooModeInputHistory[1] == 'z' then
+			if fooModeInputHistory[2] == 'f' then
+				if fooModeInputHistory[3] == 'o' then
+					api.nvim_command("echom 'It works!'")
+				else index = 3 end
+			else index = 2 end
+		end
+
+		clearHistory(index)
+	end
+
+	libmodal.mode.enter('FOO', fooMode)
 <
 
-After defining said |user-function|, you can create a |mapping| to enter the
-mode.
+Using a |key-mapping| `table`: >
+	local libmodal = require('libmodal')
+	local fooModeCombos = {
+		['zf'] = 'split',
+		['zfo'] = 'vsplit',
+		['zfc'] = 'tabnew'
+	}
 
->
-	command! FooModeEnter call libmodal#Enter('FOO', funcref('s:FooMode'))
-	nnoremap <leader>n :FooModeEnter
+	libmodal.mode.enter('FOO', fooModeCombos)
 <
 
-- NOTE: the |funcref()| call must be there or else |libmodal#Enter| won't
-        execute properly.
+                                              *libmodal-examples-supress-exit*
 
-                                                 *libmodal-key-combinations*
+Using a callback `function`: >
+	local libmodal = require('libmodal')
 
-While normally |libmodal| dictates that a mode creator should define their own
-|user-function| for controlling a mode, there is a way to specify key
-combinations.  If the second argument is set to a `modeCombos` |Dictionary|,
-|libmodal#Enter| will automatically detect the |call|er's intent and pass control
-over to an auxilliary function built to handle pre-defined combos.
+	function fooMode()
+		local userInput = string.char(
+			vim.api.nvim_get_var('fooModeInput')
+		)
 
-- NOTE: When providing `modeCombos`, one no longer has to receive input for
-        themselves. Despite this, the unique |variable| (see
-		|libmodal-receiving-input|) is still updated, and you can create a
-        listener for it just like for any other |variable|.
+		if userInput == '' then
+			vim.api.nvim_command("echom 'You cant leave using <Esc>.'")
+		elseif userInput == 'q' then
+			vim.api.nvim_set_var('fooModeExit', true)
+		end
+	end
 
-- NOTE: |libmodal-exit-supression| is still compatable with defining key
-        combinations.
-
-Here is an example that shows how to create a |Dictionary| that defines the
-following actions:
-
-Combo Action
------ ------
-`zfo` Echo a message saying "It works!"
-`zfc` Create a new tab.
-
->
-	let s:barModeCombos = {
-	\	'zfo': 'echom "It works!"',
-	\	'zfc': 'tabnew'
-	\}
+	vim.api.nvim_set_var('fooModeExit', 0)
+	libmodal.mode.enter('FOO', fooMode, true)
 <
 
-- NOTE: When defining actions that involve a chorded keypress (e.g. |CTRL-W_s|),
-        mode creators should use |i_CTRL-V| to insert the literal of that
-        character.
-        - For example, if a mode creator wants a mapping for `<C-s>v`, then it
-          should be specified as `v`.
+Using a |key-mapping| `table`: >
+	local libmodal = require('libmodal')
+	local fooModeCombos = {
+		[''] = 'echom "You cant exit using escape."',
+		['q'] = 'let g:fooModeExit = 1'
+	}
 
-And then to enter that mode, you can call:
-
->
-	call libmodal#Enter('BAR', s:barModeCombos)
+	vim.api.nvim_set_var('fooModeExit', 0)
+	libmodal.mode.enter('FOO', fooModeCombos, true)
 <
 
-|libmodal|'s internal processing of that |Dictionary| becomes more useful the
-larger the |Dictionary| is. Internally, `s:barModeCombos` is rendered into a
-|Dictionary| that looks like this:
+                                                  *libmodal-examples-submodes*
 
->
-	let s:barModeCombosInternal = {
-	\	'z': {
-	\		'f': {
-	\			'c': 'echom "It works!"',
-	\			'o': 'tabnew'
-	\		}
-	\	}
-	\}
+Using a callback `function`: >
+	local libmodal = require('libmodal')
+	local fooModeRecurse = 0
+
+	function fooMode()
+		local userInput = string.char(vim.api.nvim_get_var(
+			'foo' .. tostring(fooModeRecurse) .. 'ModeInput'
+		))
+
+		if userInput == 'z' then
+			fooModeRecurse = fooModeRecurse + 1
+			enter()
+			fooModeRecurse = fooModeRecurse - 1
+		end
+	end
+
+	function enter()
+		libmodal.mode.enter('FOO' .. fooModeRecurse, fooMode)
+	end
+
+	enter()
 <
 
-This allows |libmodal| to quickly determine which |map|pings are and are not
-part of the mode. Because of this method, modes with |map|pings that have
-similar beginnings are more efficient, and modes with more mappings get more
-benefit from the quick tree-like traversal.
+Using a |key-mapping| `table`: >
+	local libmodal = require('libmodal')
+	local fooModeRecurse = 0
+	local fooModeCombos = {
+		['z'] = 'lua fooMode()'
+	}
 
-- NOTE: |libmodal#Enter| will only parse a `modeCombos` dict once upon
-        entrance.
-        - Changes to the mapping dictionary that may occur while in a mode
-          are not reflected until the mode is entered again and the dictionary
-          is re-parsed.
+	function fooMode()
+		fooModeRecurse = fooModeRecurse + 1
+		libmodal.mode.enter('FOO' .. fooModeRecurse, fooModeCombos)
+		fooModeRecurse = fooModeRecurse - 1
+	end
 
-                                                         *libmodal-timeouts*
-
-When |libmodal-key-combinations| are being used, mode creators may also enable
-the use of Vim's built-in |timeout| feature. Unlike other options which are
-specified by passing arguments to |libmodal#Enter|, this feature is enabled
-through a |variable|.
-
-- NOTE: If two keybinds share a beginning, and one is shorter than the other,
-        (e.g. `zf` and `zfo`), then the user must press <CR> to execute it.
-		This also means that commands ending in `` are not permitted.
-        - Unfortunately, because of the limitations of Vimscript (more
-          specifically |getchar()|) it is not possible to execute a function
-          on |timeout| using |timers| exposed by the API. |getchar()| blocks
-          execution and there is no combination of |sleep| or |wait()| that
-          will allow |getchar()| to be called asynchronously
-        - If you are reading this and know how to do something like this
-          without using a secondary language, please let me know or open a
-          pull request.
-
-The reasoning for this is that the use of |timeout|s is primarily chosen by the
-user of a mode, rather than the creator (whereas other features like
-|libmodal-exit-supression| are largely creator-oriented).
-
-To enable |timeout|s, one may set the following |variables|:
-
->
-	" Set libmodal modes to turn timeouts on.
-	let g:libmodalTimeouts = 1
-	" Enable timeouts for specific mode.
-	let g:{modeName}ModeTimeout = 1
+	fooMode()
 <
 
-Similarly, to disable them, one may set them to `0`.
 
-- NOTE: If not specified by the user, `g:libmodalTimeouts` automatically
-        references the |timeout| on/off value.
-- NOTE: The `g:limbodalTimeouts` variable should NOT be defined by plugins.
-        - Allow users to decide whether or not they want timeouts to be
-          enabled globally by themselves.
-- NOTE: Mode-specific timeout variables will override `g:libmodalTimeouts`.
-        - This is so a default may be set but overridden.
+libmodal.prompt.enter() ~
+                                                    *libmodal-examples-prompt*
 
-When enabled, |libmodal-timeouts| will reference the mode user's |timeoutlen|
-as specified in their |config|. This way, modes will feel consistent to users
-by default.
+Using a callback `function`: >
+	local libmodal = require('libmodal')
+	local api = vim.api
+	local commandList = {'new', 'close', 'last'}
 
-However, mode creators may change |timeoutlen| upon entrance of a mode, and
-then reset it upon exit. Example:
+	function fooMode()
+		local userInput = vim.api.nvim_get_var('fooModeInput')
+		if userInput == 'new' then
+			api.nvim_command('tabnew')
+		elseif userInput == 'close' then
+			api.nvim_command('tabclose')
+		elseif userInput == 'last' then
+			api.nvim_command('tablast')
+		end
+	end
 
->
-	function! s:BarMode() abort
-		" Get the user's preferred timeout length.
-		let l:timeoutlen = &timeoutlen
-		" Set it to something else, like 1500ms
-		let &timeoutlen = 1500
-		" Enter a mode
-		call libmodal#Enter(…)
-		" Reset the timeout
-		let &timeoutlen = l:timeoutlen
-	endfunction
+	libmodal.prompt.enter('FOO', fooMode, commandList)
 <
 
-Mode creators who use `modeCallback`s may define timeouts manually using
-|timers|, which is how |libmodal| implements them internally.
+Using a |command| `table`: >
+	local libmodal = require('libmodal')
+	local commands = {
+		['new']   = 'tabnew',
+		['close'] = 'tabclose',
+		['last']  = 'tablast'
+	}
 
-                                                  *libmodal-exit-supression*
-
-When the `supressExit` parameter is specified, |libmodal#Enter| will ignore
-<Esc> presses and instead listen for changes to a unique |variable| created
-for the specific purpose of exiting the mode. The |variable| is generated as
-follows:
-
->
-	let g:{tolower(a:modeName)}ModeExit = 0
+	libmodal.prompt.enter('BAR', commands)
 <
 
-When this |variable| becomes set to `1`, the mode will exit the next time that
-the `modeCallback` |user-function| |return|s.
+==============================================================================
+4. Configuration                                      *libmodal-configuration*
 
-Creating Prompts ~
-                                                 *libmodal-creating-prompts*
+Highlighting ~
+                                                   *libmodal-highlight-groups*
 
-Besides accepting user input like keys in |Normal-mode|, |libmodal| is also
-capable of prompting the user for |input| like |Cmdline-mode|. To define a
-|Cmdline-mode|-like prompt, use |libmodal#Prompt| rather than |libmodal#Enter|.
-
-When `modeCommands` is specified, completions are provided the |keys| in
-the |Dictionary| (see |command-completion-customlist|). See an example of this
-below:
-
->
-	let s:barModeCommands = {
-	\	'new': 'tabnew',
-	\	'close': 'tabclose',
-	\	'last': 'tablast'
-	\}
-<
-
-When `modeCallback` is specified, completions must be provided separately.
-An equivalent to the above using a `modeCallback` would be:
-
->
-	" Define callback
-	function! s:BarMode() abort
-		if g:barModeInput ==# 'new'
-			execute 'tabnew'
-		elseif g:barModeInput ==# 'close'
-			execute 'tabclose'
-		elseif g:barModeInput ==# 'last'
-			execute 'tablast'
-		endif
-	endfunction
-
-	" Define completion list
-	let s:barModeCommandList = ['new', 'close', 'last']
-<
-
-You can then enter the mode using one of the following commands (depending on
-whether or not you used a |Dictionary| or a callback):
-
->
-	" Command dict
-	call libmodal#Prompt('BAR', s:barModeCommands)
-	" Callback + completion list
-	call libmodal#Prompt('BAR', funcref('s:BarMode'), s:barModeCommandList)
-<
-
-- NOTE: if you want to create commands with arguments, you will need to
-        use a callback.
-
-Submodes ~
-                                                         *libmodal-submodes*
-
-|libmodal| has built-in support for entering additional modes while already in
-a |libmodal| mode. To enter another mode, one must only call |libmodal#Enter|
-(or |libmodal#Prompt|) from within a mode. Additionally, when a user presses
-<Esc> they will automatically be taken back to the mode that they were
-previously inside of (unless |libmodal-exit-supression| is used).
-
-To test out this feature, one may run the following:
-
->
-	let s:recurse = 0
-
-	function! s:BarMode()
-		if g:bar{s:recurse}ModeInput ==# 'z'
-			let s:recurse += 1
-			execute 'BarModeEnter'
-			let s:recurse -= 1
-		endif
-	endfunction
-
-	let l:func = funcref('s:BarMode')
-	command! BarModeEnter call libmodal#Enter('BAR' . s:recurse, l:func)
-	execute 'BarModeEnter'
-<
-
-This triggers |libmodal#Enter| every time the user inputs the "z" key. While
-this example only uses one `modeCallback`, it is possible to use as many
-submodes as Vim's call-stack can handle (i.e. a lot).
-
-============================================================================
-4. Configuration                           *libmodal-configuration*
 
 The following |highlight-groups| can be |config|ured to change a mode's |color|s:
 
 Name              Default      Description
 ----              -------      -----------
 `LibmodalPrompt`  `ModeMsg`    Color for the mode text.
-`LibmodalStar`    `StatusLine` Color for the `*` at the beginning.
+`LibmodalStar`    `StatusLine` Color for the prompt text.
 
-============================================================================
+Note: `LibmodalStar`'s name — while not indicative of its use — is used for
+      the sake of backwards compatability.
+	  - While |nvim-libmodal| might not be 100% backwards compatable with
+		|vim-libmodal| due to limitations of Neovim 0.4, an update will ship
+		when Neovim 0.5 launches that will introduce interoperaability between
+		the two.
+
+Timeouts ~
+                                                           *libmodal-timeouts*
+                                                          *g:libmodalTimeouts*
+
+When `libmodal.mode.enter()`'s {instruction} argument is a `table`, mode
+creators may also enable the use of Vim's built-in 'timeout' feature.
+
+To enable 'timeout's, one may set the following |variables|:
+>
+	" Set libmodal modes to turn timeouts on.
+	let g:libmodalTimeouts = 1
+	" Enable timeouts for specific mode.
+	let g:{name}ModeTimeout = 1
+<
+Similarly, to disable them, one may set them to `0`.
+
+When `g:libmodalTimeouts` or `g:{name}ModeTimeout` is set to `1`, |libmodal|
+will automatically execute commands that have mappings that might also be
+longer mappings. For example:
+	If a mode specifies `zf` and `zfo` as mappings,
+	- Turning 'timeout's on will cause `zf` to be executed if the user waits
+	  for 'timeoutlen' without typing another character.
+	- If 'timeout' were to be off in this case, then the user would either
+	  have to hit <CR> to execute `zf` or hit `o` to execute `zfo`.
+
+NOTE: `g:libmodalTimeouts` defaults to the 'timeout' value.
+
+NOTE: The `g:limbodalTimeouts` variable should NOT be defined by plugins.
+      - Allow users to decide whether or not they want timeouts to be
+        enabled globally themselves.
+
+NOTE: Mode-specific timeout variables will override `g:libmodalTimeouts`.
+
+When enabled, |libmodal-timeouts| will reference the mode user's 'timeoutlen'
+as specified in their |config|. This way, modes will feel consistent to users
+by default.
+
+However, mode creators may change 'timeoutlen' upon entrance of a mode, and
+then reset it upon exit. Example:
+
+	Vimscript: ~
+>
+		function! s:FooMode() abort
+			" Get the user's preferred timeout length.
+			let l:timeoutlen = &timeoutlen
+			" Set it to something else, like 1500ms
+			let &timeoutlen = 1500
+			" Enter a mode
+			call libmodal#Enter(…)
+			" Reset the timeout
+			let &timeoutlen = l:timeoutlen
+		endfunction
+<
+	Lua: ~
+>
+		local api = vim.api
+		local libmodal = require('libmodal')
+
+		function fooMode()
+			-- Get the user's preferred timeout length.
+			local prevTimeoutLen = api.nvim_get_option('timeoutlen')
+			-- Set it to something else, like 1500ms.
+			api.nvim_set_option('timeoutlen', 1500)
+			-- Enter a mode.
+			libmodal.mode.enter(…)
+			-- Restore the `timeoutlen`
+			api.nvim_set_option('timeoutlen', prevTimeoutLen)
+		end
+<
+
+Mode creators who use `function` {instruction}s may define timeouts manually
+using |timers|, which is how |libmodal| implements them internally.
+
+==============================================================================
+5. License                                                  *libmodal-license*
+
+`nvim-libmodal` – Create new "modes" for Neovim.
+Copyright © 2020 Iron-E
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+==============================================================================
+6. Bugs                                                        *libmodal-bugs*
+
+* Passing a |funcref| through Vimscript to |Lua| yields a `nil`.
+	* This bug is fixed in Neovim 0.5, and when it releases, there will be a
+	  patch for this plugin to fix it and introduce compatability with
+	  |vim-libmodal|.
+
+==============================================================================
+7. Contributing                                        *libmodal-contributing*
+
+Code ~
+
+	Bugfixes ~
+
+	If you discover a bug and believe you know the solution to fixing it, then
+	submit a bug report and state that you are working on a fix (and what that
+	fix might be), and what general timeframe the fix may be completed in
+	(months, weeks, days, etc.).
+
+	When the fix is complete, submit a PR that references the issue you
+	submitted.
+
+	Features ~
+
+	If there is a feature you would like to be a part of |libmodal|, the best
+	thing you can do is submit a feature request, and then state that you are
+	working on a pull request (PR) so others don't attempt to do the same work
+	at the same time.
+
+	When you believe your feature is complete, write some examples for it in
+	the `examples/lua` folder, and add them to |libmodal-examples| as
+	appropriate.
+
+	Assure that all existing |libmodal-examples| continue to work with your
+	feature, unless a breaking change was discussed on the feature request.
+	If you need help getting them to pass, you can ask for help on the PR.
+
+	Reference the issue you submitted on the PR so that the two show up
+	together when looking back at the history.
+
+	Contributing documentation is not necessary but appreciated, since the
+	person who knows the most about the feature being implemented is most
+	likely the one implementing it.
+
+Documentation ~
+
+If there is a problem with the documentation, or you see an area where it
+could be improved, don't hesitate to submit an issue and a PR. At the very
+least it will exist in history if such an issue comes up again, and likely it
+will serve to help yourself and others with more clear and concise wording, or
+with more helpful and practical examples.
+
+Issues ~
+
+Issues are greatly welcomed on the GitHub repository, whether they are bug
+reports, feature requests, documentation improvements, or misunderstandings:
+it's all good to have in the archive.
+
+When submitting an issue, please describe the following:
+
+1. Context regarding the issue (how you discovered it, pertinent information,
+   etc.)
+2. Detailed description of the issue.
+3. Steps to reproduce (if applicable).
+4. Expected behavior (if applicable).
+5. Attached media (screenshots, logs, etc.) (if applicable).
+
+==============================================================================
+8. Changelog                                              *libmodal-changelog*
+
+0.3.0 ~
+
+* Generate `?` mapping for |libmodal-mode|s.
+
+0.2.1 ~
+
+* Fix `help` command completion being shown during an {instruction} callback
+  `function` when none should be shown.
+
+0.2.0 ~
+
+* |libmodal-prompt| implemetation from |vim-libmodal|.
+* |libmodal-prompt|s now automatically generate `help` command if none is
+  provided.
+
+0.1.0 ~
+
+* |libmodal-mode| implementation from |vim-libmodal|.
+
+==============================================================================
+9. Credits                                                  *libmodal-credits*
+
+Credit                      Reason
+---------------------       ----------------------------------
+Daniel Steinberg            |vim-win| creator and inspiration.
+Iron-E                      Primary contibuter/maintainer.
+neoclide/|coc-nvim|           Development environment provider.
+r/Neovim                    |Lua| and Neovim reference.
+Roberto Ierusalimschy       "Programming In Lua: 5.1".
+Steve Losh                  "Learn Vimscript The Hard Way".
+tbastos/vim-lua             Syntax highlighting for |Lua|.
+u/Mambu38                   |Lua| reference.
+u/oryiesis                  Inspiration.
+www.lua-users.org           |Lua| reference.
+www.stackoverflow.com       Vimscript and |Lua| reference.
+
+==============================================================================
  vim:tw=78:ts=4:ft=help:norl:

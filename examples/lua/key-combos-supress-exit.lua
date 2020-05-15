@@ -1,8 +1,8 @@
 local libmodal = require('libmodal')
-local barModeCombos = {
+local fooModeCombos = {
 	[''] = 'echom "You cant exit using escape."',
-	['q'] = 'let g:barModeExit = 1'
+	['q'] = 'let g:fooModeExit = 1'
 }
 
-vim.api.nvim_set_var('barModeExit', 0)
-libmodal.mode.enter('BAR', barModeCombos, true)
+vim.api.nvim_set_var('fooModeExit', 0)
+libmodal.mode.enter('FOO', fooModeCombos, true)
