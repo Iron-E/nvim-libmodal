@@ -2,24 +2,35 @@
 *libmodal-lua*
 *libmodal-dev*
 
-=============================================================================
+This is a document specifying the lower-level implementation of |libmodal|. If
+one wishes to make use of it to more finely control their |libmodal-mode| or
+|libmodal-prompt|, this document should be the primary reference.
+
+Any material not covered here is covered in |libmodal-usage|.
+
+See: |libmodal-usage|, |lua|, |lua-require-example|.
+
+==============================================================================
 0. Table of Contents                                       *libmodal-lua-toc*
 
-1.     `libmodal` ............................. |libmodal-lua-libmodal|
-2.     `libmodal.base.globals` ................ |libmodal-lua-globals|
-3.     `libmodal.mode.ParseTable` ............. |libmodal-lua-ParseTable|
-4.     `libmodal.utils` ....................... |libmodal-lua-utils|
-4.1.   `libmodal.utils.api` ................... |libmodal-lua-api|
-4.2.   `libmodal.utils.Help` .................. |libmodal-lua-Help|
-4.3.   `libmodal.utils.Indicator` ............. |libmodal-lua-Indicator|
-4.3.1. `libmodal.utils.Indicator.Entry` ....... |libmodal-lua-Entry|
-4.4.   `libmodal.utils.vars` .................. |libmodal-lua-vars|
-4.5.   `libmodal.utils.WindowState` ........... |libmodal-lua-Windowstate|
+1.   `libmodal` ............................. |libmodal-lua-libmodal|
+2.   `libmodal.base.globals` ................ |libmodal-lua-globals|
+3.   `libmodal.mode.ParseTable` ............. |libmodal-lua-ParseTable|
+4.   `libmodal.utils` ....................... |libmodal-lua-utils|
+4.1. `libmodal.utils.api` ................... |libmodal-lua-api|
+4.2. `libmodal.utils.Help` .................. |libmodal-lua-Help|
+4.3. `libmodal.utils.Indicator` ............. |libmodal-lua-Indicator|
+4.4. `libmodal.utils.vars` .................. |libmodal-lua-vars|
+4.5. `libmodal.utils.WindowState` ........... |libmodal-lua-Windowstate|
 
 ==============================================================================
 1. `libmodal`                                            *libmodal-lua-libmodal*
 
-Modules: ~
+This is the base of |libmodal|. It can be imported using: >
+	local libmodal = require('libmodal')
+<if |libmodal| is in your 'runtimepath'.
+
+MODULES                                                 *libmodal-lua-modules*
 
 * `libmodal`
 	* `libmodal.base`
@@ -37,7 +48,172 @@ Modules: ~
 ==============================================================================
 2. `libmodal.base.globals`                                *libmodal-lua-globals*
 
-TODO.
+These are global variables used throughout the project. They are never
+modified and never meant TO be modified.
+
+VARIABLES                                     *libmodal-lua-globals-variables*
+
+`globals`.DEFAULT_ERROR_TITLE         *libmodal-lua-globals.DEFAULT_ERROR_TITLE*
+
+	The default error message header for |libmodal| errors.
+
+	Type: ~
+		`string`
+
+	Value: ~
+		"vim-libmodal error"
+
+`globals`.ESC_NR                                   *libmodal-lua-globals.ESC_NR*
+
+	The byte of the <Esc> character.
+
+	Type: ~
+		`number`
+
+	Value: ~
+		27
+
+`globals`.TYPE_FUNC                             *libmodal-lua-globals.TYPE_FUNC*
+
+	The `string` yielded by `lua type(x)` when `x` is a `function`.
+
+	Type: ~
+		`string`
+
+	Value: ~
+		"function"
+
+`globals`.TYPE_NUM                               *libmodal-lua-globals.TYPE_NUM*
+
+	The `string` yielded by `lua type(x)` when `x` is a `number`.
+
+	Type: ~
+		`string`
+
+	Value: ~
+		"number"
+
+`globals`.TYPE_STR                               *libmodal-lua-globals.TYPE_STR*
+
+	The `string` yielded by `lua type(x)` when `x` is a `string`.
+
+	Type: ~
+		`string`
+
+	Value: ~
+		"string"
+
+`globals`.TYPE_TBL                               *libmodal-lua-globals.TYPE_TBL*
+
+	The `string` yielded by `lua type(x)` when `x` is a `table`.
+
+	Type: ~
+		`string`
+
+	Value: ~
+		"table"
+
+`globals`.VIM_FALSE                             *libmodal-lua-globals.VIM_FALSE*
+
+	The value Vimscript uses to return `false` (besides |v:false|).
+
+	Type: ~
+		`number`
+
+	Value: ~
+		0
+
+`globals`.VIM_TRUE                               *libmodal-lua-globals.VIM_TRUE*
+
+	Type: ~
+		`number`
+
+	Value: ~
+		1
+
+
+FUNCTIONS                                     *libmodal-lua-globals-functions*
+
+`globals`.isFalse({val})                        *libmodal-lua-globals.isFalse()*
+
+	Determine whether or not some {val} is equal to `globals.VIM_FALSE`,
+	|v:false|, or `false`.
+
+	Parameters: ~
+		{val}   The value to check. Should be a `boolean` or a `boolean`
+		        expression.
+
+	Return: ~
+		* `true` if {val} is equal to `globals.VIM_FALSE`, |v:false|, or
+		  `false`.
+		* `false` otherwise.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Get Lua's truth values.
+		local falseValue     = false
+		local trueValue      = true
+
+		-- Get Vim's `v:` truth values.
+		local v_falseValue   = vim.api.nvim_get_vvar('false')
+		local v_trueValue    = vim.api.nvim_get_vvar('true')
+
+		-- Get Vimscript's truth values.
+		local vim_falseValue = libmodal.globals.VIM_FALSE
+		local vim_trueValue  = libmodal.globals.VIM_TRUE
+
+		--[[ Test the function. ]]
+
+		print(libmodal.globals.isFalse(falseValue))
+		print(libmodal.globals.isFalse(v_falseValue))
+		print(libmodal.globals.isFalse(vim_falseValue))
+
+		print(libmodal.globals.isFalse(trueValue))
+		print(libmodal.globals.isFalse(v_trueValue))
+		print(libmodal.globals.isFalse(vim_trueValue))
+<
+
+`globals`.isTrue({val})                          *libmodal-lua-globals.isTrue()*
+
+	Determine whether or not some {val} is equal to `globals.VIM_TRUE`,
+	|v:true|, or `true`.
+
+	Parameters: ~
+		{val}   The value to check. Should be a `boolean` or a `boolean`
+		        expression.
+
+	Return: ~
+		* `true` if {val} is equal to `globals.VIM_TRUE`, |v:true|, or `true`.
+		* `false` otherwise.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Get Lua's truth values.
+		local falseValue     = false
+		local trueValue      = true
+
+		-- Get Vim's `v:` truth values.
+		local v_falseValue   = vim.api.nvim_get_vvar('false')
+		local v_trueValue    = vim.api.nvim_get_vvar('true')
+
+		-- Get Vimscript's truth values.
+		local vim_falseValue = libmodal.globals.VIM_FALSE
+		local vim_trueValue  = libmodal.globals.VIM_TRUE
+
+		--[[ Test the function. ]]
+
+		print(libmodal.globals.isTrue(falseValue))
+		print(libmodal.globals.isTrue(v_falseValue))
+		print(libmodal.globals.isTrue(vim_falseValue))
+
+		print(libmodal.globals.isTrue(trueValue))
+		print(libmodal.globals.isTrue(v_trueValue))
+		print(libmodal.globals.isTrue(vim_trueValue))
+<
 
 ==============================================================================
 3. `libmodal.mode.ParseTable`                          *libmodal-lua-ParseTable*
@@ -47,19 +223,20 @@ keybinding:expression pairs.
 
 See: |libmodal-mode| for more information.
 
-Variables ~
-                                           *libmodal-lua-ParseTable-variables*
+VARIABLES                                  *libmodal-lua-ParseTable-variables*
 
-`ParseTable`.CR                                     *libmodal-lua-ParseTable-CR*
+`ParseTable`.CR                                     *libmodal-lua-ParseTable.CR*
 
 	The character number for <CR>.
+
+	Type: ~
+		`number`
 
 	Value: ~
 		13
 
 
-Functions ~
-                                           *libmodal-lua-ParseTable-functions*
+FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 
 `ParseTable`.new({userTable})                    *libmodal-lua-ParseTable.new()*
 
@@ -77,12 +254,17 @@ Functions ~
 	Example: ~
 >
 		local libmodal = require('libmodal')
+
+		-- Create a mock set of user mappings.
 		local userTable = {
-			['zf'] = "echo 'Hello!'"
+			['zf'] = "echo 'Hello!'",
 			['zfo'] = "tabnew"
 		}
 
+		-- Create a new `ParseTable`
 		local parseTable = libmodal.mode.ParseTable.new(userTable)
+
+		-- Print the `parseTable`.
 		print(vim.inspect(parseTable))
 <
 
@@ -107,6 +289,8 @@ Functions ~
 
 	Example: ~
 >
+		local libmodal = require('libmodal')
+
 		-- Simulate user input.
 		local userInput = {122, 102} -- {'z', 'f'}
 
@@ -144,7 +328,7 @@ Functions ~
 		print(vim.inspect(parseTable))
 
 		-- this will return a `table`
-		parseTable:parsePut({'zfc', 'split'})
+		parseTable:parsePut('zfc', 'split')
 		-- Inspect it to show the difference.
 		print(vim.inspect(parseTable))
 <
@@ -175,7 +359,7 @@ Functions ~
 		}
 
 		-- Add the dummy keybindings.
-		parseTable:parsePut(unparsedUserKeybinds)
+		parseTable:parsePutAll(unparsedUserKeybinds)
 
 		-- Inspect it to show the difference.
 		print(vim.inspect(parseTable))
@@ -190,7 +374,7 @@ Functions ~
 
 Provides extra utilities to the |libmodal| library.
 
-Functions ~
+FUNCTIONS                                      *libmodal-lua-utils-functions*
 
 `utils`.showError({pcallErr})                    *libmodal-lua-utils.showError*
 
@@ -199,14 +383,42 @@ Functions ~
 	Parameters: ~
 		{pcallErr}  the error generated by `pcall()`.
 
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Run `pcall` on an anonymous function.
+		local noErrors, pcallErr = pcall(function()
+			-- This will always produce an error.
+			return "" .. true
+		end)
+
+		-- If there were errors…
+		if not noErrors then
+			-- Show the error.
+			libmodal.utils.showError(pcallErr)
+		end
+<
+
 =============================================================================
 4.1. `libmodal.utils.api`                                    *libmodal-lua-api*
 
-Functions ~
+Provides extensions to the `vim.api` |Lua| library.
+
+See: |API|.
+
+FUNCTIONS                                        *libmodal-lua-api-functions*
 
 `api`.nvim_bell()                                *libmodal-lua-api.nvim_bell()*
 
 	Make vim ring the visual/audio bell, if it is enabled.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		libmoal.utils.api.nvim_bell()
+<
 
 	See also: ~
 		'belloff'     For bell settings.
@@ -225,8 +437,12 @@ Functions ~
 	Example: ~
 >
 		local libmodal = require('libmodal')
+
+		-- Set a mock variable to 3.
+		libmodal.utils.api.nvim_set_var('foo', 3)
+		print(libmodal.utils.api.nvim_exists('g', 'foo')) -- true
+
 		libmodal.utils.api.nvim_command('unlet g:foo')
-		-- Note that the colon should not go after the scope identifier.
 		print(libmodal.utils.api.nvim_exists('g', 'foo')) -- false
 <
 
@@ -242,51 +458,152 @@ Functions ~
 	Example: ~
 >
 		local libmodal = require('libmodal')
+
+		-- Get one character of user input.
 		local char = string.char(libmodal.utils.api.nvim_input())
 
 		-- … wait for user to press a character …
 
+		-- Print the character.
 		print(char)
 <
 
-CONTINUE HERE
-
 `api`.nvim_lecho({hlTables})                     *libmodal-lua-api.nvim_lecho()*
 
---[[ SUMMARY:
-	* Echo a table of {`hlgroup`, `str`} tables.
-	* Meant to be read as "nvim list echo".
-]]
---[[ PARAMS:
-	* `hlTables` => the tables to echo with highlights.
-]]
+	Echo an `Indicator`.
+	Meant to be read as "nvim list echo".
+
+	Parameters: ~
+		{hlTables}  The `tables` to |echo| with |highlights|.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Create an indicator.
+		local indicator = libmodal.utils.Indicator.mode('FOO')
+
+		-- Show the indicator.
+		libmodal.utils.api.nvim_lecho(indicator)
+<
 
 `api`.nvim_redraw()                             *libmodal-lua-api.nvim_redraw()*
 
---[[ SUMMARY:
-	* Run `mode` to refresh the screen.
-	* The function was not named `nvim_mode` because that would be really confusing given the name of this plugin.
-]]
+	Run |mode| to refresh the screen.
+
+	The function was not named `nvim_mode` because that would be really
+	confusing given the name of this plugin.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local api = vim.api
+
+		-- Echo hello and prompt for input before continuing.
+		api.nvim_command("echo 'Hello!'")
+		api.nvim_call_function('getchar', {})
+
+		-- Clear the screen.
+		libmodal.utils.api.nvim_redraw()
+<
+
+
 
 `api`.nvim_show_err({title}, {msg})           *libmodal-lua-api.nvim_show_err()*
 
---[[ SUMMARY:
-	* Show a `title` error.
-]]
---[[ PARAMS:
-	* `title` => the title of the error.
-	* `msg` => the message of the error.
-]]
+	Show a {title}-error with a given {msg}.
+
+	Parameters: ~
+		{title}  The title of the error.
+		{msg}    The message of the error.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Show an error.
+		libmodal.utils.api.nvim_show_err(
+			-- Use the default error title.
+			libmodal.globals.DEFAULT_ERROR_TITLE,
+			-- Use a custom error message.
+			'This is a test error!'
+		)
+<
 
 ==============================================================================
 4.2. `libmodal.utils.Help`                                   *libmodal-lua-Help*
 
-TODO.
+Allows for the creation of a default "Help" table.
+
+By default, this "Help" is shown by pressing `?` in a |libmodal-mode| or by
+entering "help" into a |libmodal-prompt|.
+
+FUNCTIONS                                        *libmodal-lua-Help-functions*
+
+`Help`.new({commandsOrMaps}, {title})                  *libmodal-lua-Help.new()*
+
+	Create a default help table with `commandsOrMaps` and vim expressions.
+
+	Parameters: ~
+		{commandsOrMaps}  The `table` of |command|s or |map|pings to Vim |expression|s.
+		{title}           The leftmost table column's title.
+
+	Return: ~
+		A new `Help`.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Create a table of mock user commands.
+		local commands = {
+			['close'] = 'tabclose',
+			['new']   = 'tabnew'
+		}
+
+		-- Create a table of mock user maps.
+		local maps = {
+			['zf']  = 'split',
+			['zfo'] = 'echo "Hello!"'
+		}
+
+		local commandHelp = libmodal.utils.Help.new(commands, 'COMMANDS')
+		local mapsHelp = libmodal.utils.Help.new(maps, 'MAPS')
+<
+
+`self`:show()                                         *libmodal-lua-Help.show()*
+
+	Show the contents of this `Help`.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Create a table of mock user commands.
+		local commands = {
+			['close'] = 'tabclose',
+			['new']   = 'tabnew'
+		}
+
+		-- Create a table of mock user maps.
+		local maps = {
+			['zf']  = 'split',
+			['zfo'] = 'echo "Hello!"'
+		}
+
+		local commandHelp = libmodal.utils.Help.new(commands, 'COMMANDS')
+		local mapsHelp = libmodal.utils.Help.new(maps, 'MAPS')
+
+		commandHelp:show()
+		mapsHelp:show()
+<
 
 ==============================================================================
 4.3. `libmodal.utils.Indicator`                         *libmodal-lua-Indicator*
 
-Functions ~
+Provides creation sources for mode and prompt |echo| / |echohl| `string`s.
+
+FUNCTIONS                                   *libmodal-lua-indicator-functions*
 
 `Indicator`.mode({modeName})                     *libmodal-lua-Indicator.mode()*
 
@@ -298,7 +615,7 @@ Functions ~
 	Example: ~
 >
 		local libmodal = require('libmodal')
-		local indicator = libmodal.utils.Indicator.new('FOO')
+		local indicator = libmodal.utils.Indicator.mode('FOO')
 		libmodal.utils.api.nvim_lecho(indicator)
 <
 
@@ -317,120 +634,175 @@ Functions ~
 	Example: ~
 >
 		local libmodal = require('libmodal')
-		local indicator = libmodal.utils.Indicator.new('FOO')
+		local indicator = libmodal.utils.Indicator.prompt('FOO')
 		print(indicator) -- you can't use `nvim_lecho` with this one.
 <
 
 	See also: ~
 		|libmodal-prompt|  For this function's use.
 
-
 ==============================================================================
-4.3.1. `libmodal.utils.Indicator.Entry`                     *libmodal-lua-Entry*
+4.4. `libmodal.utils.vars`                                   *libmodal-lua-vars*
 
-Functions ~
+Provides an interface between Vimscript and Lua instance variables that are
+created during a |libmodal-mode| or |libmodal-prompt|'s execution.
 
-`Entry`.new({hlgroup}, {str})                         *libmodal-lua-Entry.new()*
+Several `vars` are created by default:
 
-	Create a new `Indicator.Entry`.
+Name                  Use
+------------------    -----------------------------------------------------
+`vars.buffers`          Buffers that hold |nvim_open_win()| text.
+`vars.combos`           `ParseTable`s when |libmodal-mode|'s {instruction} is a
+                          `table`.
+`vars.completions`      |libmodal-prompt| completions.
+`vars.exit`             |libmodal-mode|'s {supressExit}.
+`vars.input`            Keeping user input history during |libmodal-mode|.
+`vars.timeouts`          Tracks if |libmodal-timeouts| are enabled for a mode.
+`vars.timer`            Tracks if there is an active |timer| for a mode.
+`vars.windows`          Tracks |nvim_open_win()| handles.
+
+VARIABLES                                        *libmodal-lua-vars-variables*
+
+`vars`.libmodalTimeouts
+
+	The value of `g:libmodalTimeouts`.
+
+	Type: ~
+		`boolean`/`number`
+
+	Value: ~
+		`vim.api.nvim_get_var('libmodalTimeouts')`
+
+`self`.instances
+
+	Instances of variables pertaining to a certain mode.
+
+	Type: ~
+		`table`
+
+	Value: ~
+		Starts as `{}`.
+
+FUNCTIONS                                        *libmodal-lua-vars-functions*
+
+`self`:name({modeName})                               *libmodal-lua-vars.name()*
+
+	Get the name of this variable's global setting for a specific {modeName}.
+
+	Note: not all variables have a global setting. See |libmodal-usage| and
+	      |libmodal-configuration| for what is pertinent.
+
+	Note: This function is case insensitive. {modeName} will always come out
+	      lower case.
 
 	Parameters: ~
-		{hlgroup}  The |highlight-group| to be used for this `Indicator.Entry`.
-		{str}      The text for this `Indicator.Entry`.
+		{modeName}  The name of the mode that this global setting is for.
 
 	Return: ~
-		A new `Indicator.Entry`.
+		The name of this variable's global setting for a specific {modeName}.
 
 	Example: ~
 >
 		local libmodal = require('libmodal')
-		local entry = libmodal.utils.Indicator.Entry.new('Error', 'EXAMPLE!')
-		print(vim.inspect(entry))
+		-- Get the |libmodal-timeouts| variable for `FOO` mode.
+		print(libmodal.utils.vars.exit:name('FOO'))
 <
 
-==============================================================================
-4.4. `libmodal.utils.vars`                                   *libmodal-lua-vars*
+`vars`.nvim_get({var}, {modeName})                *libmodal-lua-vars.nvim_get()*
 
-CONTINUE HERE.
+	Retrieve a {var} value for {modeName} from |nvim_get_var()|.
 
---[[
-	/*
-	 * MODULE `libmodal.utils.vars` %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 */
---]]
+	Parameters: ~
+		{var}       The `vars` table to retrieve the value of.
+		            (e.g. `vars.input`)
+		{modeName}  The mode name this value is being retrieved for.
 
-local vars = {}
-vars.libmodalTimeout = api.nvim_get_var('libmodalTimeouts')
+	Return: ~
+		`vim.api.nvim_get_var( {var}:name({modeName}) )`
 
-====================================
---[[ SUMMARY:
-	* Create a new entry in `vars`
-]]
---[[ PARAMS:
-	* `keyName` => the name of the key used to refer to this variable in `vars`.
-	* `varName` => the name of the variable as it is stored in vim.
-]]
-------------------------------------
-local function new(keyName)
-	vars[keyName] = {
-		-- Instances of variables pertaining to a certain mode.
-		instances = {},
-		_varName = 'Mode'
-			.. string.upper(string.sub(keyName, 0, 1))
-			.. string.sub(keyName, 2),
+	Example: ~
+>
+		local libmodal = require('libmodal')
 
-		---------------------------------
-		--[[ SUMMARY:
-			* Get the name of `modeName`s global setting.
-		]]
-		--[[ PARAMS:
-			* `modeName` => the name of the mode.
-		]]
-		---------------------------------
-		name = function(__self, modeName)
-			return modeName .. __self._varName
-		end,
-	}
-end
+		-- Set the 'g:fooModeExit' variable.
+		vim.api.nvim_set_var('fooModeExit', 1)
 
-====================================
---[[ SUMMARY:
-	* Retrieve a variable value.
-]]
---[[ PARAMS:
-	* `var` => the `vars.*` table to retrieve the value of.
-	* `modeName` => the mode name this value is being retrieved for.
-]]
-------------------------------------
-function vars.nvim_get(var, modeName)
-	return api.nvim_get_var(var:name(modeName))
-end
+		-- Get the `g:fooModeExit` variable.
+		print( libmodal.utils.vars.nvim_get(libmodal.utils.vars.exit, 'FOO') )
+<
 
-function vars.nvim_set(var, modeName, val)
-	api.nvim_set_var(var:name(modeName), val)
-end
+`vars`.nvim_set({var}, {modeName}, {val})         *libmodal-lua-vars.nvim_set()*
 
-================================
---[[ SUMMARY:
-	* Remove temporary variables created by `modeName`.
-]]
---[[ PARAMS:
-	* `modeName` => the name of the mode that created the variables.
-]]
---------------------------------
-function vars:tearDown(modeName)
+	Set a {var} {val} for {modeName} with |nvim_set_var()|.
 
-new('buffers'     )
-new('combos'      )
-new('completions' )
-new('exit'        )
-new('input'       )
-new('timeout'     )
-new('timer'       )
-new('windows'     )
+	Parameters: ~
+		{var}       The `vars` table to retrieve the value of.
+		            (e.g. `vars.input`)
+		{modeName}  The mode name this value is being retrieved for.
+		{val}       The value to set {var} to.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Set the 'g:fooModeExit' variable.
+		libmodal.utils.vars.nvim_set(libmodal.utils.vars.exit, 'FOO', 1)
+
+		-- Get the `g:fooModeExit` variable.
+		print(vim.api.nvim_get_var('fooModeExit'))
+<
+
+`vars`:tearDown({modeName})                       *libmodal-lua-vars.tearDown()*
+
+	Remove temporary variables created by the |libmodal-mode| {modeName}.
+
+	Parameters: ~
+		{modeName}  The name of the |libmodal-mode| that created the variables.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+	-- Create a mock name for a mode.
+	local mode = 'foo'
+
+	-- Define a function to display all of the `vars`.
+	function print_vars()
+		for k, v in pairs(libmodal.utils.vars) do
+			if type(v) == libmodal.globals.TYPE_TBL and v['instances'] then
+				print(k)
+				print(vim.inspect(v))
+				print('===============')
+			end
+		end
+	end
+
+
+	-- Add some variable values for the mode.
+	libmodal.utils.vars.input.instances[mode]    = {}
+	libmodal.utils.vars.timeouts.instances[mode] = true
+	libmodal.utils.vars.timer.instances[mode]   = vim.loop.new_timer()
+
+	-- Print the `vars` with our new assigned values.
+	print_vars()
+	libmodal.utils.vars:tearDown(mode)
+	-- Print the `vars` after `tearDown`.
+	print([[
+	 
+	<<<<<<AFTER TEARDOWN.>>>>>>
+	 
+	]])
+	print_vars()
+<
+
 
 ==============================================================================
 4.5 `libmodal.utils.WindowState`                      *libmodal-lua-WindowState*
+
+Tracks 'winheight' and 'winwidth' when created, so that it can be modified
+freely and then restored later.
+
+FUNCTIONS                                 *libmodal-lua-WindowState-functions*
 
 `WindowState`.new()                             *libmodal-lua-WindowState.new()*
 
@@ -453,6 +825,30 @@ new('windows'     )
 `self`:restore()                            *libmodal-lua-WindowState.restore()*
 
 	Restore the state of this `WindowState`.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local api = vim.api
+
+		-- Create a new `WindowState`.
+		local windowState = libmodal.utils.WindowState.new()
+
+		-- Set the 'winheight' to a new value.
+		api.nvim_set_option('winheight', 100)
+
+		-- Define a function to print the 'winheight' value.
+		local print_height = function()
+			api.nvim_command('echo &winheight')
+		end
+
+		-- Print the 'winheight' prior to `restore()`.
+		print_height()
+		-- Restore the `windowState`.
+		windowState:restore()
+		-- Print the 'winheight' after `restore()`ing.
+		print_height()
+<
 
 ==============================================================================
  vim:tw=78:ts=4:ft=help:norl:

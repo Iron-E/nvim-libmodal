@@ -14,7 +14,7 @@ local api = vim.api
 --]]
 
 local vars = {}
-vars.libmodalTimeout = api.nvim_get_var('libmodalTimeouts')
+vars.libmodalTimeouts = api.nvim_get_var('libmodalTimeouts')
 
 --[[
 	/*
@@ -48,7 +48,7 @@ local function new(keyName)
 		]]
 		---------------------------------
 		name = function(__self, modeName)
-			return modeName .. __self._varName
+			return string.lower(modeName) .. __self._varName
 		end,
 	}
 end
@@ -90,7 +90,7 @@ new('completions' )
 new('exit'        )
 new('help'        )
 new('input'       )
-new('timeout'     )
+new('timeouts'    )
 new('timer'       )
 new('windows'     )
 

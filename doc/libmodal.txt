@@ -33,8 +33,7 @@ modes is also creator-defined, and is outlined in |libmodal-usage|.
 
 See: |vim-modes|
 
-Use Case ~
-                                                   *libmodal-use-case-example*
+USE CASE                                           *libmodal-use-case-example*
 
 As an |init.vim| configuration grows, it becomes harder to create keybindings
 that alphabetically represent the action that they perform. To get around
@@ -109,10 +108,10 @@ Note: Examples for all topics covered here can be found in the "examples"
 
 See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode
 
-Functions ~
+FUNCTIONS                                           *libmodal-usage-functions*
 
                                        *libmodal-mode* *libmodal.mode.enter()*
-libmodal.mode.enter({name}, {instruction} [, {handleExit}])
+`libmodal.mode`.enter({name}, {instruction} [, {handleExit}])
 
 	Enter a new |vim-mode| using {instruction} to determine what actions will
 	be taken upon specific user inputs.
@@ -178,7 +177,7 @@ libmodal.mode.enter({name}, {instruction} [, {handleExit}])
 
 
                                    *libmodal-prompt* *libmodal.prompt.enter()*
-libmodal.prompt.enter({name}, {instruction} [, {completions}])
+`libmodal.prompt`.enter({name}, {instruction} [, {completions}])
 
 	Besides accepting user input like keys in |Normal-mode|, |libmodal| is
 	also capable of prompting the user for |input| like |Cmdline-mode|. To
@@ -241,8 +240,7 @@ all be tested using the |luafile| |command|.
 
 See: |libmodal-usage|, |libmodal-use-case|, |lua-require-example|.
 
-libmodal.mode.enter() ~
-                                                      *libmodal-examples-mode*
+MODES                                                 *libmodal-examples-mode*
 
 Using a callback `function`: >
 	local api = vim.api
@@ -286,6 +284,7 @@ Using a |key-mapping| `table`: >
 	libmodal.mode.enter('FOO', fooModeCombos)
 <
 
+Exit Supression ~
                                               *libmodal-examples-supress-exit*
 
 Using a callback `function`: >
@@ -318,6 +317,7 @@ Using a |key-mapping| `table`: >
 	libmodal.mode.enter('FOO', fooModeCombos, true)
 <
 
+Submodes ~
                                                   *libmodal-examples-submodes*
 
 Using a callback `function`: >
@@ -360,8 +360,7 @@ Using a |key-mapping| `table`: >
 <
 
 
-libmodal.prompt.enter() ~
-                                                    *libmodal-examples-prompt*
+PROMPTS                                             *libmodal-examples-prompt*
 
 Using a callback `function`: >
 	local libmodal = require('libmodal')
@@ -396,16 +395,15 @@ Using a |command| `table`: >
 ==============================================================================
 4. Configuration                                      *libmodal-configuration*
 
-Highlighting ~
-                                                   *libmodal-highlight-groups*
+HIGHLIGHT GROUPS                                   *libmodal-highlight-groups*
 
 
 The following |highlight-groups| can be |config|ured to change a mode's |color|s:
 
-Name              Default      Description
-----              -------      -----------
-`LibmodalPrompt`  `ModeMsg`    Color for the mode text.
-`LibmodalStar`    `StatusLine` Color for the prompt text.
+Name               Default       Description
+----------------   ------------  --------------------------
+`LibmodalPrompt`     `ModeMsg`       Color for the mode text.
+`LibmodalStar`       `StatusLine`    Color for the prompt text.
 
 Note: `LibmodalStar`'s name — while not indicative of its use — is used for
       the sake of backwards compatability.
@@ -414,23 +412,32 @@ Note: `LibmodalStar`'s name — while not indicative of its use — is used for
 		when Neovim 0.5 launches that will introduce interoperaability between
 		the two.
 
-Timeouts ~
-                                                           *libmodal-timeouts*
-                                                          *g:libmodalTimeouts*
+TIMEOUTS                              *libmodal-timeouts* *g:libmodalTimeouts*
 
 When `libmodal.mode.enter()`'s {instruction} argument is a `table`, mode
 creators may also enable the use of Vim's built-in 'timeout' feature.
 
 To enable 'timeout's, one may set the following |variables|:
+
+	Lua: ~
+>
+	" Set libmodal modes to turn timeouts on.
+	vim.api.nvim_set_var('libmodalTimeouts', true)
+	" Enable timeouts for specific mode.
+	vim.api.nvim_set_var('{name}ModeTimeouts', true)
+<
+	Vimscript: ~
 >
 	" Set libmodal modes to turn timeouts on.
 	let g:libmodalTimeouts = 1
 	" Enable timeouts for specific mode.
-	let g:{name}ModeTimeout = 1
+	let g:{name}ModeTimeouts = 1
 <
+
+
 Similarly, to disable them, one may set them to `0`.
 
-When `g:libmodalTimeouts` or `g:{name}ModeTimeout` is set to `1`, |libmodal|
+When `g:libmodalTimeouts` or `g:{name}ModeTimeouts` is set to `1`, |libmodal|
 will automatically execute commands that have mappings that might also be
 longer mappings. For example:
 	If a mode specifies `zf` and `zfo` as mappings,
@@ -517,7 +524,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ==============================================================================
 7. Contributing                                        *libmodal-contributing*
 
-Code ~
+CODE                                              *libmodal-contributing-code*
 
 	Bugfixes ~
 
@@ -551,7 +558,7 @@ Code ~
 	person who knows the most about the feature being implemented is most
 	likely the one implementing it.
 
-Documentation ~
+DOCUMENTATION                            *libmodal-contributing-documentation*
 
 If there is a problem with the documentation, or you see an area where it
 could be improved, don't hesitate to submit an issue and a PR. At the very
@@ -559,7 +566,7 @@ least it will exist in history if such an issue comes up again, and likely it
 will serve to help yourself and others with more clear and concise wording, or
 with more helpful and practical examples.
 
-Issues ~
+ISSUES                                          *libmodal-contributing-issues*
 
 Issues are greatly welcomed on the GitHub repository, whether they are bug
 reports, feature requests, documentation improvements, or misunderstandings:
@@ -580,6 +587,7 @@ When submitting an issue, please describe the following:
 0.3.0 ~
 
 * Generate `?` mapping for |libmodal-mode|s.
+* Fix |libmodal-timeouts| not being respected.
 
 0.2.1 ~
 

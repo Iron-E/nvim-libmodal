@@ -147,7 +147,7 @@ function prompt.enter(...)
 					elseif userInput == _HELP then -- the user did not define a 'help' command, so use the default.
 						vars.help.instances[modeName]:show()
 					else -- show an error.
-						api.nvim_show_err(globals.DEFAULT_ERROR_MESSAGE, 'Unknown command')
+						api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
 					end
 				else
 					args[2]()

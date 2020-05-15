@@ -37,7 +37,7 @@ utils.WindowState = require('libmodal/src/utils/WindowState')
 function utils.showError(pcallErr)
 	utils.api.nvim_bell()
 	utils.api.nvim_show_err(
-		globals.DEFAULT_ERROR_MESSAGE,
+		globals.DEFAULT_ERROR_TITLE,
 		api.nvim_get_vvar('throwpoint')
 		.. '\n' ..
 		api.nvim_get_vvar('exception')

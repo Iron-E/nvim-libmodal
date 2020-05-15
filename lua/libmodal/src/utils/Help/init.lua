@@ -72,9 +72,11 @@ function Help.new(commandsOrMaps, title)
 		[1] = ' ',
 		[2] = table.concat(tabAlign({
 			[title] = 'VIM EXPRESSION',
+		})),
+		[3] = table.concat(tabAlign({
 			[helpSeparator] = '--------------'
 		})),
-		[3] = table.concat(tabAlign(commandsOrMaps)),
+		[4] = table.concat(tabAlign(commandsOrMaps)),
 		-----------------------
 		--[[ SUMMARY:
 			* Show the contents of this `Help`.

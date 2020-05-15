@@ -96,7 +96,9 @@ local function _comboSelect(modeName)
 		end
 		clearUserInput = true
 	-- The command was a table, meaning that it MIGHT match.
-	elseif commandType == globals.TYPE_TBL then
+	elseif commandType == globals.TYPE_TBL
+	       and globals.isTrue(vars.timeouts.instances[modeName])
+	then
 		-- Create a new timer
 		vars.timer.instances[modeName] = vim.loop.new_timer()
 
@@ -140,12 +142,14 @@ local function _initCombos(modeName, comboTable)
 	local doTimeout = nil
 
 	-- Read the correct timeout variable.
-	if api.nvim_exists('g', vars.timeout:name(modeName)) then
-		doTimeout = vars.nvim_get(vars.timeout, modeName)
-	else doTimeout = vars.libmodalTimeout end
+	if api.nvim_exists('g', vars.timeouts:name(modeName)) then doTimeout =
+		vars.nvim_get(vars.timeouts, modeName)
+	else doTimeout =
+		vars.libmodalTimeouts
+	end
 
 	-- Assign the timeout variable according to `doTimeout`
-	vars.timeout.instances[modeName] = doTimeout
+	vars.timeouts.instances[modeName] = doTimeout
 
 	-- create a floating window
 	local buf = api.nvim_create_buf(false, true)

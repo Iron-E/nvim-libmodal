@@ -12,7 +12,7 @@ local globals = {}
 	 */
 --]]
 
-globals.DEFAULT_ERROR_MESSAGE = 'vim-libmodal error'
+globals.DEFAULT_ERROR_TITLE = 'vim-libmodal error'
 globals.ESC_NR = 27
 globals.TYPE_FUNC = 'function'
 globals.TYPE_NUM = 'number'

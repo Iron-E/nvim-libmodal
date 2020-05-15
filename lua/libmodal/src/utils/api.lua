@@ -106,12 +106,12 @@ end
 	* `msg` => the message of the error.
 ]]
 --------------------------------------
-local returnEntry = Entry.new('Question', '\nPress any key to return.')
+-- local returnEntry = Entry.new('Question', '\nPress any key to return.')
 function api.nvim_show_err(title, msg)
 	api.nvim_lecho({
 		Entry.new('Title', tostring(title) .. '\n'),
 		Entry.new('Error', tostring(msg)),
-		returnEntry
+		-- returnEntry
 	})
 	api.nvim_call_function('getchar', {})
 end
