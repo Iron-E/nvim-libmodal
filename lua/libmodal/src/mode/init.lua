@@ -25,6 +25,7 @@ mode.ParseTable = require('libmodal/src/mode/ParseTable')
 	 */
 --]]
 
+local _HELP = '?'
 local _TIMEOUT_CHAR = 'ø'
 local _TIMEOUT_NR = string.byte(_TIMEOUT_CHAR)
 local _TIMEOUT_LEN = api.nvim_get_option('timeoutlen')
@@ -89,7 +90,11 @@ local function _comboSelect(modeName)
 	local clearUserInput = false
 
 	-- if there was no matching command
-	if cmd == false then clearUserInput = true
+	if cmd == false then
+		if vars.help.instances[modeName] then
+			vars.help.instances[modeName]:show()
+		end
+		clearUserInput = true
 	-- The command was a table, meaning that it MIGHT match.
 	elseif commandType == globals.TYPE_TBL then
 		-- Create a new timer
@@ -146,6 +151,11 @@ local function _initCombos(modeName, comboTable)
 	local buf = api.nvim_create_buf(false, true)
 	vars.buffers.instances[modeName] = buf
 	vars.windows.instances[modeName] = api.nvim_call_function('libmodal#_winOpen', {buf})
+
+	-- Determine if a default `Help` should be created.
+	if not comboTable[_HELP] then
+		vars.help.instances[modeName] = utils.Help.new(comboTable, 'KEY MAP')
+	end
 
 	-- Build the parse tree.
 	vars.combos.instances[modeName] = mode.ParseTable.new(comboTable)

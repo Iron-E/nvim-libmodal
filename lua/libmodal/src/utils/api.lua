@@ -24,18 +24,6 @@ function api.nvim_bell()
 	api.nvim_command('normal ' .. string.char(27)) -- escape char
 end
 
----------------------------
---[[ SUMMARY:
-	* Echo a string to Vim.
-]]
---[[ PARAMS:
-	* `str` => the string to echo.
-]]
----------------------------
-function api.nvim_echo(str)
-	api.nvim_command("echo " .. tostring(str))
-end
-
 ------------------------------------
 --[[ SUMMARY:
 	* Check whether or not some variable exists.

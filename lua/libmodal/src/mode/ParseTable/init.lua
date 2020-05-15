@@ -48,10 +48,8 @@ end
 ---------------------------------
 local function _tableReverse(tbl)
 	local reversed = {}
-	local i = #tbl
-	while i > 0 do
-		reversed[#reversed + 1] = tbl[i]
-		i = i - 1
+	while #reversed < #tbl do
+		reversed[#reversed + 1] = tbl[#tbl - #reversed]
 	end
 	return reversed
 end

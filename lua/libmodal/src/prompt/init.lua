@@ -116,6 +116,7 @@ function prompt.enter(...)
 		end
 		if not containedHelp then -- assign it.
 			completions[#completions + 1] = _HELP
+			vars.help.instances[modeName] = utils.Help.new(args[2], 'COMMAND')
 		end
 	elseif #args > 2 then -- assign completions as the custom completions table provided.
 		completions = args[3]
@@ -144,7 +145,7 @@ function prompt.enter(...)
 					if args[2][userInput] then -- there is a defined command for the input.
 						api.nvim_command(args[2][userInput])
 					elseif userInput == _HELP then -- the user did not define a 'help' command, so use the default.
-						utils.commandHelp(args[2])
+						vars.help.instances[modeName]:show()
 					else -- show an error.
 						api.nvim_show_err(globals.DEFAULT_ERROR_MESSAGE, 'Unknown command')
 					end

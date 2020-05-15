@@ -14,5 +14,5 @@ libmodal.utils  = require('libmodal/src/utils')
 	 * PUBLICIZE MODULE
 	 */
 --]]
-return libmodal
 
+return libmodal
