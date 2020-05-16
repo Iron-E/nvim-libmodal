@@ -1,4 +1,4 @@
-*libmodal-lua.txt*     Create modes for Neovim - Lua Referenc
+*libmodal-lua.txt*     Create modes for Neovim - Lua Reference
 *libmodal-lua*
 *libmodal-dev*
 
