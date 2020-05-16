@@ -11,7 +11,7 @@ Any material not covered here is covered in |libmodal-usage|.
 See: |libmodal-usage|, |lua|, |lua-require-example|.
 
 ==============================================================================
-0. Table of Contents                                       *libmodal-lua-toc*
+0. Table of Contents                                        *libmodal-lua-toc*
 
 1.   `libmodal` ............................. |libmodal-lua-libmodal|
 2.   `libmodal.base.globals` ................ |libmodal-lua-globals|
