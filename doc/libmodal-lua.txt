@@ -30,6 +30,7 @@ This is the base of |libmodal|. It can be imported using: >
 	local libmodal = require('libmodal')
 <if |libmodal| is in your 'runtimepath'.
 
+------------------------------------------------------------------------------
 MODULES                                                 *libmodal-lua-modules*
 
 * `libmodal`
@@ -51,6 +52,7 @@ MODULES                                                 *libmodal-lua-modules*
 These are global variables used throughout the project. They are never
 modified and never meant TO be modified.
 
+------------------------------------------------------------------------------
 VARIABLES                                     *libmodal-lua-globals-variables*
 
 `globals`.DEFAULT_ERROR_TITLE         *libmodal-lua-globals.DEFAULT_ERROR_TITLE*
@@ -132,6 +134,7 @@ VARIABLES                                     *libmodal-lua-globals-variables*
 		1
 
 
+------------------------------------------------------------------------------
 FUNCTIONS                                     *libmodal-lua-globals-functions*
 
 `globals`.isFalse({val})                        *libmodal-lua-globals.isFalse()*
@@ -223,6 +226,7 @@ keybinding:expression pairs.
 
 See: |libmodal-mode| for more information.
 
+------------------------------------------------------------------------------
 VARIABLES                                  *libmodal-lua-ParseTable-variables*
 
 `ParseTable`.CR                                     *libmodal-lua-ParseTable.CR*
@@ -235,7 +239,7 @@ VARIABLES                                  *libmodal-lua-ParseTable-variables*
 	Value: ~
 		13
 
-
+------------------------------------------------------------------------------
 FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 
 `ParseTable`.new({userTable})                    *libmodal-lua-ParseTable.new()*
@@ -370,13 +374,14 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 		                                    {tableToUnite}.
 
 =============================================================================
-4. `libmodal.utils`                                        *libmodal-lua-utils*
+4. `libmodal.utils`                                         *libmodal-lua-utils*
 
 Provides extra utilities to the |libmodal| library.
 
-FUNCTIONS                                      *libmodal-lua-utils-functions*
+------------------------------------------------------------------------------
+FUNCTIONS                                       *libmodal-lua-utils-functions*
 
-`utils`.showError({pcallErr})                    *libmodal-lua-utils.showError*
+`utils`.showError({pcallErr})                   *libmodal-lua-utils.showError()*
 
 	Show an error from `pcall()`.
 
@@ -401,15 +406,16 @@ FUNCTIONS                                      *libmodal-lua-utils-functions*
 <
 
 =============================================================================
-4.1. `libmodal.utils.api`                                    *libmodal-lua-api*
+4.1. `libmodal.utils.api`                                     *libmodal-lua-api*
 
 Provides extensions to the `vim.api` |Lua| library.
 
 See: |API|.
 
-FUNCTIONS                                        *libmodal-lua-api-functions*
+------------------------------------------------------------------------------
+FUNCTIONS                                         *libmodal-lua-api-functions*
 
-`api`.nvim_bell()                                *libmodal-lua-api.nvim_bell()*
+`api`.nvim_bell()                                 *libmodal-lua-api.nvim_bell()*
 
 	Make vim ring the visual/audio bell, if it is enabled.
 
@@ -426,7 +432,7 @@ FUNCTIONS                                        *libmodal-lua-api-functions*
 		'visualbell'  For bell settings.
 
 
-`api`.nvim_exists({scope}, {var})              *libmodal-lua-api.nvim_exists()*
+`api`.nvim_exists({scope}, {var})               *libmodal-lua-api.nvim_exists()*
 
 	Check whether or not some |variable| exists.
 
@@ -538,6 +544,7 @@ Allows for the creation of a default "Help" table.
 By default, this "Help" is shown by pressing `?` in a |libmodal-mode| or by
 entering "help" into a |libmodal-prompt|.
 
+------------------------------------------------------------------------------
 FUNCTIONS                                        *libmodal-lua-Help-functions*
 
 `Help`.new({commandsOrMaps}, {title})                  *libmodal-lua-Help.new()*
@@ -603,6 +610,7 @@ FUNCTIONS                                        *libmodal-lua-Help-functions*
 
 Provides creation sources for mode and prompt |echo| / |echohl| `string`s.
 
+------------------------------------------------------------------------------
 FUNCTIONS                                   *libmodal-lua-indicator-functions*
 
 `Indicator`.mode({modeName})                     *libmodal-lua-Indicator.mode()*
@@ -651,19 +659,20 @@ Several `vars` are created by default:
 
 Name                  Use
 ------------------    -----------------------------------------------------
-`vars.buffers`          Buffers that hold |nvim_open_win()| text.
-`vars.combos`           `ParseTable`s when |libmodal-mode|'s {instruction} is a
-                          `table`.
-`vars.completions`      |libmodal-prompt| completions.
-`vars.exit`             |libmodal-mode|'s {supressExit}.
-`vars.input`            Keeping user input history during |libmodal-mode|.
-`vars.timeouts`          Tracks if |libmodal-timeouts| are enabled for a mode.
-`vars.timer`            Tracks if there is an active |timer| for a mode.
-`vars.windows`          Tracks |nvim_open_win()| handles.
+`vars`.buffers          Buffers that hold |nvim_open_win()| text.
+`vars`.combos           `ParseTable`s when |libmodal-mode|'s {instruction} is a
+                           `table`.
+`vars`.completions      |libmodal-prompt| completions.
+`vars`.exit             |libmodal-mode|'s {supressExit}.
+`vars`.input            Keeping user input history during |libmodal-mode|.
+`vars`.timeouts          Tracks if |libmodal-timeouts| are enabled for a mode.
+`vars`.timer            Tracks if there is an active |timer| for a mode.
+`vars`.windows          Tracks |nvim_open_win()| handles.
 
+------------------------------------------------------------------------------
 VARIABLES                                        *libmodal-lua-vars-variables*
 
-`vars`.libmodalTimeouts
+`vars`.libmodalTimeouts                     *libmodal-lua-vars.libmodalTimeouts*
 
 	The value of `g:libmodalTimeouts`.
 
@@ -673,7 +682,7 @@ VARIABLES                                        *libmodal-lua-vars-variables*
 	Value: ~
 		`vim.api.nvim_get_var('libmodalTimeouts')`
 
-`self`.instances
+`self`.instances                                   *libmodal-lua-vars.instances*
 
 	Instances of variables pertaining to a certain mode.
 
@@ -683,6 +692,7 @@ VARIABLES                                        *libmodal-lua-vars-variables*
 	Value: ~
 		Starts as `{}`.
 
+------------------------------------------------------------------------------
 FUNCTIONS                                        *libmodal-lua-vars-functions*
 
 `self`:name({modeName})                               *libmodal-lua-vars.name()*
@@ -802,6 +812,7 @@ FUNCTIONS                                        *libmodal-lua-vars-functions*
 Tracks 'winheight' and 'winwidth' when created, so that it can be modified
 freely and then restored later.
 
+------------------------------------------------------------------------------
 FUNCTIONS                                 *libmodal-lua-WindowState-functions*
 
 `WindowState`.new()                             *libmodal-lua-WindowState.new()*

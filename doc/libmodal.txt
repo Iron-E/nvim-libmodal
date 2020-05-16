@@ -33,6 +33,7 @@ modes is also creator-defined, and is outlined in |libmodal-usage|.
 
 See: |vim-modes|
 
+------------------------------------------------------------------------------
 USE CASE                                           *libmodal-use-case-example*
 
 As an |init.vim| configuration grows, it becomes harder to create keybindings
@@ -108,6 +109,7 @@ Note: Examples for all topics covered here can be found in the "examples"
 
 See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode
 
+------------------------------------------------------------------------------
 FUNCTIONS                                           *libmodal-usage-functions*
 
                                        *libmodal-mode* *libmodal.mode.enter()*
@@ -240,6 +242,7 @@ all be tested using the |luafile| |command|.
 
 See: |libmodal-usage|, |libmodal-use-case|, |lua-require-example|.
 
+------------------------------------------------------------------------------
 MODES                                                 *libmodal-examples-mode*
 
 Using a callback `function`: >
@@ -359,7 +362,7 @@ Using a |key-mapping| `table`: >
 	fooMode()
 <
 
-
+------------------------------------------------------------------------------
 PROMPTS                                             *libmodal-examples-prompt*
 
 Using a callback `function`: >
@@ -395,6 +398,10 @@ Using a |command| `table`: >
 ==============================================================================
 4. Configuration                                      *libmodal-configuration*
 
+The following specifies what settings may be used to configure
+|libmodal-mode|s and |libmodal-prompt|s.
+
+------------------------------------------------------------------------------
 HIGHLIGHT GROUPS                                   *libmodal-highlight-groups*
 
 
@@ -412,6 +419,7 @@ Note: `LibmodalStar`'s name — while not indicative of its use — is used for
 		when Neovim 0.5 launches that will introduce interoperaability between
 		the two.
 
+------------------------------------------------------------------------------
 TIMEOUTS                              *libmodal-timeouts* *g:libmodalTimeouts*
 
 When `libmodal.mode.enter()`'s {instruction} argument is a `table`, mode
@@ -524,6 +532,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ==============================================================================
 7. Contributing                                        *libmodal-contributing*
 
+The following describes what should be done if an individual wishes to
+contribute something to the `Iron-E/nvim-libmodal` repository.
+
+------------------------------------------------------------------------------
 CODE                                              *libmodal-contributing-code*
 
 	Bugfixes ~
@@ -558,6 +570,7 @@ CODE                                              *libmodal-contributing-code*
 	person who knows the most about the feature being implemented is most
 	likely the one implementing it.
 
+------------------------------------------------------------------------------
 DOCUMENTATION                            *libmodal-contributing-documentation*
 
 If there is a problem with the documentation, or you see an area where it
@@ -566,6 +579,7 @@ least it will exist in history if such an issue comes up again, and likely it
 will serve to help yourself and others with more clear and concise wording, or
 with more helpful and practical examples.
 
+------------------------------------------------------------------------------
 ISSUES                                          *libmodal-contributing-issues*
 
 Issues are greatly welcomed on the GitHub repository, whether they are bug
