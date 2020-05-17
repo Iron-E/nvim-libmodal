@@ -205,8 +205,6 @@ end
 --------------------------------------------------------------------------------
 local function _modeLoop(handleExitEvents, indicator, modeInstruction, modeName)
 	-- If the mode is not handling exit events automatically and the global exit var is true.
-	print(type(modeInstruction))
-	print(modeInstruction)
 	if not handleExitEvents and globals.isTrue(
 		vars.nvim_get(vars.exit, modeName)
 	) then return false end
@@ -249,9 +247,6 @@ end
 ------------------------
 function mode.enter(...)
 	local args = {...}
-	print(args[1])
-	print(args[2])
-	print(args[3])
 
 	--[[ SETUP. ]]
 
