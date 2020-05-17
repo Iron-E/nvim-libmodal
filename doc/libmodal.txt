@@ -678,6 +678,9 @@ When submitting an issue, please describe the following:
 
 	Fixes: ~
 	* Fix bad reference to `vars.windows`.
+	* Fix bug where help was always shown upon entering an invalid key-combo in
+	  `libmodal.mode.enter()`.
+
 
 0.3.1 ~
 
