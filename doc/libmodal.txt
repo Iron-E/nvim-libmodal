@@ -598,6 +598,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 6. Bugs                                                        *libmodal-bugs*
 
 * `libmodal#Enter()` does not work when {instruction} is a |funcref|.
+* `libmodal#Prompt()` does not work when {instruction} is a |funcref|.
 
 ==============================================================================
 7. Contributing                                        *libmodal-contributing*
