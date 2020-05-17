@@ -673,32 +673,43 @@ When submitting an issue, please describe the following:
 
 0.4.0 ~
 
-* Add partial support for |vim-libmodal|.
+	Additions: ~
+	* Add partial support for |vim-libmodal|.
+
+	Fixes: ~
+	* Add partial support for |vim-libmodal|.
 
 0.3.1 ~
 
-* Fix bug where everytime `api.nvim_lecho()` was called, its {hlTables} would
-  infinitely grow with placeholder "None" entries.
+	Fixes: ~
+	* Fix bug where everytime `api.nvim_lecho()` was called, its {hlTables} would
+	  infinitely grow with placeholder "None" entries.
 
 0.3.0 ~
 
-* Generate `?` mapping for |libmodal-mode|s.
-* Fix |libmodal-timeouts| not being respected.
+	Additions: ~
+	* Generate `?` mapping for |libmodal-mode|s.
+
+	Fixes: ~
+	* Fix |libmodal-timeouts| not being respected.
 
 0.2.1 ~
 
-* Fix `help` command completion being shown during an {instruction} callback
-  `function` when none should be shown.
+	Fixes: ~
+	* Fix `help` command completion being shown during an {instruction}
+	  callback `function` when none should be shown.
 
 0.2.0 ~
 
-* |libmodal-prompt| implemetation from |vim-libmodal|.
-* |libmodal-prompt|s now automatically generate `help` command if none is
-  provided.
+	Additions: ~
+	* |libmodal-prompt| implemetation from |vim-libmodal|.
+	* |libmodal-prompt|s now automatically generate `help` command if none is
+	  provided.
 
 0.1.0 ~
 
-* |libmodal-mode| implementation from |vim-libmodal|.
+	Additions: ~
+	* |libmodal-mode| implementation from |vim-libmodal|.
 
 ==============================================================================
 9. Credits                                                  *libmodal-credits*
