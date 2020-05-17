@@ -88,17 +88,14 @@ See: |libmodal-usage|
 ==============================================================================
 2. Usage                                                      *libmodal-usage*
 
-The |libmodal| interface is designed completely in |Lua|. It is incompatable
-with Vimscript until Neovim 0.5 releases (as `neovim/neovim#11306` will
-merge). Because of this timed incompatability, the following must be done:
+The |libmodal| interface is designed completely in |Lua|. It is compatable
+with Vimscript, and so one may either:
 
-1. Define a |Lua| interface for your mode.
-2. Use |lua-require| as a |user-command|.
+1. Define a |Lua| interface for your mode (see |libmodal-examples|).
+	* Use |lua-require| as a |user-command|.
 	* See |lua-require-example| for information about how to do this.
-
-`nvim-tabmode` is a plugin that was written to specifically display how to do
-this. See below for a link to the repository where the source code may be
-viewed.
+	* See `Iron-E/nvim-tabmode` for a complete example.
+2. |call| `libmodal#Enter()` or `libmodal#Prompt()` from Vimscript.
 
 The following is a reference for high-level functions meant to be used by mode
 creators. For those who wish to see a low-level specification of |libmodal|,
@@ -112,8 +109,9 @@ See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode
 ------------------------------------------------------------------------------
 FUNCTIONS                                           *libmodal-usage-functions*
 
-                                       *libmodal-mode* *libmodal.mode.enter()*
-`libmodal.mode`.enter({name}, {instruction} [, {handleExit}])
+                    *libmodal-mode* *libmodal#Enter()* *libmodal.mode.enter()*
+`libmodal.mode`.enter({name}, {instruction} [, {supressExit}])
+`libmodal`#Enter({name}, {instruction} [, {supressExit}])
 
 	Enter a new |vim-mode| using {instruction} to determine what actions will
 	be taken upon specific user inputs.
@@ -127,8 +125,8 @@ FUNCTIONS                                           *libmodal-usage-functions*
 
 	To take input on a line-by-line basis, see |libmodal-prompt|.
 
-	Note: `libmodal.mode.enter()` may be called from inside itself. See
-	      |libmodal-examples-submodes| for an example.
+	Note: `libmodal.mode.enter()`/`libmodal#Enter()` may be called from inside
+	      itself. See |libmodal-examples-submodes| for an example.
 
 	Parameters: ~
 		{name}         The name of the mode (e.g. |INSERT|).
@@ -137,38 +135,51 @@ FUNCTIONS                                           *libmodal-usage-functions*
 
 		{instruction}  What to do when accepting user input.
 
-			- If {instruction} is a `table`, then it is treated as
-			  a map of user key-chord to Vim |command|s. Example: >
+			- If {instruction} is a `dict`/`table`, then it is treated as a
+			  map of user key-chord to Vim |command|s. Example: >
+			      -- LUA
 			      local modeInstruction = {
 			          ['zf'] = 'split',
 			          ['zfo'] = 'vsplit',
 			          ['zfc'] = 'tabnew'
 			      }
+
+			    " VIMSCRIPT
+			    let s:modeInstruction = {
+			        'zf': 'split',
+			        'zfo': 'vsplit',
+			        'zfc': 'tabnew'
+			    }
 <
 
-			Note: If no `?` key is defined, one will be created
-			      automatically.
+			Note: If no `?` key is defined, one will be created automatically.
 
-			- If {instruction} is a `function`, then it is called
-			  every time that |getchar()| completes. The user input
-			  is received through `g:{name}ModeInput` (see above).
+			- If {instruction} is a `function`, then it is called every time
+			  that |getchar()| completes. The user input is received through
+			  `g:{name}ModeInput` (see above).
+
+			*Error	you cannot pass a function to Lua from Vimscript!
+			      	- If you try to use a |funcref()| for {instruction}, it
+			      	  will fail, GUARANTEED. This is because of |E5004|.
+			      	- If you want to use a |funcref()| for {instruction}, you
+			      	  must use a |Lua| `function` instead.
 
 			Note: Some QoL features are available by default when
-			      specifying a `table` value for {instruction} that
-			      would otherwise have to be programmed manually if
-			      a `function` is specified.
+			      specifying a `dict`/`table` value for {instruction} that
+			      would otherwise have to be programmed manually if a
+			      `function` is specified.
 
 			      - A user's typed characters will show in the
 			        lower right corner when {instruction} is a table.
 			      - If `g:libmodalTimeouts` is enabled, then user input will be
-			       subjected to the |timeoutlen|.
+			        subjected to the |timeoutlen|.
 
 		{supressExit}  Whether or not to automatically exit the mode upon an
                        <Esc> press.
 
-			- If `false`, then <Esc> is automatically mapped to
+			- If |v:false|/`false`, then <Esc> is automatically mapped to
               exiting.
-			- If `true`, then <Esc> is ignored unless specified by
+			- If |v:true|/`true`, then <Esc> is ignored unless specified by
 			  the user. In such cases, the user should set the
 			  `g:`{name}`ModeExit` variable to `true` when exiting is
 			  desired. See |libmodal-examples-supress-exit|.
@@ -178,13 +189,14 @@ FUNCTIONS                                           *libmodal-usage-functions*
 		|libmodal-examples-mode|  For examples of this function.
 
 
-                                   *libmodal-prompt* *libmodal.prompt.enter()*
+              *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
 `libmodal.prompt`.enter({name}, {instruction} [, {completions}])
+`libmodal`#Prompt({name}, {instruction} [, {completions}])
 
 	Besides accepting user input like keys in |Normal-mode|, |libmodal| is
 	also capable of prompting the user for |input| like |Cmdline-mode|. To
 	define a |Cmdline-mode|-like prompt, use this function rather than
-	`libmodal.mode.enter()`.
+	`libmodal.mode.enter()`/`libmodal#Enter()`.
 
 	User input is taken using |input()|. It is passed through a |g:var|
 	determined by the {name} of the mode. For example, if {name} is "FOO"
@@ -197,17 +209,31 @@ FUNCTIONS                                           *libmodal-usage-functions*
 
 		{instruction}  What to do when accepting user input.
 
-			- If {instruction} is a `table`, then it is treated as
-			  a map of user inputs to Vim |command|s. Example: >
-		          local modeInstruction = {
-		              ['new']   = 'tabnew',
-		              ['close'] = 'tabclose',
-		              ['last']  = 'tablast'
-		          }
+			- If {instruction} is a `dict`/`table`, then it is treated as a
+			  map of user inputs to Vim |command|s. Example: >
+			      -- LUA
+			      local modeInstruction = {
+			          ['new']   = 'tabnew',
+			          ['close'] = 'tabclose',
+			          ['last']  = 'tablast'
+			      }
+
+			      " VIMSCRIPT
+			      let s:modeInstruction = {
+			          'new': 'tabnew',
+			          'close': 'tabclose',
+			          'last': 'tablast'
+			      }
 <
 			- If {instruction} is a `function`, then it is called
 			  every time that |input()| completes. The user input
 			  is received through `g:{name}ModeInput` (see above).
+
+			*Error	you cannot pass a function to Lua from Vimscript!
+			      	- If you try to use a |funcref()| for {instruction}, it
+			      	  will fail, GUARANTEED. This is because of |E5004|.
+			      	- If you want to use a |funcref()| for {instruction}, you
+			      	  must use a |Lua| `function` instead.
 
 			Note: If you want to create commands with arguments, you will
 			      need to use a `function`.
@@ -276,6 +302,16 @@ Using a callback `function`: >
 	libmodal.mode.enter('FOO', fooMode)
 <
 
+using a |key-mapping| `dict`: >
+	let s:barModeCombos = {
+	\	'zf': 'split',
+	\	'zfo': 'vsplit',
+	\	'zfc': 'tabnew'
+	\}
+
+	call libmodal#Enter('BAR', s:barModeCombos)
+<
+
 Using a |key-mapping| `table`: >
 	local libmodal = require('libmodal')
 	local fooModeCombos = {
@@ -307,6 +343,16 @@ Using a callback `function`: >
 
 	vim.api.nvim_set_var('fooModeExit', 0)
 	libmodal.mode.enter('FOO', fooMode, true)
+<
+
+Using a |key-mapping| `dict`: >
+	let s:barModeCombos = {
+	\	'': 'echom "You cant exit using escape."',
+	\	'q': 'let g:barModeExit = 1'
+	\}
+
+	let g:barModeExit = 0
+	call libmodal#Enter('BAR', s:barModeCombos, 1)
 <
 
 Using a |key-mapping| `table`: >
@@ -347,6 +393,23 @@ Using a callback `function`: >
 <
 
 Using a |key-mapping| `table`: >
+	let s:barModeRecurse = 0
+
+	let s:barModeCombos = {
+	\	'z': 'BarModeEnter',
+	\}
+
+	function! s:BarMode()
+		let s:barModeRecurse += 1
+		call libmodal#Enter('BAR' . s:barModeRecurse, s:barModeCombos)
+		let s:barModeRecurse -= 1
+	endfunction
+
+	command! BarModeEnter call s:BarMode()
+	execute 'BarModeEnter'
+<
+
+Using a |key-mapping| `table`: >
 	local libmodal = require('libmodal')
 	local fooModeRecurse = 0
 	local fooModeCombos = {
@@ -382,6 +445,16 @@ Using a callback `function`: >
 	end
 
 	libmodal.prompt.enter('FOO', fooMode, commandList)
+<
+
+Using a |command| `dict`: >
+	let s:commands = {
+	\	'new': 'tabnew',
+	\	'close': 'tabclose',
+	\	'last': 'tablast'
+	\}
+
+	call libmodal#Prompt('TAB', s:commands)
 <
 
 Using a |command| `table`: >
@@ -524,10 +597,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ==============================================================================
 6. Bugs                                                        *libmodal-bugs*
 
-* Passing a |funcref| through Vimscript to |Lua| yields a `nil`.
-	* This bug is fixed in Neovim 0.5, and when it releases, there will be a
-	  patch for this plugin to fix it and introduce compatability with
-	  |vim-libmodal|.
+* `libmodal#Enter()` does not work when {instruction} is a |funcref|.
 
 ==============================================================================
 7. Contributing                                        *libmodal-contributing*
@@ -636,4 +706,4 @@ www.lua-users.org           |Lua| reference.
 www.stackoverflow.com       Vimscript and |Lua| reference.
 
 ==============================================================================
- vim:tw=78:ts=4:ft=help:norl:
+vim:tw=78:ts=4:ft=help:norl:

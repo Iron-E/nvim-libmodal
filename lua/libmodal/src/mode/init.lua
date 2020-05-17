@@ -91,7 +91,7 @@ local function _comboSelect(modeName)
 
 	-- if there was no matching command
 	if cmd == false then
-		if vars.help.instances[modeName] then
+		if #userInputHistory < 2 and userInputHistory[1] == string.byte(_HELP) then
 			vars.help.instances[modeName]:show()
 		end
 		clearUserInput = true
@@ -205,6 +205,8 @@ end
 --------------------------------------------------------------------------------
 local function _modeLoop(handleExitEvents, indicator, modeInstruction, modeName)
 	-- If the mode is not handling exit events automatically and the global exit var is true.
+	print(type(modeInstruction))
+	print(modeInstruction)
 	if not handleExitEvents and globals.isTrue(
 		vars.nvim_get(vars.exit, modeName)
 	) then return false end
@@ -247,6 +249,9 @@ end
 ------------------------
 function mode.enter(...)
 	local args = {...}
+	print(args[1])
+	print(args[2])
+	print(args[3])
 
 	--[[ SETUP. ]]
 
