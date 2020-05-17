@@ -677,7 +677,7 @@ When submitting an issue, please describe the following:
 	* Add partial support for |vim-libmodal|.
 
 	Fixes: ~
-	* Add partial support for |vim-libmodal|.
+	* Fix bad reference to `vars.windows`.
 
 0.3.1 ~
 
