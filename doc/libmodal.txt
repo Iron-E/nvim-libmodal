@@ -671,6 +671,15 @@ When submitting an issue, please describe the following:
 ==============================================================================
 8. Changelog                                              *libmodal-changelog*
 
+0.4.0 ~
+
+* Add partial support for |vim-libmodal|.
+
+0.3.1 ~
+
+* Fix bug where everytime `api.nvim_lecho()` was called, its {hlTables} would
+  infinitely grow with placeholder "None" entries.
+
 0.3.0 ~
 
 * Generate `?` mapping for |libmodal-mode|s.
