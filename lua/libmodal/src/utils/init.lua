@@ -5,7 +5,7 @@
 --]]
 
 local api = vim.api
-local globals = require('libmodal/src/base/globals')
+local globals = require('libmodal/src/globals')
 
 --[[
 	/*

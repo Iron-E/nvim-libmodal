@@ -4,7 +4,7 @@
 	 */
 --]]
 
-local globals = require('libmodal/src/base/globals')
+local globals = require('libmodal/src/globals')
 local utils   = require('libmodal/src/utils')
 
 local api  = utils.api

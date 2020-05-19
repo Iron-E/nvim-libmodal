@@ -4,7 +4,7 @@
 	 */
 --]]
 
-local globals = require('libmodal/src/base/globals')
+local globals = require('libmodal/src/globals')
 local api = vim.api
 
 --[[
@@ -14,6 +14,7 @@ local api = vim.api
 --]]
 
 local vars = {}
+
 vars.libmodalTimeouts = api.nvim_get_var('libmodalTimeouts')
 
 --[[

@@ -4,11 +4,11 @@
 	 */
 --]]
 
-local globals = require('libmodal/src/base/globals')
+local globals = require('libmodal/src/globals')
 local utils   = require('libmodal/src/utils')
+local Vars    = require('libmodal/src/Vars')
 
 local api  = utils.api
-local vars = utils.vars
 
 --[[
 	/*
@@ -16,116 +16,120 @@ local vars = utils.vars
 	 */
 --]]
 
-local mode = {}
-mode.ParseTable = require('libmodal/src/mode/ParseTable')
+-- Public interface for this module.
+local Mode = {}
+
+-- Private class.
+local _modeMetaTable = {}
+
+_modeMetaTable.ParseTable = require('libmodal/src/mode/ParseTable')
+
+local _HELP = '?'
+local _TIMEOUT = {
+	CHAR = 'ø',
+	NR   = string.byte(_TIMEOUT.CHAR),
+	LEN  = api.nvim_get_option('timeoutlen'),
+	SEND = function(__self)
+		api.nvim_feedkeys(__self.CHAR, '', false)
+	end
+}
 
 --[[
 	/*
-	 * LIBRARY `mode`
+	 * META `_modeMetaTable`
 	 */
 --]]
-
-local _HELP = '?'
-local _TIMEOUT_CHAR = 'ø'
-local _TIMEOUT_NR = string.byte(_TIMEOUT_CHAR)
-local _TIMEOUT_LEN = api.nvim_get_option('timeoutlen')
 
 ----------------------------------------
 --[[ SUMMARY:
 	* Reset libmodal's internal counter of user input to default.
 ]]
 ----------------------------------------
-local function _clearUserInput(modeName)
-	vars.input.instances[modeName] = {}
+function _modeMetaTable:clearInputBytes()
+	self._inputBytes = {}
 end
 
-----------------------------------------------
+-----------------------------------------------
 --[[ SUMMARY:
 	* Update the floating window with the latest user input.
 ]]
 --[[ PARAMS:
 	* `modeName` => the name of the mode.
 ]]
-----------------------------------------------
-local function _updateFloatingWindow(modeName)
-	local userInput = {}
-	for _, v in ipairs(vars.input.instances[modeName]) do
-		userInput[#userInput + 1] = string.char(v)
+-----------------------------------------------
+function _modeMetaTable:_updateFloatingWindow()
+	local inputChars = {}
+	for _, byte in ipairs(self._inputBytes) do
+		inputChars[#inputChars + 1] = string.char(byte)
 	end
 	api.nvim_buf_set_lines(
-		vars.buffers.instances[modeName],
-		0, 1, true, {table.concat(userInput)}
+		self._popupBuffer,
+		0, 1, true, {table.concat(inputChars)}
 	)
 end
 
--------------------------------------
+--------------------------------------
 --[[ SUMMARY:
 	* Parse the `comboDict` and see if there is any command to execute.
 ]]
 --[[ PARAMS:
 	* `modeName` => the name of the mode that is currently active.
 ]]
--------------------------------------
-local function _comboSelect(modeName)
+--------------------------------------
+function _modeMetaTable:_comboSelect()
 	-- Stop any running timers
-	if vars.timer.instances[modeName] then
-		vars.timer.instances[modeName]:stop()
-		vars.timer.instances[modeName] = nil
+	if self._flushInputTimer then
+		self._flushInputTimer:stop()
 	end
 
 	-- Append the latest input to the locally stored input history.
-	local userInputHistory = vars.input.instances[modeName]
-	userInputHistory[#userInputHistory + 1] = vars.nvim_get(
-		vars.input, modeName
+	self._inputBytes[#self._inputBytes + 1] = Vars.nvim_get(
+		self._inputBytes, self._modeName
 	)
 
-	-- Get the combo dict.
-	local comboTable = vars.combos.instances[modeName]
-
 	-- Get the command based on the users input.
-	local cmd = comboTable:get(userInputHistory)
+	local cmd = self._keybindings:get(self._inputBytes)
 
 	-- Get the type of the command.
 	local commandType = type(cmd)
-	local clearUserInput = false
+	local clearInputBytes = false
 
 	-- if there was no matching command
 	if cmd == false then
-		if #userInputHistory < 2 and userInputHistory[1] == string.byte(_HELP) then
-			vars.help.instances[modeName]:show()
+		if #self._inputBytes < 2 and self._inputBytes[1] == string.byte(_HELP) then
+			self._help:show()
 		end
-		clearUserInput = true
+		clearInputBytes = true
 	-- The command was a table, meaning that it MIGHT match.
 	elseif commandType == globals.TYPE_TBL
-	       and globals.isTrue(vars.timeouts.instances[modeName])
+	       and globals.isTrue(self._timeoutsEnabled)
 	then
 		-- Create a new timer
-		vars.timer.instances[modeName] = vim.loop.new_timer()
 
 		-- start the timer
-		vars.timer.instances[modeName]:start(
-			_TIMEOUT_LEN, 0, vim.schedule_wrap(function()
+		self._flushInputTimer:start(
+			_TIMEOUT.LEN, 0, vim.schedule_wrap(function()
 				-- Send input to interrupt a blocking `getchar`
-				api.nvim_feedkeys(_TIMEOUT_CHAR, '', false)
+				_TIMEOUT:SEND()
 				-- if there is a command, execute it.
-				if cmd[mode.ParseTable.CR] then
-					api.nvim_command(cmd[mode.ParseTable.CR])
+				if cmd[self.ParseTable.CR] then
+					api.nvim_command(cmd[self.ParseTable.CR])
 				end
 				-- clear input
-				_clearUserInput(modeName)
+				_clearInputBytes(modeName)
 				_updateFloatingWindow(modeName)
 			end)
 		)
 	-- The command was an actual vim command.
 	else
 		api.nvim_command(cmd)
-		clearUserInput = true
+		clearInputBytes = true
 	end
 
-	if clearUserInput then
-		_clearUserInput(modeName)
+	if clearInputBytes then
+		self:_clearInputBytes()
 	end
-	_updateFloatingWindow(modeName)
+	self:_updateFloatingWindow()
 end
 
 ------------------------------------------------
@@ -137,24 +141,25 @@ end
 	* `comboTable` => the table of combos being initialized.
 ]]
 ------------------------------------------------
+-- TODO
 local function _initCombos(modeName, comboTable)
 	-- Placeholder for timeout value.
-	local doTimeout = nil
+	local timeoutsEnabled = nil
 
 	-- Read the correct timeout variable.
-	if api.nvim_exists('g', vars.timeouts:name(modeName)) then doTimeout =
+	if api.nvim_exists('g', vars.timeouts:name(modeName)) then timeoutsEnabled =
 		vars.nvim_get(vars.timeouts, modeName)
-	else doTimeout =
+	else timeoutsEnabled =
 		vars.libmodalTimeouts
 	end
 
-	-- Assign the timeout variable according to `doTimeout`
-	vars.timeouts.instances[modeName] = doTimeout
+	-- Assign the timeout variable according to `timeoutsEnabled`
+	self._timeoutsEnabled = timeoutsEnabled
 
 	-- create a floating window
 	local buf = api.nvim_create_buf(false, true)
 	vars.buffers.instances[modeName] = buf
-	vars.windows.instances[modeName] = api.nvim_call_function('libmodal#_winOpen', {buf})
+	self._popupWindow = api.nvim_call_function('libmodal#_winOpen', {buf})
 
 	-- Determine if a default `Help` should be created.
 	if not comboTable[_HELP] then
@@ -164,8 +169,11 @@ local function _initCombos(modeName, comboTable)
 	-- Build the parse tree.
 	vars.combos.instances[modeName] = mode.ParseTable.new(comboTable)
 
+	-- Create a timer
+	self._flushInputTimer = vim.loop.new_timer()
+
 	-- Initialize the input history variable.
-	_clearUserInput(modeName)
+	_clearInputBytes(modeName)
 end
 
 -----------------------------------------------------
@@ -174,19 +182,25 @@ end
 ]]
 --[[ PARAMS:
 	* `modeName` => the name of the mode.
-	* `winState` => the window state prior to mode activation.
+	* `self._winState` => the window state prior to mode activation.
 ]]
 -----------------------------------------------------
-local function _modeEnterTeardown(modeName, winState)
-	if vars.windows.instances[modeName] then
-		api.nvim_win_close(
-			vars.windows.instances[modeName], false
-		)
+function _modeMetaTable:_deconstruct()
+	if self._flushInputTimer:info()['repeat'] ~= 0 then
+		self._flushInputTimer:stop()
 	end
 
-	vars:tearDown(modeName)
+	if self._popupWindow then
+		api.nvim_win_close(self._popupWindow, false)
+	end
+
+	self._winState:restore()
+
+	for k, _ in pairs(self) do
+		self[k] = nil
+	end
+
 	api.nvim_command("mode | echo '' | call garbagecollect()")
-	winState:restore()
 end
 
 --------------------------------------------------------------------------------
@@ -203,6 +217,7 @@ end
 	* `boolean` => whether or not the mode should continue
 ]]
 --------------------------------------------------------------------------------
+-- TODO
 local function _modeLoop(handleExitEvents, indicator, modeInstruction, modeName)
 	-- If the mode is not handling exit events automatically and the global exit var is true.
 	if not handleExitEvents and globals.isTrue(
@@ -216,7 +231,7 @@ local function _modeLoop(handleExitEvents, indicator, modeInstruction, modeName)
 	local userInput = api.nvim_input()
 
 	-- Return if there was a timeout event.
-	if userInput == _TIMEOUT_NR then
+	if userInput == _TIMEOUT.NR then
 		return true
 	end
 
@@ -245,7 +260,8 @@ end
 	* `args[3]` => optional exit supresion flag.
 ]]
 ------------------------
-function mode.enter(...)
+-- TODO
+function _modeMetaTable:enter(...)
 	local args = {...}
 
 	--[[ SETUP. ]]
@@ -254,7 +270,7 @@ function mode.enter(...)
 	local indicator = utils.Indicator.mode(args[1])
 
 	-- Grab the state of the window.
-	local winState = utils.WindowState.new()
+	self._winState = utils.WindowState.new()
 
 	-- Convert the name into one that can be used for variables.
 	local modeName = string.lower(args[1])
@@ -286,8 +302,6 @@ function mode.enter(...)
 		end
 
 	end
-
-	_modeEnterTeardown(modeName, winState)
 end
 
 --[[
@@ -296,4 +310,4 @@ end
 	 */
 --]]
 
-return mode
+return Mode

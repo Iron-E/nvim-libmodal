@@ -4,7 +4,7 @@
 	 */
 --]]
 
-local globals = require('libmodal/src/base/globals')
+local globals = require('libmodal/src/globals')
 local Entry = require('libmodal/src/utils/Indicator/Entry')
 
 --[[
