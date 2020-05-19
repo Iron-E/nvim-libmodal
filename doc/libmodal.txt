@@ -43,45 +43,29 @@ within a pseudo-|vim-mode|. This layer of keybindings can be bound to a
 command which executes `libmodal.mode.enter()` or `libmodal.prompt.enter()`,
 and any settings outside of these commands are preserved.
 
-For example, say that a user of Neovim regularly converts between spaces and
-tabs. They may define an "INDENT" mode that only requires pressing <Space>
-or <Tab> to swap between 'expandtab' and 'shiftwidth' settings as well as
-execute `retab`. This could be defined as a |user-function|, but the
-keybindings are easier to remember as <Space> and <Tab>.
+For example, say that a user of Neovim regularly uses |:diffsplit| to merge
+changes from `git`. They might define a "DIFF" mode that takes input and
+directly translates it into |:diff|* operations. This would allow them to
 
-<Space> and <Tab>, however, are commonly mapped to. Rather than defining a
-longer mapping to perform this operation, one may define a |user-command| to
-enter "INDENT" mode where any mapping can be defined without affecting
-mappings in other |vim-modes|.
+For instance, perhaps this mode is defined so that `n` goes to the next diff
+(like `]c`), and `N` goes to the previous diff (like `[c`). This would make
+going from diff to diff more rememberable, as `n` is commonly used because of
+`/` searches.
 
-Here is what that might look like:
->
-	--[[ .config/lua/indent_mode.lua ]]
+Suppose that the mode also numbers each |:buffer|, so that you don't have
+to remember which |:diffsplit| to |:diffget| from. The numbers would disappear
+when you leave the mode.
 
-	local libmodal = require('libmodal')
-	local indent_mode = {}
+Finally, there could be a help key, `?`, which would show exactly which keys
+have been mapped and what they do.
 
-	local _combos = {
-		-- tabs to spaces
-		[' '] = 'set expandtab | %retab'
-		-- spaces to tabs
-		['	'] = 'set noexpandtab | %retab!'
-	}
+You can see such a mode here:
+* https://gist.github.com/Iron-E/f36116e8862ea03fd195e4e0a48cb05d
 
-	function indent_mode.enter()
-		libmodal.mode.enter('INDENT', _combos)
-	end
-
-	return indent_mode
-<
->
-	--[[  .config/nvim/init.vim ]]
-	command! IndentModeEnter lua requre('indent_mode').enter()
-	nnoremap <leader>i IndentModeEnter
-<
-
-Then this user could press `<leader>i` and have access to the <Space> and
-<Tab> mappings that were defined, without affecting any other mappings.
+Outside of the |libmodal-mode|, `n` still searches for the |last-pattern|, and
+the buffers are not visibly numbered. Any setup that a |libmodal-mode| does to
+inderpret keybindings is undone before the mode ends (while any changes to
+buffers persevere).
 
 See: |libmodal-usage|
 
@@ -95,6 +79,7 @@ with Vimscript, and so one may either:
 	* Use |lua-require| as a |user-command|.
 	* See |lua-require-example| for information about how to do this.
 	* See `Iron-E/nvim-tabmode` for a complete example.
+	* See `Iron-E/mode-fugidiff.lua` on GitHub Gists for another example.
 2. |call| `libmodal#Enter()` or `libmodal#Prompt()` from Vimscript.
 
 The following is a reference for high-level functions meant to be used by mode
@@ -104,7 +89,8 @@ see |libmodal-lua|.
 Note: Examples for all topics covered here can be found in the "examples"
       folder at the root of the repository.
 
-See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode
+See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode,
+     https://gist.github.com/Iron-E/f36116e8862ea03fd195e4e0a48cb05d
 
 ------------------------------------------------------------------------------
 FUNCTIONS                                           *libmodal-usage-functions*
