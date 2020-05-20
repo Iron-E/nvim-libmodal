@@ -138,16 +138,14 @@ function Prompt.createCompletionsProvider(completions)
 		-- replace conjoining characters with spaces.
 		local spacedArgLead = argLead
 		for _, replacement in ipairs(_REPLACEMENTS) do
-			spacedArgLead, _ = string.gsub(spacedArgLead, replacement, ' ')
+			spacedArgLead, _ = string.gsub(spacedArgLead, vim.pesc(replacement), ' ')
 		end
 
 		-- split the spaced version of `argLead`.
 		local splitArgLead = vim.split(spacedArgLead, ' ', true)
 
-		print(spacedArgLead)
-
-		-- make sure the user is in a position were this function
-		--     will provide accurate completions.
+		--[[ make sure the user is in a position were this function
+		     will provide accurate completions.]]
 		if #splitArgLead > 1 then
 			return nil
 		end
@@ -158,13 +156,9 @@ function Prompt.createCompletionsProvider(completions)
 		-- get all matches from the completions list.
 		local matches = {}
 		for _, completion in ipairs(completions) do
-			print('testing ' .. word .. ' against ' .. string.upper(completion))
 			-- test if `word` is inside of `completions`:`v`, ignoring case.
 			if string.match(vim.pesc(string.upper(completion)), word) then
-				print('>>match')
 				matches[#matches + 1] = completion -- preserve case when providing completions.
-			else
-				print('>>nomatch')
 			end
 		end
 		return matches
