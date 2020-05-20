@@ -25,6 +25,7 @@ Vars.libmodalTimeouts = api.nvim_get_var('libmodalTimeouts')
 --]]
 
 local _metaVars = {}
+_metaVars.__index = _metaVars
 
 -- Instances of variables pertaining to a certain mode.
 _metaVars.varName = nil
@@ -83,7 +84,6 @@ end
 function Vars.new(keyName)
 	self = {}
 	setmetatable(self, _metaVars)
-	self.__index = self
 
 	self._varName = 'Mode' .. string.upper(
 		string.sub(keyName, 0, 1)

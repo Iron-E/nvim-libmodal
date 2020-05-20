@@ -657,6 +657,29 @@ When submitting an issue, please describe the following:
 ==============================================================================
 8. Changelog                                              *libmodal-changelog*
 
+0.5.0 ~
+
+	Additions: ~
+	* New class `libmodal.Mode`
+	* New class `libmodal.Mode.Popup`
+	* New class `libmodal.Prompt`
+	* New class `libmodal.Vars`
+
+	Breaking Changes: ~
+	* Removed `libmodal.utils.vars`
+	* Moved `libmodal.utils.Indicator` to `libmodal.Indicator`
+	* Moved `libmodal.utils.Indicator.Entry` to
+	  `libmodal.Indicator.HighlightSegment`
+
+	Changes: ~
+	*Error	deprecated `libmodal.mode.enter()`
+		* Use `libmodal.Mode.new(…):enter()` instead.
+	*Error	deprecated `libmodal.prompt.enter()`
+		* Use `libmodal.Prompt.new(…):enter()` instead.
+	* Allowed creation of |libmodal-mode| and |libmodal-prompt| table-objects.
+		* Call `{mode}:enter()` to enter the mode.
+		* More efficient recursion.
+
 0.4.1 ~
 
 	Fixes: ~
@@ -671,7 +694,6 @@ When submitting an issue, please describe the following:
 	* Fix bad reference to `vars.windows`.
 	* Fix bug where help was always shown upon entering an invalid key-combo in
 	  `libmodal.mode.enter()`.
-
 
 0.3.1 ~
 

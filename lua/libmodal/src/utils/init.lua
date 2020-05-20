@@ -16,8 +16,6 @@ local globals = require('libmodal/src/globals')
 local utils       = {}
 utils.api         = require('libmodal/src/utils/api')
 utils.Help        = require('libmodal/src/utils/Help')
-utils.Indicator   = require('libmodal/src/utils/Indicator')
-utils.vars        = require('libmodal/src/utils/vars')
 utils.WindowState = require('libmodal/src/utils/WindowState')
 
 --[[

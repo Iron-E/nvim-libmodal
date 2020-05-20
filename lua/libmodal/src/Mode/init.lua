@@ -6,6 +6,7 @@
 
 local globals = require('libmodal/src/globals')
 local utils   = require('libmodal/src/utils')
+local Stack   = require('libmodal/src/collections/Stack')
 local Vars    = require('libmodal/src/Vars')
 
 local api  = utils.api
@@ -20,8 +21,6 @@ local Mode = {}
 
 Mode.ParseTable = require('libmodal/src/mode/ParseTable')
 Mode.Popup      = require('libmodal/src/Mode/Popup')
-
-local _metaMode = {}
 
 local _HELP = '?'
 local _TIMEOUT = {
@@ -39,6 +38,15 @@ _TIMEOUT.NR = string.byte(_TIMEOUT.CHAR)
 	 */
 --]]
 
+local _metaMode = {}
+_metaMode.__index = _metaMode
+
+self._exit             = Vars.new('exit')
+_metaMode._indicator   = nil
+_metaMode._instruction = nil
+_metaMode._name        = nil
+_metaMode._winState    = nil
+
 -----------------------------------------------
 --[[ SUMMARY:
 	* Parse `self._mappings` and see if there is any command to execute.
@@ -46,15 +54,15 @@ _TIMEOUT.NR = string.byte(_TIMEOUT.CHAR)
 -----------------------------------------------
 function _metaMode:_checkInputForMapping()
 	-- Stop any running timers
-	if self._flushInputTimer then
-		self._flushInputTimer:stop()
-	end
+	self._modeEnterData:peek().flushInputTimer:stop()
 
 	-- Append the latest input to the locally stored input history.
-	self._input.bytes[#self._input.bytes + 1] = self._input:nvimGet(self._name)
+	local input = self._modeEnterData:peek().input
+
+	input.bytes[#input.bytes + 1] = input:nvimGet(self._name)
 
 	-- Get the command based on the users input.
-	local cmd = self._mappings:get(self._input.bytes)
+	local cmd = self._mappings:get(input.bytes)
 
 	-- Get the type of the command.
 	local commandType = type(cmd)
@@ -62,10 +70,10 @@ function _metaMode:_checkInputForMapping()
 
 	-- if there was no matching command
 	if cmd == false then
-		if #self._input.bytes < 2 and self._input.bytes[1] == string.byte(_HELP) then
+		if #input.bytes < 2 and input.bytes[1] == string.byte(_HELP) then
 			self._help:show()
 		end
-		self._input:clear()
+		input:clear()
 	-- The command was a table, meaning that it MIGHT match.
 	elseif commandType == globals.TYPE_TBL
 	       and globals.isTrue(self._timeouts.enabled)
@@ -73,7 +81,7 @@ function _metaMode:_checkInputForMapping()
 		-- Create a new timer
 
 		-- start the timer
-		self._flushInputTimer:start(
+		self._modeEnterData:peek().flushInputTimer:start(
 			_TIMEOUT.LEN, 0, vim.schedule_wrap(function()
 				-- Send input to interrupt a blocking `getchar`
 				_TIMEOUT:SEND()
@@ -82,17 +90,18 @@ function _metaMode:_checkInputForMapping()
 					api.nvim_command(cmd[Mode.ParseTable.CR])
 				end
 				-- clear input
-				self._input:clear()
-				self._popup:refresh(self._input.bytes)
+				input:clear()
+				self._modeEnterData:peek().popup:refresh(input.bytes)
 			end)
 		)
+
 	-- The command was an actual vim command.
 	else
 		api.nvim_command(cmd)
-		self._input:clear()
+		input:clear()
 	end
 
-	self._popup:refresh(self._input.bytes)
+	self._modeEnterData:peek().popup:refresh(input.bytes)
 end
 
 --------------------------
@@ -101,25 +110,25 @@ end
 ]]
 --------------------------
 function _metaMode:enter()
+	-- intialize variables that are needed for each recurse of a function
 	if self._instruction == globals.TYPE_TBL then
-		-- Create a timer
-		self._flushInputTimer = vim.loop.new_timer()
-
 		-- Initialize the input history variable.
-		self._input = {
-			['bytes'] = {},
-			----------------------------
-			--[[ SUMMARY:
-				* Clear the self.bytes table.
-			]]
-			----------------------------
-			['clear'] = function(__self)
-				__self.bytes = {}
-			end
-		}
+		local input = Vars.new('input')
+		input.bytes = {}
+		function input:clear()
+			self.bytes = {}
+		end
 
-		-- create a floating window
-		self._popup = Mode.Popup.new()
+		self._modeEnterData:push({
+			-- Create a timer
+			['flushInputTimer'] = vim.loop.new_timer(),
+
+			-- assign input
+			['input'] = input,
+
+			-- create a floating window
+			['popup'] = Mode.Popup.new()
+		})
 	end
 
 	--[[ MODE LOOP. ]]
@@ -161,18 +170,21 @@ function _metaMode:_initMappings()
 		self._help = utils.Help.new(self._instruction, 'KEY MAP')
 	end
 
+	-- Create a table for mode-specific data.
+	self._modeEnterData = Stack.new()
+
 	-- Build the parse tree.
 	self._mappings = Mode.ParseTable.new(self._instruction)
 end
 
-------------------------------------
+-------------------------------
 --[[ SUMMARY:
 	* Loop an initialized `mode`.
 ]]
 --[[ RETURNS:
 	* `boolean` => whether or not the mode should continue
 ]]
-------------------------------------
+-------------------------------
 function _metaMode:_inputLoop()
 	-- If the mode is not handling exit events automatically and the global exit var is true.
 	if self._exit.supress
@@ -193,7 +205,7 @@ function _metaMode:_inputLoop()
 	end
 
 	-- Set the global input variable to the new input.
-	self._input:nvimSet(self._name, userInput)
+	self._modeEnterData:peek().input:nvimSet(self._name, userInput)
 
 	-- Make sure that the user doesn't want to exit.
 	if not self._exit.supress
@@ -215,16 +227,18 @@ end
 ---------------------------------
 function _metaMode:_tearDown()
 	if self._instruction == globals.TYPE_TBL then
-		self._flushInputTimer:stop()
-		self._flushInputTimer = nil
+		local modeEnterData = self._modeEnterData:pop()
 
-		for k, _ in pairs(self._input) do
-			self._input[k] = nil
+		modeEnterData.flushInputTimer:stop()
+		modeEnterData.flushInputTimer = nil
+
+		for k, _ in pairs(modeEnterData.input) do
+			modeEnterData.input[k] = nil
 		end
-		self._input = nil
+		modeEnterData.input = nil
 
-		self._popup:close()
-		self._popup = nil
+		modeEnterData.popup:close()
+		modeEnterData.popup = nil
 	end
 
 	self._winState:restore()
@@ -236,7 +250,7 @@ end
 	 */
 --]]
 
-------------------------
+-----------------------------------------
 --[[ SUMMARY:
 	* Enter a mode.
 ]]
@@ -245,13 +259,11 @@ end
 	* `instruction` => the mode callback, or mode combo table.
 	* `...` => optional exit supresion flag.
 ]]
-------------------------
--- TODO
+-----------------------------------------
 function Mode.new(name, instruction, ...)
 	-- Inherit the metatable.
 	self = {}
 	setmetatable(self, _metaMode)
-	self.__index = self
 
 	-- Define the exit flag
 	self._exit         = Vars.new('exit')

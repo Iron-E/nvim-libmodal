@@ -5,7 +5,7 @@
 --]]
 
 local globals = require('libmodal/src/globals')
-local Entry = require('libmodal/src/utils/Indicator/Entry')
+local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
 
 --[[
 	/*
@@ -105,12 +105,11 @@ end
 	* `msg` => the message of the error.
 ]]
 --------------------------------------
--- local returnEntry = Entry.new('Question', '\nPress any key to return.')
+-- local returnHighlightSegment = HighlightSegment.new('Question', '\nPress any key to return.')
 function api.nvim_show_err(title, msg)
 	api.nvim_lecho({
-		Entry.new('Title', tostring(title) .. '\n'),
-		Entry.new('Error', tostring(msg)),
-		-- returnEntry
+		HighlightSegment.new('Title', tostring(title) .. '\n'),
+		HighlightSegment.new('Error', tostring(msg)),
 	})
 	api.nvim_call_function('getchar', {})
 end
