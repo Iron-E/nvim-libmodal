@@ -42,7 +42,7 @@ _TIMEOUT.NR = string.byte(_TIMEOUT.CHAR)
 local _metaMode = {}
 _metaMode.__index = _metaMode
 
-self._exit             = Vars.new('exit')
+_metaMode._exit        = Vars.new('exit')
 _metaMode._indicator   = nil
 _metaMode._instruction = nil
 _metaMode._name        = nil
@@ -263,11 +263,10 @@ end
 -----------------------------------------
 function Mode.new(name, instruction, ...)
 	-- Inherit the metatable.
-	self = {}
-	setmetatable(self, _metaMode)
+	self = setmetatable({}, _metaMode)
 
 	-- Define the exit flag
-	self._exit         = Vars.new('exit')
+	self._exit         = setmetatable({}, _metaMode._exit)
 	self._exit.supress = (function(optionalValue)
 		if #optionalValue > 0 then
 			return globals.isTrue(optionalValue)

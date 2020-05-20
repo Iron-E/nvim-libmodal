@@ -160,8 +160,7 @@ end
 ]]
 -------------------------------------------
 function Prompt.new(name, instruction, ...)
-	self = {}
-	setmetatable(self, _metaPrompt)
+	self = setmetatable({}, _metaPrompt)
 
 	self._indicator   = Indicator.prompt(name)
 	self._input       = vars.new('input')
