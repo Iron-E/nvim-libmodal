@@ -6,7 +6,6 @@
 
 local globals   = require('libmodal/src/globals')
 local Indicator = require('libmodal/src/Indicator')
-local Stack     = require('libmodal/src/collections/Stack')
 local utils     = require('libmodal/src/utils')
 local Vars      = require('libmodal/src/Vars')
 
@@ -21,11 +20,14 @@ local api  = utils.api
 local Prompt = {}
 
 local _HELP = 'help'
-local _replacements = {
+local _REPLACEMENTS = {
 	'(', ')', '[', ']', '{', '}',
 	'=', '+', '<', '>', '^',
 	',', '/', ':', '?', '@', '!', '$', '*', '.', '%', '&', '\\',
 }
+for i, replacement in ipairs(_REPLACEMENTS) do
+	_REPLACEMENTS[i] = vim.pesc(replacement)
+end
 
 --[[
 	/*
@@ -36,58 +38,72 @@ local _replacements = {
 local _metaPrompt = {}
 _metaPrompt.__index = _metaPrompt
 
-_metaPrompt._indicator   = nil
-_metaPrompt._input       = nil
-_metaPrompt._instruction = nil
-_metaPrompt._name        = nil
-
+---------------------------------
+--[[ SUMMARY:
+	* Loop to get user input with `input()`.
+]]
+---------------------------------
 function _metaPrompt:_inputLoop()
 	-- clear previous `echo`s.
 	api.nvim_redraw()
 
-	-- get user input based on `instruction`.
+	-- define a placeholder for user input
 	local userInput = ''
-	if self._completions then userInput =
+
+	-- echo the highlighting
+	api.nvim_command('echohl ' .. self._indicator.hl)
+
+	-- set the user input variable
+	if self._completions
+	then userInput =
 		api.nvim_call_function('libmodal#_inputWith', {
-			self._indicator, self._completions
+			self._indicator.str, self._completions
 		})
 	else userInput =
-		api.nvim_call_function('input', {
-			self._indicator
-		})
+		api.nvim_call_function('input', {self._indicator})
 	end
 
-	-- if a:2 is a function then call it.
-	if string.len(userInput) > 0 then
-		self._input:nvimSet(self._name, userInput)
-		if type(self._instruction) == globals.TYPE_TBL then
-			if self._instruction[userInput] then -- there is a defined command for the input.
+	-- get the instruction for the mode.
+	local instruction = self._instruction
+
+	-- determine what to do with the input
+	if string.len(userInput) > 0 then -- the user actually entered something
+		self._input:nvimSet(userInput)
+		if type(instruction) == globals.TYPE_TBL then -- the instruction is a command table.
+			if instruction[userInput] then -- there is a defined command for the input.
 				api.nvim_command(instruction[userInput])
 			elseif userInput == _HELP then -- the user did not define a 'help' command, so use the default.
 				self._help:show()
 			else -- show an error.
 				api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
 			end
-		else instruction()
+		else -- attempt to call the instruction.
+			instruction()
 		end
-	else return false
+	else -- indicate we want to leave the prompt
+		return false
 	end
 
 	return true
 end
 
+----------------------------
+--[[ SUMMARY:
+	* Enter a prompt 'mode'.
+]]
+----------------------------
 function _metaPrompt:enter()
 	-- enter the mode using a loop.
-	local continueMode =  true
-	while continueMode == true do
-		local noErrors, result = pcall(self._inputLoop, self)
+	local continueMode = true
+	while continueMode do
+		local noErrors, promptResult = pcall(self._inputLoop, self)
 
 		-- if there were errors.
 		if not noErrors then
-			utils.showError(err)
+			utils.showError(promptResult)
 			continueMode = false
 		else
-			continueMode = result
+			continueMode = promptResult
 		end
 	end
 end
@@ -121,12 +137,14 @@ function Prompt.createCompletionsProvider(completions)
 
 		-- replace conjoining characters with spaces.
 		local spacedArgLead = argLead
-		for _, v in ipairs(_replacements) do
-			spacedArgLead, _ = string.gsub(spacedArgLead, vim.pesc(v), ' ')
+		for _, replacement in ipairs(_REPLACEMENTS) do
+			spacedArgLead, _ = string.gsub(spacedArgLead, replacement, ' ')
 		end
 
 		-- split the spaced version of `argLead`.
 		local splitArgLead = vim.split(spacedArgLead, ' ', true)
+
+		print(spacedArgLead)
 
 		-- make sure the user is in a position were this function
 		--     will provide accurate completions.
@@ -139,10 +157,14 @@ function Prompt.createCompletionsProvider(completions)
 
 		-- get all matches from the completions list.
 		local matches = {}
-		for _, v in ipairs(completions) do
+		for _, completion in ipairs(completions) do
+			print('testing ' .. word .. ' against ' .. string.upper(completion))
 			-- test if `word` is inside of `completions`:`v`, ignoring case.
-			if string.match(vim.pesc(string.upper(v)), word) then
-				matches[#matches + 1] = v -- preserve case when providing completions.
+			if string.match(vim.pesc(string.upper(completion)), word) then
+				print('>>match')
+				matches[#matches + 1] = completion -- preserve case when providing completions.
+			else
+				print('>>nomatch')
 			end
 		end
 		return matches
@@ -160,12 +182,15 @@ end
 ]]
 -------------------------------------------
 function Prompt.new(name, instruction, ...)
-	self = setmetatable({}, _metaPrompt)
-
-	self._indicator   = Indicator.prompt(name)
-	self._input       = vars.new('input')
-	self._instruction = instruction
-	self._name        = name
+	local self = setmetatable(
+		{
+			['_indicator']   = Indicator.prompt(name),
+			['_input']       = Vars.new('input', name),
+			['_instruction'] = instruction,
+			['_name']        = name
+		},
+		_metaPrompt
+	)
 
 	-- get the arguments
 	local userCompletions = unpack({...})
@@ -176,15 +201,15 @@ function Prompt.new(name, instruction, ...)
 		local completions   = {}
 		local containedHelp = false
 
-		for k, _ in pairs(instruction) do
-			completions[#completions + 1] = k
-			if k == _HELP then containedHelp = true
+		for command, _ in pairs(instruction) do
+			completions[#completions + 1] = command
+			if command == _HELP then containedHelp = true
 			end
 		end
 
 		if not containedHelp then -- assign it.
 			completions[#completions + 1] = _HELP
-			vars.help.instances[modeName] = utils.Help.new(instruction, 'COMMAND')
+			self._help = utils.Help.new(instruction, 'COMMAND')
 		end
 
 		self._completions = completions
@@ -192,6 +217,8 @@ function Prompt.new(name, instruction, ...)
 		-- Use the table that the user gave.
 		self._completions = userCompletions
 	end
+
+	return self
 end
 
 

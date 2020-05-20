@@ -27,7 +27,7 @@ _metaStack._top = nil
 ]]
 --------------------------------
 function _metaStack:peek()
-	return top
+	return self._top
 end
 
 -------------------------
@@ -39,18 +39,28 @@ end
 ]]
 -------------------------
 function _metaStack:pop()
-	if len < 1 then return nil
+	local previousLen = self._len
+
+	if previousLen < 1 then return nil
 	end
 
 	-- Store the previous top of the stack.
 	local previousTop = self._top
 
 	-- Remove the previous top of the stack.
-	self[_len] = nil
+	self[previousLen] = nil
+
+	-- Get the new length of the stack
+	local newLen = previousLen - 1
 
 	-- Update the values of the stack.
-	self._len = self._len - 1
-	self._top = self[_len]
+	if newLen < 1 then -- the stack is empty
+		self._len = nil
+		self._top = nil
+	else -- there is still something in the stack
+		self._len = newLen
+		self._top = self[newLen]
+	end
 
 	-- Return the previous top of the stack.
 	return previousTop
@@ -65,8 +75,15 @@ end
 ]]
 -------------------------------
 function _metaStack:push(value)
-	self._len  = self._len + 1
-	self[_len] = value
+	-- create placeholder so new values are not put into the table until operations have succeeded.
+	local newLen = self._len + 1
+
+	-- Push to the stack
+	self[newLen] = value
+
+	-- update stack values
+	self._len  = newLen
+	self._top = value
 end
 
 --[[
@@ -76,8 +93,13 @@ end
 --]]
 
 function Stack.new()
-	local self = {}
-	setmetatable(self, _metaStack)
-
-	return self
+	return setmetatable({}, _metaStack)
 end
+
+--[[
+	/*
+	 * PUBLICIZE `Stack`
+	 */
+--]]
+
+return Stack

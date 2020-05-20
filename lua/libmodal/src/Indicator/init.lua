@@ -9,32 +9,19 @@ local Indicator = {}
 Indicator.HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
 
 -- highlight group names
-local _HL_GROUP_PROMPT = 'LibmodalPrompt'
-local _HL_GROUP_STAR   = 'LibmodalStar'
-local _HL_GROUP_NONE   = 'None'
+local _HL_GROUP_MODE    = 'LibmodalPrompt'
+local _HL_GROUP_PROMPT  = 'LibmodalStar'
 
--- `libmodal.mode` `HighlightSegment`s.
-local _ENTRY_MODE_START = Indicator.HighlightSegment.new(_HL_GROUP_PROMPT, '-- ')
-local _ENTRY_MODE_END   = Indicator.HighlightSegment.new(_HL_GROUP_PROMPT, ' --')
-
--- `libmodal.prompt` `HighlightSegment`s.
-local _ENTRY_PROMPT_START = Indicator.HighlightSegment.new(_HL_GROUP_STAR, '* ')
-local _ENTRY_PROMPT_END   = Indicator.HighlightSegment.new(_HL_GROUP_PROMPT, ' > ')
+-- predefined segments
+local _SEGMENT_MODE_BEGIN = Indicator.HighlightSegment.new(_HL_GROUP_MODE, '-- ')
+local _SEGMENT_MODE_END   = Indicator.HighlightSegment.new(_HL_GROUP_MODE, ' --')
+local _PROMPT_TEMPLATE = {'* ', ' > '}
 
 --[[
 	/*
 	 * META `Indicator`
 	 */
 --]]
-
-local _metaIndicator = {
-	_ENTRY_MODE_START, nil, _ENTRY_MODE_END
-}
-_metaIndicator.__index = _metaIndicator
-
-local _PROMPT_TEMPLATE = {
-	'* ', ' > '
-}
 
 --[[
 	/*
@@ -51,14 +38,13 @@ local _PROMPT_TEMPLATE = {
 ]]
 ---------------------------------
 function Indicator.mode(modeName)
-	local self = {}
-	setmetatable(self, _metaIndicator)
-
-	self[2] = Indicator.HighlightSegment.new(
-		_HL_GROUP_PROMPT, tostring(modeName)
-	)
-
-	return self
+	return {
+		[1] = _SEGMENT_MODE_BEGIN,
+		[2] = Indicator.HighlightSegment.new(
+			_HL_GROUP_MODE, tostring(modeName)
+		),
+		[3] = _SEGMENT_MODE_END,
+	}
 end
 
 -----------------------------------
@@ -70,7 +56,10 @@ end
 ]]
 -----------------------------------
 function Indicator.prompt(modeName)
-	return table.concat(_PROMPT_TEMPLATE, modeName)
+	return Indicator.HighlightSegment.new(
+		_HL_GROUP_PROMPT,
+		table.concat(_PROMPT_TEMPLATE, modeName)
+	)
 end
 
 --[[

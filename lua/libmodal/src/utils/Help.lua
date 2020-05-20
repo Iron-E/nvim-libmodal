@@ -1,5 +1,26 @@
 --[[
 	/*
+	 * META `Help`
+	 */
+--]]
+
+local _metaHelp = {}
+_metaHelp.__index = _metaHelp
+
+-------------------------
+--[[ SUMMARY:
+	* Show the contents of this `Help`.
+]]
+-------------------------
+function _metaHelp:show()
+	for _, helpText in ipairs(self) do
+		print(helpText)
+	end
+	vim.api.nvim_call_function('getchar', {})
+end
+
+--[[
+	/*
 	 * CLASS `Help`
 	 */
 --]]
@@ -68,27 +89,19 @@ function Help.new(commandsOrMaps, title)
 	helpSeparator = table.concat(helpSeparator)
 
 	-- Create a new `Help`.
-	return {
-		[1] = ' ',
-		[2] = table.concat(tabAlign({
-			[title] = 'VIM EXPRESSION',
-		})),
-		[3] = table.concat(tabAlign({
-			[helpSeparator] = '--------------'
-		})),
-		[4] = table.concat(tabAlign(commandsOrMaps)),
-		-----------------------
-		--[[ SUMMARY:
-			* Show the contents of this `Help`.
-		]]
-		-----------------------
-		show = function(__self)
-			for _, v in ipairs(__self) do
-				print(v)
-			end
-			vim.api.nvim_call_function('getchar', {})
-		end
-	}
+	return setmetatable(
+		{
+			[1] = ' ',
+			[2] = table.concat(tabAlign({
+				[title] = 'VIM EXPRESSION',
+			})),
+			[3] = table.concat(tabAlign({
+				[helpSeparator] = '--------------'
+			})),
+			[4] = table.concat(tabAlign(commandsOrMaps)),
+		},
+		_metaHelp
+	)
 end
 
 --[[

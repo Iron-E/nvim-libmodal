@@ -660,25 +660,29 @@ When submitting an issue, please describe the following:
 0.5.0 ~
 
 	Additions: ~
-	* New class `libmodal.Mode`
-	* New class `libmodal.Mode.Popup`
-	* New class `libmodal.Prompt`
-	* New class `libmodal.Vars`
+	* New class `libmodal.collections.Stack`.
+	* New class `libmodal.Mode`.
+	* New class `libmodal.Mode.Popup`.
+	* New class `libmodal.Prompt`.
+	* New class `libmodal.Vars`.
 
 	Breaking Changes: ~
-	* Removed `libmodal.utils.vars`
-	* Moved `libmodal.utils.Indicator` to `libmodal.Indicator`
+	* Moved `libmodal.mode.ParseTable` to `libmodal.collections.ParseTable`.
+	* Removed `libmodal.utils.vars`.
+	* Moved `libmodal.utils.Indicator` to `libmodal.Indicator`.
 	* Moved `libmodal.utils.Indicator.Entry` to
-	  `libmodal.Indicator.HighlightSegment`
+	  `libmodal.Indicator.HighlightSegment`.
 
 	Changes: ~
-	*Error	deprecated `libmodal.mode.enter()`
-		* Use `libmodal.Mode.new(…):enter()` instead.
-	*Error	deprecated `libmodal.prompt.enter()`
-		* Use `libmodal.Prompt.new(…):enter()` instead.
-	* Allowed creation of |libmodal-mode| and |libmodal-prompt| table-objects.
-		* Call `{mode}:enter()` to enter the mode.
-		* More efficient recursion.
+	* Allow creation of |libmodal-mode| and |libmodal-prompt| table-objects.
+		* Call `libmodal.Mode.new()` or `libmodal.Prompt.new()` to create one.
+			* Call `{mode}:enter()` to enter the mode.
+		* More consistent mode recursion with `libmodal.collections.Stack`.
+
+	* Removed program logic from `libmodal.mode.enter()`.
+		* Now internally calls `libmodal.Mode.new(…):enter()` instead.
+	* Removed program logic from `libmodal.prompt.enter()`.
+		* Now internally calls `libmodal.Prompt.new(…):enter()` instead.
 
 0.4.1 ~
 

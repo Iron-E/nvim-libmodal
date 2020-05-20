@@ -1,5 +1,5 @@
 local libmodal = require('libmodal')
-local fooModeRecurse = 0
+local fooModeRecurse = 1
 
 function fooMode()
 	local userInput = string.char(vim.api.nvim_get_var(

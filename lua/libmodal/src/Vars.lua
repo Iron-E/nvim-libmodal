@@ -29,18 +29,19 @@ local _metaVars = {}
 _metaVars.__index = _metaVars
 
 -- Instances of variables pertaining to a certain mode.
-_metaVars.varName = nil
+_metaVars._varName = nil
+_metaVars._modeName = nil
 
--------------------------
+---------------------------------
 --[[ SUMMARY:
 	* Get the name of `modeName`s global setting.
 ]]
 --[[ PARAMS:
 	* `modeName` => the name of the mode.
 ]]
--------------------------
-function _metaVars:name(modeName)
-	return string.lower(modeName) .. self._varName
+---------------------------------
+function _metaVars:name()
+	return string.lower(self._modeName) .. self._varName
 end
 
 ------------------------------------
@@ -51,8 +52,8 @@ end
 	* `modeName` => the mode name this value is being retrieved for.
 ]]
 ------------------------------------
-function _metaVars:nvimGet(modeName)
-	return api.nvim_get_var(self:name(modeName))
+function _metaVars:nvimGet()
+	return api.nvim_get_var(self:name())
 end
 
 -----------------------------------------
@@ -64,8 +65,8 @@ end
 	* `val` => the value to set `self`'s Vimscript var to.
 ]]
 -----------------------------------------
-function _metaVars:nvimSet(modeName, val)
-	api.nvim_set_var(self:name(modeName), val)
+function _metaVars:nvimSet(val)
+	api.nvim_set_var(self:name(), val)
 end
 
 --[[
@@ -82,11 +83,11 @@ end
 	* `keyName` => the name of the key used to refer to this variable in `Vars`.
 ]]
 --------------------------
-function Vars.new(keyName)
-	self = {}
-	setmetatable(self, _metaVars)
+function Vars.new(keyName, modeName)
+	local self = setmetatable({}, _metaVars)
 
-	self._varName = 'Mode' .. string.upper(
+	self._modeName = modeName
+	self._varName  = 'Mode' .. string.upper(
 		string.sub(keyName, 0, 1)
 	) .. string.sub(keyName, 2)
 

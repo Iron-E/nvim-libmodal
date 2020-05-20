@@ -74,14 +74,21 @@ end
 	* `hlTables` => the tables to echo with highlights.
 ]]
 ---------------------------------
+local lecho_template = {
+	[1] = "echohl ",
+	[2] = nil,
+	[3] = " | echon '",
+	[4] = nil,
+	[5] = "'"
+}
 function api.nvim_lecho(hlTables)
 	api.nvim_redraw()
 	for _, hlTable in ipairs(hlTables) do
 		-- `:echohl` the hlgroup and then `:echon` the string
-		api.nvim_command(
-			"echohl " .. tostring(hlTable['hl'])
-			.. " | echon '" .. tostring(hlTable['str']) .. "'"
-		)
+		lecho_template[2] = tostring(hlTable.hl)
+		lecho_template[4] = tostring(hlTable.str)
+
+		api.nvim_command(table.concat(lecho_template))
 	end
 	api.nvim_command('echohl None')
 end

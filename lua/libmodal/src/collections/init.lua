@@ -1,3 +1,6 @@
 local collections = {}
-collections.Stack = require('libmodal/src/collections/Stack')
+
+collections.ParseTable = require('libmodal/src/collections/ParseTable')
+collections.Stack      = require('libmodal/src/collections/Stack')
+
 return collections
