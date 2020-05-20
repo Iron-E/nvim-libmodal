@@ -23,6 +23,7 @@ mode.ParseTable = Mode.ParseTable
 --]]
 
 ------------------------
+--[[ DEPRECATED. ]]
 --[[ SUMMARY:
 	* Enter a mode.
 ]]

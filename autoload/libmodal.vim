@@ -21,7 +21,7 @@ function! libmodal#_inputWith(indicator, completions)
 	" return the closure that was generated using the completions from lua.
 	function! LibmodalCompletionsProvider(argLead, cmdLine, cursorPos) abort closure
 		return luaeval(
-		\	'require("libmodal/src/prompt/")._createCompletionsProvider(_A[1])(_A[2], _A[3], _A[4])',
+		\	'require("libmodal/src/Prompt/").createCompletionsProvider(_A[1])(_A[2], _A[3], _A[4])',
 		\	[a:completions, a:argLead, a:cmdLine, a:cursorPos]
 		\)
 	endfunction

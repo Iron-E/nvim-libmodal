@@ -4,10 +4,11 @@
 	 */
 --]]
 
-local globals = require('libmodal/src/globals')
-local Stack   = require('libmodal/src/collections/Stack')
-local utils   = require('libmodal/src/utils')
-local Vars    = require('libmodal/src/Vars')
+local globals   = require('libmodal/src/globals')
+local Indicator = require('libmodal/src/Indicator')
+local Stack     = require('libmodal/src/collections/Stack')
+local utils     = require('libmodal/src/utils')
+local Vars      = require('libmodal/src/Vars')
 
 local api  = utils.api
 
@@ -162,7 +163,7 @@ function Prompt.new(name, instruction, ...)
 	self = {}
 	setmetatable(self, _metaPrompt)
 
-	self._indicator   = utils.indicator.prompt(name)
+	self._indicator   = Indicator.prompt(name)
 	self._input       = vars.new('input')
 	self._instruction = instruction
 	self._name        = name

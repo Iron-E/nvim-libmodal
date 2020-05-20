@@ -4,10 +4,11 @@
 	 */
 --]]
 
-local globals = require('libmodal/src/globals')
-local utils   = require('libmodal/src/utils')
-local Stack   = require('libmodal/src/collections/Stack')
-local Vars    = require('libmodal/src/Vars')
+local globals   = require('libmodal/src/globals')
+local Indicator = require('libmodal/src/Indicator')
+local Stack     = require('libmodal/src/collections/Stack')
+local utils     = require('libmodal/src/utils')
+local Vars      = require('libmodal/src/Vars')
 
 local api  = utils.api
 
@@ -19,7 +20,7 @@ local api  = utils.api
 
 local Mode = {}
 
-Mode.ParseTable = require('libmodal/src/mode/ParseTable')
+Mode.ParseTable = require('libmodal/src/Mode/ParseTable')
 Mode.Popup      = require('libmodal/src/Mode/Popup')
 
 local _HELP = '?'
@@ -276,7 +277,7 @@ function Mode.new(name, instruction, ...)
 	end)(unpack({...}))
 
 	-- Define other "session" variables.
-	self._indicator   = utils.Indicator.mode(name)
+	self._indicator   = Indicator.mode(name)
 	self._instruction = instruction
 	self._name        = name
 	self._winState    = utils.WindowState.new()

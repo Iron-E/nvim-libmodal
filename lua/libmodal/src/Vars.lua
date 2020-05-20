@@ -13,10 +13,11 @@ local api = vim.api
 	 */
 --]]
 
-local Vars = {}
+local _TIMEOUT_GLOBAL_NAME = 'libmodalTimeouts'
 
-Vars.libmodalTimeouts = api.nvim_get_var('libmodalTimeouts')
-
+local Vars = {
+	[_TIMEOUT_GLOBAL_NAME] = api.nvim_get_var(_TIMEOUT_GLOBAL_NAME)
+}
 
 --[[
 	/*
