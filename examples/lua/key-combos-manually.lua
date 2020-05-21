@@ -12,14 +12,14 @@ function _inputHistory:clear(indexToCheck)
 end
 
 function fooMode()
-	inputHistory[#inputHistory + 1] = string.char(
+	_inputHistory[#_inputHistory + 1] = string.char(
 		api.nvim_get_var('fooModeInput')
 	)
 
 	local index = 1
-	if inputHistory[1] == 'z' then
-		if inputHistory[2] == 'f' then
-			if inputHistory[3] == 'o' then
+	if _inputHistory[1] == 'z' then
+		if _inputHistory[2] == 'f' then
+			if _inputHistory[3] == 'o' then
 				api.nvim_command("echom 'It works!'")
 			else index = 3
 			end
