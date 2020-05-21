@@ -64,7 +64,7 @@ function _metaMode:_checkInputForMapping()
 	inputBytes[#inputBytes + 1] = self._input:nvimGet()
 
 	-- Get the command based on the users input.
-	local cmd = self._mappings:get(inputBytes)
+	local cmd = self._mappings:parseGet(inputBytes)
 
 	-- Get the type of the command.
 	local commandType = type(cmd)
