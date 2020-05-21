@@ -24,7 +24,6 @@ function! libmodal#_inputWith(indicator, completions)
 		\)
 	endfunction
 
-	echohl LibmodalStar
 	return input(a:indicator, '', 'customlist,LibmodalCompletionsProvider')
 endfunction
 
