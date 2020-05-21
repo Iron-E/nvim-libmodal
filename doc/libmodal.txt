@@ -657,6 +657,11 @@ When submitting an issue, please describe the following:
 ==============================================================================
 8. Changelog                                              *libmodal-changelog*
 
+0.4.1 ~
+
+	Fixes: ~
+	* Fix reference to `libmodal/src/prompt` as `libmodal/src/path`.
+
 0.4.0 ~
 
 	Additions: ~
