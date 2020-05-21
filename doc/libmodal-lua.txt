@@ -13,15 +13,21 @@ See: |libmodal-usage|, |lua|, |lua-require-example|.
 ==============================================================================
 0. Table of Contents                                        *libmodal-lua-toc*
 
-1.   `libmodal` ............................. |libmodal-lua-libmodal|
-2.   `libmodal.base.globals` ................ |libmodal-lua-globals|
-3.   `libmodal.mode.ParseTable` ............. |libmodal-lua-ParseTable|
-4.   `libmodal.utils` ....................... |libmodal-lua-utils|
-4.1. `libmodal.utils.api` ................... |libmodal-lua-api|
-4.2. `libmodal.utils.Help` .................. |libmodal-lua-Help|
-4.3. `libmodal.utils.Indicator` ............. |libmodal-lua-Indicator|
-4.4. `libmodal.utils.vars` .................. |libmodal-lua-vars|
-4.5. `libmodal.utils.WindowState` ........... |libmodal-lua-Windowstate|
+ 1.   `libmodal` ............................. |libmodal-lua-libmodal|
+ 2.   `libmodal.collections` ................. |libmodal-lua-collections|
+ 3.1. `libmodal.collections.ParseTable` ...... |libmodal-lua-ParseTable|
+ 4.2. `libmodal.collections.Stack` ........... |libmodal-lua-Stack|
+ 5.   `libmodal.globals` ..................... |libmodal-lua-globals|
+ 6.   `libmodal.Indicator` ................... |libmodal-lua-Indicator|
+ 7.1. `libmodal.Indicator.HighlightSegment` .. |libmodal-lua-HighlightSegment|
+ 8.   `libmodal.Mode` ........................ |libmodal-lua-Mode|
+ 9.1. `libmodal.Mode.Popup` .................. |libmodal-lua-Popup|
+10.   `libmodal.Prompt` ...................... |libmodal-lua-Prompt|
+11.   `libmodal.utils` ....................... |libmodal-lua-utils|
+12.1. `libmodal.utils.api` ................... |libmodal-lua-api|
+13.2. `libmodal.utils.Help` .................. |libmodal-lua-Help|
+14.3. `libmodal.utils.WindowState` ........... |libmodal-lua-Windowstate|
+15.   `libmodal.Vars` ........................ |libmodal-lua-Vars|
 
 ==============================================================================
 1. `libmodal`                                            *libmodal-lua-libmodal*
@@ -33,18 +39,24 @@ This is the base of |libmodal|. It can be imported using: >
 ------------------------------------------------------------------------------
 MODULES                                                 *libmodal-lua-modules*
 
-* `libmodal`
-	* `libmodal.base`
-		* `libmodal.base.globals`
-	* `libmodal.mode`
-		* `libmodal.mode.ParseTable`
-	* `libmodal.prompt`
-	* `libmodal.utils`
-		* `libmodal.utils.api`
-		* `libmodal.utils.Help`
-		* `libmodal.utils.Indicator`
-		* `libmodal.utils.vars`
-		* `libmodal.utils.WindowState`
+  `libmodal`
+├──   `.collections`
+│   ├──   `.ParseTable`
+│   └──   `.Stack`
+├──   `.globals`
+├──   init.lua
+│   ├── `.mode.enter()`
+│   └── `.prompt.enter()`
+├──   `.Indicator`
+│   └──   `.HighlightSegment`
+├──   `.Mode`
+│   └──   `.Popup`
+├──   `.Prompt`
+├──   `.utils`
+│   ├──   `.api`
+│   ├──   `.Help`
+│   └──   `.WindowState`
+└──   `.Vars`
 
 ==============================================================================
 2. `libmodal.base.globals`                                *libmodal-lua-globals*
