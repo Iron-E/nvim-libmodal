@@ -4,6 +4,7 @@
 	 */
 --]]
 
+local classes   = require('libmodal/src/classes')
 local globals   = require('libmodal/src/globals')
 local Indicator = require('libmodal/src/Indicator')
 local utils     = require('libmodal/src/utils')
@@ -35,8 +36,7 @@ end
 	 */
 --]]
 
-local _metaPrompt = {}
-_metaPrompt.__index = _metaPrompt
+local _metaPrompt = classes.new({})
 
 ---------------------------------
 --[[ SUMMARY:

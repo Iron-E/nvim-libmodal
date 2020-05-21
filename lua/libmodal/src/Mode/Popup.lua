@@ -4,7 +4,8 @@
 	 */
 --]]
 
-local api = vim.api
+local api        = vim.api
+local classes = require('libmodal/src/classes')
 
 --[[
 	/*
@@ -33,8 +34,7 @@ local _winOpenOpts = {
 	 */
 --]]
 
-local _metaPopup = {}
-_metaPopup.__index = _metaPopup
+local _metaPopup = classes.new({})
 
 _metaPopup._buffer     = nil
 _metaPopup._inputChars = nil

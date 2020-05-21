@@ -149,7 +149,7 @@ VARIABLES                                     *libmodal-lua-globals-variables*
 ------------------------------------------------------------------------------
 FUNCTIONS                                     *libmodal-lua-globals-functions*
 
-`globals`.isFalse({val})                        *libmodal-lua-globals.isFalse()*
+`globals`.is_false({val})                      *libmodal-lua-globals.is_false()*
 
 	Determine whether or not some {val} is equal to `globals.VIM_FALSE`,
 	|v:false|, or `false`.
@@ -181,16 +181,16 @@ FUNCTIONS                                     *libmodal-lua-globals-functions*
 
 		--[[ Test the function. ]]
 
-		print(libmodal.globals.isFalse(falseValue))
-		print(libmodal.globals.isFalse(v_falseValue))
-		print(libmodal.globals.isFalse(vim_falseValue))
+		print(libmodal.globals.is_false(falseValue))
+		print(libmodal.globals.is_false(v_falseValue))
+		print(libmodal.globals.is_false(vim_falseValue))
 
-		print(libmodal.globals.isFalse(trueValue))
-		print(libmodal.globals.isFalse(v_trueValue))
-		print(libmodal.globals.isFalse(vim_trueValue))
+		print(libmodal.globals.is_false(trueValue))
+		print(libmodal.globals.is_false(v_trueValue))
+		print(libmodal.globals.is_false(vim_trueValue))
 <
 
-`globals`.isTrue({val})                          *libmodal-lua-globals.isTrue()*
+`globals`.is_true({val})                        *libmodal-lua-globals.is_true()*
 
 	Determine whether or not some {val} is equal to `globals.VIM_TRUE`,
 	|v:true|, or `true`.
@@ -221,13 +221,13 @@ FUNCTIONS                                     *libmodal-lua-globals-functions*
 
 		--[[ Test the function. ]]
 
-		print(libmodal.globals.isTrue(falseValue))
-		print(libmodal.globals.isTrue(v_falseValue))
-		print(libmodal.globals.isTrue(vim_falseValue))
+		print(libmodal.globals.is_true(falseValue))
+		print(libmodal.globals.is_true(v_falseValue))
+		print(libmodal.globals.is_true(vim_falseValue))
 
-		print(libmodal.globals.isTrue(trueValue))
-		print(libmodal.globals.isTrue(v_trueValue))
-		print(libmodal.globals.isTrue(vim_trueValue))
+		print(libmodal.globals.is_true(trueValue))
+		print(libmodal.globals.is_true(v_trueValue))
+		print(libmodal.globals.is_true(vim_trueValue))
 <
 
 ==============================================================================

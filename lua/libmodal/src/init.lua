@@ -6,6 +6,7 @@
 
 local libmodal = {}
 
+libmodal.classes    = require('libmodal/src/classes')
 libmodal.collection = require('libmodal/src/collections')
 libmodal.globals    = require('libmodal/src/globals')
 libmodal.Indicator  = require('libmodal/src/Indicator')

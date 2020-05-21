@@ -4,6 +4,7 @@
 	 */
 --]]
 
+local classes     = require('libmodal/src/classes')
 local globals     = require('libmodal/src/globals')
 local Indicator   = require('libmodal/src/Indicator')
 local collections = require('libmodal/src/collections')
@@ -38,18 +39,15 @@ _TIMEOUT.NR = string.byte(_TIMEOUT.CHAR)
 	 */
 --]]
 
-local _metaMode = {}
-_metaMode.__index = _metaMode
+local _metaMode = classes.new({})
 
-local _metaInputBytes = {
+local _metaInputBytes = classes.new({
 	['clear'] = function(__self)
 		for i, _ in ipairs(__self) do
 			__self[i] = nil
 		end
 	end
-}
-_metaInputBytes.__index = _metaInputBytes
-
+})
 
 -----------------------------------------------
 --[[ SUMMARY:
@@ -80,7 +78,7 @@ function _metaMode:_checkInputForMapping()
 		inputBytes:clear()
 	-- The command was a table, meaning that it MIGHT match.
 	elseif commandType == globals.TYPE_TBL
-	       and globals.isTrue(self._timeouts.enabled)
+	       and globals.is_true(self._timeouts.enabled)
 	then
 		-- Create a new timer
 
@@ -184,7 +182,7 @@ end
 function _metaMode:_inputLoop()
 	-- If the mode is not handling exit events automatically and the global exit var is true.
 	if self._exit.supress
-	   and globals.isTrue(self._exit:nvimGet())
+	   and globals.is_true(self._exit:nvimGet())
 	then
 		return false
 	end
@@ -266,7 +264,7 @@ function Mode.new(name, instruction, ...)
 	-- Define the exit flag
 	self._exit.supress = (function(optionalValue)
 		if optionalValue then
-			return globals.isTrue(optionalValue)
+			return globals.is_true(optionalValue)
 		else
 			return false
 		end

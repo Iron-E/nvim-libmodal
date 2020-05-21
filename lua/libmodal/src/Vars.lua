@@ -4,8 +4,9 @@
 	 */
 --]]
 
+local api     = vim.api
+local classes = require('libmodal/src/classes')
 local globals = require('libmodal/src/globals')
-local api = vim.api
 
 --[[
 	/*
@@ -25,8 +26,7 @@ local Vars = {
 	 */
 --]]
 
-local _metaVars = {}
-_metaVars.__index = _metaVars
+local _metaVars = classes.new({})
 
 -- Instances of variables pertaining to a certain mode.
 _metaVars._varName = nil

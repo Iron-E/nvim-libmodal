@@ -1,5 +1,13 @@
 --[[
 	/*
+	 * IMPORTS
+	 */
+--]]
+
+local classes = require('libmodal/src/classes')
+
+--[[
+	/*
 	 * MODULE `Stack`
 	 */
 --]]
@@ -12,8 +20,7 @@ local Stack = {}
 	 */
 --]]
 
-local _metaStack = {}
-_metaStack.__index = _metaStack
+local _metaStack = classes.new({})
 
 _metaStack._len = 0
 _metaStack._top = nil

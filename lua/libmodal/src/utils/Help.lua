@@ -1,11 +1,18 @@
 --[[
 	/*
+	 * IMPORTS
+	 */
+--]]
+
+local classes = require('libmodal/src/classes')
+
+--[[
+	/*
 	 * META `Help`
 	 */
 --]]
 
-local _metaHelp = {}
-_metaHelp.__index = _metaHelp
+local _metaHelp = classes.new({})
 
 -------------------------
 --[[ SUMMARY:
@@ -54,7 +61,7 @@ function Help.new(commandsOrMaps, title)
 	end
 
 	-- define the separator for entries in the help table.
-	local SEPARATOR = ' │ '
+	local SEPARATOR_TEMPLATE = {' │ ', '\n'}
 
 	----------------------
 	--[[ SUMMARY:
@@ -71,20 +78,18 @@ function Help.new(commandsOrMaps, title)
 		local toPrint = {}
 		for k, v in pairs(tbl) do
 			toPrint[#toPrint + 1] = k
-			local i = longestKey - string.len(k)
-			while i > 0 do
+			for i = longestKey, string.len(k) do
 				toPrint[#toPrint + 1] = ' '
-				i = i - 1
 			end
-			toPrint[#toPrint + 1] = SEPARATOR .. v .. '\n'
+			toPrint[#toPrint + 1] = table.concat(SEPARATOR_TEMPLATE, v)
 		end
 		return toPrint
 	end
 
 	-- define the separator for the help table.
 	local helpSeparator = {}
-	while #helpSeparator < string.len(title) do
-		helpSeparator[#helpSeparator + 1] = '-'
+	for i = 1, string.len(title) do
+		helpSeparator[i] = '-'
 	end
 	helpSeparator = table.concat(helpSeparator)
 
@@ -93,7 +98,7 @@ function Help.new(commandsOrMaps, title)
 		{
 			[1] = ' ',
 			[2] = table.concat(tabAlign({
-				[title] = 'VIM EXPRESSION',
+				[title] = 'VIM EXPRESSION'
 			})),
 			[3] = table.concat(tabAlign({
 				[helpSeparator] = '--------------'
