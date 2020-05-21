@@ -678,11 +678,25 @@ When submitting an issue, please describe the following:
 		* Call `libmodal.Mode.new()` or `libmodal.Prompt.new()` to create one.
 			* Call `{mode}:enter()` to enter the mode.
 		* More consistent mode recursion with `libmodal.collections.Stack`.
+		* Mode creators can now override specific functionality by copying
+		  portions of the source code, or changing the values that are
+		  referenced by the mode directly.
+			* This allows for finer control over how a mode behaves.
+			* It also allows for modes to inherit each other through
+			  `setmetatable()`.
 
 	* Removed program logic from `libmodal.mode.enter()`.
 		* Now internally calls `libmodal.Mode.new(…):enter()` instead.
 	* Removed program logic from `libmodal.prompt.enter()`.
 		* Now internally calls `libmodal.Prompt.new(…):enter()` instead.
+
+
+	Fixes: ~
+	* Fix unexpected behavior when repeating `libmodal.mode.enter()` calls
+	  with the from within themselves.
+	  * Mode popup windows may be closed prematurely by entering two different
+	    modes and then exiting them in reverse order, among other things. All
+	    previously known mysterious behavior is corrected.
 
 0.4.1 ~
 

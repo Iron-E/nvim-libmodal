@@ -61,7 +61,7 @@ function _metaMode:_checkInputForMapping()
 	self._flushInputTimer:stop()
 
 	-- Append the latest input to the locally stored input history.
-	local inputBytes = self._modeEnterData:peek().inputBytes
+	local inputBytes = self._inputBytes
 
 	inputBytes[#inputBytes + 1] = self._input:nvimGet()
 
@@ -95,7 +95,7 @@ function _metaMode:_checkInputForMapping()
 				end
 				-- clear input
 				inputBytes:clear()
-				self._modeEnterData:peek().popup:refresh(inputBytes)
+				self._popups:peek():refresh(inputBytes)
 			end)
 		)
 
@@ -105,7 +105,7 @@ function _metaMode:_checkInputForMapping()
 		inputBytes:clear()
 	end
 
-	self._modeEnterData:peek().popup:refresh(inputBytes)
+	self._popups:peek():refresh(inputBytes)
 end
 
 --------------------------
@@ -117,13 +117,7 @@ function _metaMode:enter()
 	-- intialize variables that are needed for each recurse of a function
 	if type(self._instruction) == globals.TYPE_TBL then
 		-- Initialize the input history variable.
-		self._modeEnterData:push({
-			-- assign input
-			['inputBytes'] = setmetatable({}, _metaInputBytes),
-
-			-- create a floating window
-			['popup'] = Mode.Popup.new()
-		})
+		self._popups:push(Mode.Popup.new())
 	end
 
 
@@ -159,11 +153,13 @@ function _metaMode:_initMappings()
 		self._help = utils.Help.new(self._instruction, 'KEY MAP')
 	end
 
+	self._inputBytes = setmetatable({}, _metaInputBytes)
+
 	-- Build the parse tree.
 	self._mappings = collections.ParseTable.new(self._instruction)
 
 	-- Create a table for mode-specific data.
-	self._modeEnterData = collections.Stack.new()
+	self._popups = collections.Stack.new()
 
 	-- Create a variable for whether or not timeouts are enabled.
 	self._timeouts = Vars.new('timeouts', self._name)
@@ -228,16 +224,9 @@ end
 function _metaMode:_tearDown()
 	if type(self._instruction) == globals.TYPE_TBL then
 		self._flushInputTimer:stop()
+		self._inputBytes = nil
 
-		local modeEnterData = self._modeEnterData:pop()
-
-		for k, _ in pairs(modeEnterData.inputBytes) do
-			modeEnterData.inputBytes[k] = nil
-		end
-		modeEnterData.inputBytes = nil
-
-		modeEnterData.popup:close()
-		modeEnterData.popup = nil
+		self._popups:pop():close()
 	end
 
 	self._winState:restore()
