@@ -62,7 +62,7 @@ endfunction
 " * `a:2` => `modeCallback` OR `modeCommands`
 " * `a:3` => `modeCompletions`
 function! libmodal#Prompt(...) abort
-	call libmodal#_lua('path', a:000)
+	call libmodal#_lua('prompt', a:000)
 endfunction
 
 " SUMMARY:
