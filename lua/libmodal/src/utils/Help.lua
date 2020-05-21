@@ -78,7 +78,13 @@ function Help.new(commandsOrMaps, title)
 		local toPrint = {}
 		for k, v in pairs(tbl) do
 			toPrint[#toPrint + 1] = k
-			for i = longestKey, string.len(k) do
+			local len = string.len(k)
+			local byte = string.byte(k)
+			-- account for ASCII chars that take up more space.
+			if byte <= 32 or byte == 127 then len = len + 1
+			end
+
+			for i = len, longestKey do
 				toPrint[#toPrint + 1] = ' '
 			end
 			toPrint[#toPrint + 1] = table.concat(SEPARATOR_TEMPLATE, v)

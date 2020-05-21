@@ -42,7 +42,7 @@ local function _get(parseTable, splitKey)
 
 	-- Make sure the dicitonary has a key for that value.
 	if parseTable[k] then
-		val = parseTable[k]
+		local val = parseTable[k]
 		local valType = type(val)
 
 		if valType == globals.TYPE_TBL then
@@ -67,7 +67,7 @@ end
 	* `splitKey` => the key split into groups.
 ]]
 -----------------------------------------
-local function _put(parseTable, splitKey) -- †
+local function _put(parseTable, splitKey, value) -- †
 	--[[ Get the next character in the table. ]]
 	local k = string.byte(table.remove(splitKey))
 
@@ -80,7 +80,7 @@ local function _put(parseTable, splitKey) -- †
 		end
 
 		-- run _update() again
-		_put(parseTable[k], splitKey)
+		_put(parseTable[k], splitKey, value)
 	-- If parseTable[k] is a pre-existing table, don't clobber the table— clobber the `CR` value.
 	elseif type(parseTable[k]) == globals.TYPE_TBL then
 		parseTable[k][ParseTable.CR] = value
@@ -157,9 +157,10 @@ end
 ]]
 ---------------------------------------------
 function _metaParseTable:parsePut(key, value)
-	_put(self, _string_split(
-		string.reverse(key), '.'
-	))
+	_put(self,
+		_string_split(string.reverse(key), '.'),
+		value
+	)
 end
 
 --------------------------------------------------

@@ -27,7 +27,7 @@ local _REPLACEMENTS = {
 	',', '/', ':', '?', '@', '!', '$', '*', '.', '%', '&', '\\',
 }
 for i, replacement in ipairs(_REPLACEMENTS) do
-	_REPLACEMENTS[i] = vim.pesc(replacement)
+	_REPLACEMENTS[i], _ = vim.pesc(replacement)
 end
 
 --[[
@@ -131,14 +131,14 @@ end
 ------------------------------------------------------
 function Prompt.createCompletionsProvider(completions)
 	return function(argLead, cmdLine, cursorPos)
-		if string.len(cmdLine) < 1 then
-			return completions
+		if string.len(cmdLine) < 1 then return completions
 		end
 
 		-- replace conjoining characters with spaces.
 		local spacedArgLead = argLead
 		for _, replacement in ipairs(_REPLACEMENTS) do
-			spacedArgLead, _ = string.gsub(spacedArgLead, vim.pesc(replacement), ' ')
+			-- _REPLACEMENTS are already `vim.pesc`aped
+			spacedArgLead, _ = string.gsub(spacedArgLead, replacement, ' ')
 		end
 
 		-- split the spaced version of `argLead`.
@@ -146,8 +146,7 @@ function Prompt.createCompletionsProvider(completions)
 
 		--[[ make sure the user is in a position were this function
 		     will provide accurate completions.]]
-		if #splitArgLead > 1 then
-			return nil
+		if #splitArgLead > 1 then return nil
 		end
 
 		-- get the word selected by the user. (don't compare case)
@@ -157,7 +156,8 @@ function Prompt.createCompletionsProvider(completions)
 		local matches = {}
 		for _, completion in ipairs(completions) do
 			-- test if `word` is inside of `completions`:`v`, ignoring case.
-			if string.match(vim.pesc(string.upper(completion)), word) then
+			local escapedCompletion, _ = vim.pesc(string.upper(completion))
+			if string.match(escapedCompletion, word) then
 				matches[#matches + 1] = completion -- preserve case when providing completions.
 			end
 		end
