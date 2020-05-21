@@ -157,7 +157,7 @@ end
 ]]
 ---------------------------------------------
 function _metaParseTable:parsePut(key, value)
-	_put(self, _stringSplit(
+	_put(self, _string_split(
 		string.reverse(key), '.'
 	))
 end
