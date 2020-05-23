@@ -1112,9 +1112,78 @@ FUNCTIONS                                 *libmodal-lua-WindowState-functions*
 <
 
 =============================================================================
-9. `libmodal.Vars`                                        *libmodal-lua-Vars*
+9. `libmodal.Vars`                                          *libmodal-lua-Vars*
 
-TODO.
+A `Var`'s purpose is to act as an intermediary between |global-variables| and
+the modes that use them.
+
+-----------------------------------------------------------------------------
+FUNCTIONS                                       *libmodal-lua-Vars.functions*
+
+`self`:name()                                        *libmodal-lua-Vars.name()*
+
+	Get the name of `modeName`s global setting.
+
+	Parameters: ~
+		{modeName}  The name of the mode.
+
+	Return: ~
+		* The name of the vimscript variable that this `Var` corresponds to.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		local input = libmodal.Vars('input', 'FOO')
+		print(input:name()) -- 'fooModeInput'
+<
+
+`self`:nvimGet()                                  *libmodal-lua-Vars.nvimGet()*
+
+	Retrieve a variable value.
+
+	Parameters: ~
+		{modeName}  The mode name this value is being retrieved for.
+
+	Return: ~
+		* The |global-variable| value that this `Var` represents
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		local input = libmodal.Vars('input', 'FOO')
+		vim.api.nvim_set_var(input:name(), 'test')
+		print(input:nvimGet())
+<
+
+`self`:nvimSet({val})                             *libmodal-lua-Vars.nvimSet()*
+
+	Set a |variable| value.
+
+	Parameters: ~
+		{modeName}  The mode name this value is being retrieved for.
+		{val}       The value to set `self`'s Vimscript var to.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		local input = libmodal.Vars('input', 'FOO')
+		input:nvimSet('test')
+		print(input:nvimGet())
+<
+
+`Vars`.new(keyName, modeName)                         *libmodal-lua-Vars.new()*
+
+	Create a new `Var`.
+
+	Parameters: ~
+		{keyName}   The name of the key used to refer to this variable in `Vars`.
+		{modeName}  The name of the mode that this `Variable` is for.
+
+	Return: ~
+		* A new `Var`.
 
 ==============================================================================
  vim:tw=78:ts=4:ft=help:norl:
