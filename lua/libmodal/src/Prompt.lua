@@ -178,8 +178,8 @@ end
 function Prompt.new(name, instruction, ...)
 	local self = setmetatable(
 		{
-			['_indicator']   = Indicator.prompt(name),
-			['_input']       = Vars.new('input', name),
+			['indicator']   = Indicator.prompt(name),
+			['input']       = Vars.new('input', name),
 			['_instruction'] = instruction,
 			['_name']        = name
 		},
