@@ -91,7 +91,7 @@ function Popup.new()
 		{
 			['_buffer']     = buf,
 			['_inputChars'] = {},
-			['window']      = api.nvim_call_function(
+			['_window']      = api.nvim_call_function(
 				'nvim_open_win', {buf, false, _winOpenOpts}
 			)
 		},
