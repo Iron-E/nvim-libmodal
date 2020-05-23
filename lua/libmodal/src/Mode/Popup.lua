@@ -57,7 +57,7 @@ end
 ---------------------------------
 function _metaPopup:refresh(inputBytes)
 	local inputBytesLen = #inputBytes
-	local inputChars = self._inputChars
+	local inputChars    = self._inputChars
 
 	-- The user simply typed one more character onto the last one.
 	if inputBytesLen == #inputChars + 1 then
