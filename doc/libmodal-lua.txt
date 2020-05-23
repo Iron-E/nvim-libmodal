@@ -608,6 +608,16 @@ want to for their mode specifically. >
 ------------------------------------------------------------------------------
 functions                                        *libmodal-lua-Mode-functions*
 
+`self`.exit                                             *libmodal-lua-Mode.exit*
+
+	A liason to the `g:`{name}`ModeExit` variable.
+
+	Type: ~
+		`libmodal.Vars`
+
+	Value: ~
+		`libmodal.Vars.new('exit', `{name}`)`
+
 `self`.indicator                                   *libmodal-lua-Mode.indicator*
 
 	The message that is shown in the bottom-left corner of the screen while the

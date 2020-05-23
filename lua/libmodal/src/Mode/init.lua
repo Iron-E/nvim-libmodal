@@ -181,8 +181,8 @@ end
 -------------------------------
 function _metaMode:_inputLoop()
 	-- If the mode is not handling exit events automatically and the global exit var is true.
-	if self._exit.supress
-	   and globals.is_true(self._exit:nvimGet())
+	if self.exit.supress
+	   and globals.is_true(self.exit:nvimGet())
 	then
 		return false
 	end
@@ -202,7 +202,7 @@ function _metaMode:_inputLoop()
 	self.input:nvimSet(userInput)
 
 	-- Make sure that the user doesn't want to exit.
-	if not self._exit.supress
+	if not self.exit.supress
 	   and userInput == globals.ESC_NR then return false
 	-- If the second argument was a dict, parse it.
 	elseif type(self._instruction) == globals.TYPE_TBL then
@@ -251,9 +251,9 @@ function Mode.new(name, instruction, ...)
 	-- Inherit the metatable.
 	local self = setmetatable(
 		{
-			['_exit']        = Vars.new('exit', name),
+			['exit']         = Vars.new('exit', name),
 			['indicator']    = Indicator.mode(name),
-			['_input']       = Vars.new('input', name),
+			['input']        = Vars.new('input', name),
 			['_instruction'] = instruction,
 			['_name']        = name,
 			['_winState']    = utils.WindowState.new(),
@@ -262,7 +262,7 @@ function Mode.new(name, instruction, ...)
 	)
 
 	-- Define the exit flag
-	self._exit.supress = (function(optionalValue)
+	self.exit.supress = (function(optionalValue)
 		if optionalValue then
 			return globals.is_true(optionalValue)
 		else
