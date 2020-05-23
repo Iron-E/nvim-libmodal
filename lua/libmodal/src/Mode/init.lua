@@ -51,7 +51,7 @@ local _metaInputBytes = classes.new({
 
 -----------------------------------------------
 --[[ SUMMARY:
-	* Parse `self._mappings` and see if there is any command to execute.
+	* Parse `self.mappings` and see if there is any command to execute.
 ]]
 -----------------------------------------------
 function _metaMode:_checkInputForMapping()
@@ -59,12 +59,12 @@ function _metaMode:_checkInputForMapping()
 	self._flushInputTimer:stop()
 
 	-- Append the latest input to the locally stored input history.
-	local inputBytes = self._inputBytes
+	local inputBytes = self.inputBytes
 
-	inputBytes[#inputBytes + 1] = self._input:nvimGet()
+	inputBytes[#inputBytes + 1] = self.input:nvimGet()
 
 	-- Get the command based on the users input.
-	local cmd = self._mappings:parseGet(inputBytes)
+	local cmd = self.mappings:parseGet(inputBytes)
 
 	-- Get the type of the command.
 	local commandType = type(cmd)
@@ -127,7 +127,7 @@ function _metaMode:enter()
 
 		-- If there were errors, handle them.
 		if not noErrors then
-			utils.showError(modeResult)
+			utils.show_error(modeResult)
 			continueMode = false
 		else
 			continueMode = modeResult
@@ -151,10 +151,10 @@ function _metaMode:_initMappings()
 		self._help = utils.Help.new(self._instruction, 'KEY MAP')
 	end
 
-	self._inputBytes = setmetatable({}, _metaInputBytes)
+	self.inputBytes = setmetatable({}, _metaInputBytes)
 
 	-- Build the parse tree.
-	self._mappings = collections.ParseTable.new(self._instruction)
+	self.mappings = collections.ParseTable.new(self._instruction)
 
 	-- Create a table for mode-specific data.
 	self._popups = collections.Stack.new()
@@ -188,7 +188,7 @@ function _metaMode:_inputLoop()
 	end
 
 	-- Echo the indicator.
-	api.nvim_lecho(self._indicator)
+	api.nvim_lecho(self.indicator)
 
 	-- Capture input.
 	local userInput = api.nvim_input()
@@ -199,7 +199,7 @@ function _metaMode:_inputLoop()
 	end
 
 	-- Set the global input variable to the new input.
-	self._input:nvimSet(userInput)
+	self.input:nvimSet(userInput)
 
 	-- Make sure that the user doesn't want to exit.
 	if not self._exit.supress
@@ -222,7 +222,7 @@ end
 function _metaMode:_tearDown()
 	if type(self._instruction) == globals.TYPE_TBL then
 		self._flushInputTimer:stop()
-		self._inputBytes = nil
+		self.inputBytes = nil
 
 		self._popups:pop():close()
 	end
@@ -252,7 +252,7 @@ function Mode.new(name, instruction, ...)
 	local self = setmetatable(
 		{
 			['_exit']        = Vars.new('exit', name),
-			['_indicator']   = Indicator.mode(name),
+			['indicator']    = Indicator.mode(name),
 			['_input']       = Vars.new('input', name),
 			['_instruction'] = instruction,
 			['_name']        = name,

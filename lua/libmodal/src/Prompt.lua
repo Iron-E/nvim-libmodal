@@ -51,16 +51,16 @@ function _metaPrompt:_inputLoop()
 	local userInput = ''
 
 	-- echo the highlighting
-	api.nvim_command('echohl ' .. self._indicator.hl)
+	api.nvim_command('echohl ' .. self.indicator.hl)
 
 	-- set the user input variable
 	if self._completions
 	then userInput =
 		api.nvim_call_function('libmodal#_inputWith', {
-			self._indicator.str, self._completions
+			self.indicator.str, self._completions
 		})
 	else userInput =
-		api.nvim_call_function('input', {self._indicator})
+		api.nvim_call_function('input', {self.indicator})
 	end
 
 	-- get the instruction for the mode.
@@ -68,7 +68,7 @@ function _metaPrompt:_inputLoop()
 
 	-- determine what to do with the input
 	if string.len(userInput) > 0 then -- the user actually entered something
-		self._input:nvimSet(userInput)
+		self.input:nvimSet(userInput)
 		if type(instruction) == globals.TYPE_TBL then -- the instruction is a command table.
 			if instruction[userInput] then -- there is a defined command for the input.
 				api.nvim_command(instruction[userInput])
@@ -100,7 +100,7 @@ function _metaPrompt:enter()
 
 		-- if there were errors.
 		if not noErrors then
-			utils.showError(promptResult)
+			utils.show_error(promptResult)
 			continueMode = false
 		else
 			continueMode = promptResult

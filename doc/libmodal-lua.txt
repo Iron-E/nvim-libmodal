@@ -13,21 +13,22 @@ See: |libmodal-usage|, |lua|, |lua-require-example|.
 ==============================================================================
 0. Table of Contents                                        *libmodal-lua-toc*
 
- 1.   `libmodal` ............................. |libmodal-lua-libmodal|
- 2.   `libmodal.collections` ................. |libmodal-lua-collections|
- 3.1. `libmodal.collections.ParseTable` ...... |libmodal-lua-ParseTable|
- 4.2. `libmodal.collections.Stack` ........... |libmodal-lua-Stack|
- 5.   `libmodal.globals` ..................... |libmodal-lua-globals|
- 6.   `libmodal.Indicator` ................... |libmodal-lua-Indicator|
- 7.1. `libmodal.Indicator.HighlightSegment` .. |libmodal-lua-HighlightSegment|
- 8.   `libmodal.Mode` ........................ |libmodal-lua-Mode|
- 9.1. `libmodal.Mode.Popup` .................. |libmodal-lua-Popup|
-10.   `libmodal.Prompt` ...................... |libmodal-lua-Prompt|
-11.   `libmodal.utils` ....................... |libmodal-lua-utils|
-12.1. `libmodal.utils.api` ................... |libmodal-lua-api|
-13.2. `libmodal.utils.Help` .................. |libmodal-lua-Help|
-14.3. `libmodal.utils.WindowState` ........... |libmodal-lua-Windowstate|
-15.   `libmodal.Vars` ........................ |libmodal-lua-Vars|
+1.   `libmodal` ............................. |libmodal-lua-libmodal|
+2.   `libmodal.classes` ..................... |libmodal-lua-classes|
+3.   `libmodal.collections` ................. |libmodal-lua-collections|
+3.1. `libmodal.collections.ParseTable` ...... |libmodal-lua-ParseTable|
+3.2. `libmodal.collections.Stack` ........... |libmodal-lua-Stack|
+4.   `libmodal.globals` ..................... |libmodal-lua-globals|
+5.   `libmodal.Indicator` ................... |libmodal-lua-Indicator|
+5.1. `libmodal.Indicator.HighlightSegment` .. |libmodal-lua-HighlightSegment|
+6.   `libmodal.Mode` ........................ |libmodal-lua-Mode|
+6.1. `libmodal.Mode.Popup` .................. |libmodal-lua-Popup|
+7.   `libmodal.Prompt` ...................... |libmodal-lua-Prompt|
+8.   `libmodal.utils` ....................... |libmodal-lua-utils|
+8.1. `libmodal.utils.api` ................... |libmodal-lua-api|
+8.2. `libmodal.utils.Help` .................. |libmodal-lua-Help|
+8.3. `libmodal.utils.WindowState` ........... |libmodal-lua-Windowstate|
+9.   `libmodal.Vars` ........................ |libmodal-lua-Vars|
 
 ==============================================================================
 1. `libmodal`                                            *libmodal-lua-libmodal*
@@ -59,13 +60,255 @@ MODULES                                                 *libmodal-lua-modules*
 └──   `.Vars`
 
 ==============================================================================
-2. `libmodal.base.globals`                                *libmodal-lua-globals*
+3. `libmodal.collections`                             *libmodal-lua-collections*
 
-These are global variables used throughout the project. They are never
+The `libmodal.collections` module consists of a few data structures that
+support the rest of `libmodal`.
+
+==============================================================================
+3.1. `libmodal.collections.ParseTable`                 *libmodal-lua-ParseTable*
+
+A `ParseTable` is a pseudo-parse tree of a given user collection of
+keybinding:expression pairs.
+
+See: |libmodal-mode| for more information.
+
+------------------------------------------------------------------------------
+functions                                  *libmodal-lua-ParseTable-functions*
+
+`ParseTable`.CR                                     *libmodal-lua-ParseTable.CR*
+
+	The character number for <CR>.
+
+	Type: ~
+		`number`
+
+	Value: ~
+		13
+
+------------------------------------------------------------------------------
+FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
+
+`ParseTable`.new({userTable})                    *libmodal-lua-ParseTable.new()*
+
+	Create a new `ParseTable` from a user-defined `table` of combos.
+
+	All keys of a `ParseTable` are numbers of characters.
+
+	Parameters: ~
+		{userTable}  the table of combos defined by the user (see
+		             `libmodal.mode.enter()`)
+
+	Return: ~
+		A new `ParseTable`.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Create a mock set of user mappings.
+		local userTable = {
+			['zf'] = "echo 'Hello!'",
+			['zfo'] = "tabnew"
+		}
+
+		-- Create a new `ParseTable`
+		local parseTable = libmodal.mode.ParseTable.new(userTable)
+
+		-- Print the `parseTable`.
+		print(vim.inspect(parseTable))
+<
+
+	See Also: ~
+		|char2nr|, |nr2char|  For character to number conversion and vice
+		                      versa.
+
+		|libmodal-mode|       For information about {userTable}.
+
+
+`self`:parseGet({keyDict})                  *libmodal-lua-ParseTable.parseGet()*
+
+	Get a value from an instance of `ParseTable`.
+
+	Parameters: ~
+		{keyDict}  a string of key characters as bytes.
+
+	Return: ~
+		A `function`  {keyDict} is a full match.
+		A `table`     the {keyDict} partially matches.
+		* `false`     {keyDict} is not ANYWHERE.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+
+		-- Simulate user input.
+		local userInput = {122, 102} -- {'z', 'f'}
+
+		-- Create a dummy `ParseTable`.
+		local parseTable = libmodal.mode.ParseTable.new({
+			['zfo'] = 'echo "Hello!"'
+		})
+		-- Inspect it.
+		print(vim.inspect(parseTable))
+
+		-- this will return a `table`
+		local tbl = parseTable:parseGet(userInput)
+		-- Inspect it to show the difference.
+		print(vim.inspect(tbl))
+<
+
+
+`self`:parsePut({key}, {value})             *libmodal-lua-ParseTable.parsePut()*
+
+	Put `value` into the parse tree as `key`.
+
+	Parameters: ~
+		{key}    the key that {value} is reffered to by. A `char`, not a
+		         `byte`.
+
+		{value}  the value to store as {key}. A `string` to |execute|.
+
+	Example: ~
+>
+		-- Create a dummy `ParseTable`.
+		local parseTable = libmodal.mode.ParseTable.new({
+			['zfo'] = 'echo "Hello!"'
+		})
+		-- Inspect it.
+		print(vim.inspect(parseTable))
+
+		-- this will return a `table`
+		parseTable:parsePut('zfc', 'split')
+		-- Inspect it to show the difference.
+		print(vim.inspect(parseTable))
+<
+
+	See also: ~
+		|libmodal-lua-parsetable-parseputall| for how to put multiple {key}s
+		                                      and {value}s at a time.
+
+
+`self`:parsePutAll({tableToUnite})       *libmodal-lua-ParseTable.parsePutAll()*
+
+	Create the union of `self` and `tableToUnite`
+
+	Interally calls |libmodal-lua-parsetable-parseput| on every key:value pair
+	in {tableToUnite}.
+
+	Parameters: ~
+		{tableToUnite}  the table to unite with `self.`
+
+	Example: ~
+>
+		-- Create an empty `ParseTable`.
+		local parseTable = libmodal.mode.ParseTable.new({})
+		-- Create some dummy keybindings.
+		local unparsedUserKeybinds = {
+			['zfo'] = 'echo "Hello!"',
+			['zfc'] = 'split'
+		}
+
+		-- Add the dummy keybindings.
+		parseTable:parsePutAll(unparsedUserKeybinds)
+
+		-- Inspect it to show the difference.
+		print(vim.inspect(parseTable))
+<
+
+	See also: ~
+		|libmodal-lua-parsetable-parseput|  For more information on
+		                                    {tableToUnite}.
+
+==============================================================================
+3.2. `libmodal.collections.Stack`                           *libmodal-lua-Stack*
+
+The `libmodal.collections.Stack` is a simple implementation of a Stack data
+structure. It is designed with reuse of resources in mind, as
+commonly-accessed pieces of data are locally stored for faster reference
+times.
+
+The `#` operator in |Lua| will work on this structure.
+
+------------------------------------------------------------------------------
+FUNCTIONS                                       *libmodal-lua-Stack-functions*
+
+`self`:peek()                                        *libmodal-lua-Stack.peek()*
+
+	Access the value at the top of the stack without removing it.
+
+	Return: ~
+		* The value at the top of the stack.
+
+	Example: ~
+>
+		local Stack = require('libmodal').collections.Stack
+
+		local stk = Stack.new()
+		stk:push('foo')
+		stk:push('bar')
+		print(stk:peek())
+<
+
+`self`:pop()                                          *libmodal-lua-Stack.pop()*
+
+	Access the value at the top of the stack by removing it.
+
+	Return: ~
+		* The value at the top of the stack.
+
+	Example: ~
+>
+		local Stack = require('libmodal').collections.Stack
+
+		local stk = Stack.new()
+		stk:push('foo')
+		stk:push('bar')
+		print(stk:peek())
+		local _ = stk:pop()
+		print(stk:peek())
+<
+
+`self`:push({value})                                 *libmodal-lua-Stack.push()*
+
+	Push some {value} onto the top of the stack.
+
+	Parameters: ~
+		{value}  The value to put on top of the stack.
+
+	Example: ~
+>
+		local Stack = require('libmodal').collections.Stack
+
+		local stk = Stack.new()
+		stk:push('foo')
+		stk:push('bar')
+		print(vim.inspect(stk))
+<
+
+`Stack`.new()                                         *libmodal-lua-Stack.new()*
+
+	Create a new `libmodal.collections.Stack` and return it.
+
+	Return: ~
+		* A new `libmodal.collections.Stack`.
+
+	Example: ~
+>
+		local Stack = require('libmodal').collections.Stack
+
+		local stk = Stack.new()
+		print(vim.inspect(stk))
+<
+
+==============================================================================
+4. `libmodal.globals`                                     *libmodal-lua-globals*
+
+These are global functions used throughout the project. They are never
 modified and never meant TO be modified.
 
 ------------------------------------------------------------------------------
-VARIABLES                                     *libmodal-lua-globals-variables*
+functions                                     *libmodal-lua-globals-functions*
 
 `globals`.DEFAULT_ERROR_TITLE         *libmodal-lua-globals.DEFAULT_ERROR_TITLE*
 
@@ -230,182 +473,378 @@ FUNCTIONS                                     *libmodal-lua-globals-functions*
 		print(libmodal.globals.is_true(vim_trueValue))
 <
 
+
 ==============================================================================
-3. `libmodal.mode.ParseTable`                          *libmodal-lua-ParseTable*
+5. `libmodal.utils.Indicator`                           *libmodal-lua-Indicator*
 
-A `ParseTable` is a pseudo-parse tree of a given user collection of
-keybinding:expression pairs.
-
-See: |libmodal-mode| for more information.
+Provides creation sources for mode and prompt |echo| / |echohl| `string`s.
 
 ------------------------------------------------------------------------------
-VARIABLES                                  *libmodal-lua-ParseTable-variables*
+FUNCTIONS                                   *libmodal-lua-indicator-functions*
 
-`ParseTable`.CR                                     *libmodal-lua-ParseTable.CR*
+`Indicator`.mode({modeName})                     *libmodal-lua-Indicator.mode()*
 
-	The character number for <CR>.
+	Create a new `Indicator` for a mode.
+
+	Parameters: ~
+		{modeName}  The name of the mode that this `Indicator` is for.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local indicator = libmodal.utils.Indicator.mode('FOO')
+		libmodal.utils.api.nvim_lecho(indicator)
+<
+
+	See also: ~
+		|libmodal-mode|                 For this function's use.
+		|libmodal-lua-api.nvim_lecho()| For effective |echo|ing of this
+		                                function.
+
+`Indicator`.prompt({modeName})                 *libmodal-lua-Indicator.prompt()*
+
+	Create a new `Indicator` for a prompt.
+
+	Parameters: ~
+		{modeName}  The name of the mode that this `Indicator` is for.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local indicator = libmodal.utils.Indicator.prompt('FOO')
+		print(indicator) -- you can't use `nvim_lecho` with this one.
+<
+
+	See also: ~
+		|libmodal-prompt|  For this function's use.
+
+==============================================================================
+5.1. `libmodal.Indicator.HighlightSegment`       *libmodal-lua-HighlightSegment*
+
+The `HighlightSegment` is a map describing how a particular string should be
+highlighted by Vim.
+
+These `HighlightSegment`s can be put into a list and interpreted by
+`libmodal.utils.api.nvim_lecho()`.
+
+------------------------------------------------------------------------------
+functions                            *libmodal-lua-HighlightSegment-functions*
+
+`self`.hl                                     *libmodal-lua-HighlightSegment.hl*
+
+	Which |highlight-group| to use when |highlight|ing `HighlightSegment.str`.
 
 	Type: ~
-		`number`
+		|highlight-group| `string`.
 
-	Value: ~
-		13
+`self`.str                                   *libmodal-lua-HighlightSegment.str*
+
+	What this `HighlightSegment`'s string value is.
+
+	Type: ~
+		`string`
 
 ------------------------------------------------------------------------------
-FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
+FUNCTIONS                            *libmodal-lua-HighlightSegment-Functions*
 
-`ParseTable`.new({userTable})                    *libmodal-lua-ParseTable.new()*
+`HighlightSegment`.new({hlgroup}, {str})   *libmodal-lua-HighlightSegment.new()*
 
-	Create a new `ParseTable` from a user-defined `table` of combos.
-
-	All keys of a `ParseTable` are numbers of characters.
+	Create a new `HighlightSegment`.
 
 	Parameters: ~
-		{userTable}  the table of combos defined by the user (see
-		             `libmodal.mode.enter()`)
+		{hlgroup}  The |highlight-group| to use when |highlight|ing {str}.
+		{str}      The {str} to |highlight|.
 
 	Return: ~
-		A new `ParseTable`.
+		* A new `HighlightSegment`.
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal         = require('libmodal')
+		local api              = libmodal.utils.api
+		local HighlightSegment = libmodal.Indicator.HighlightSegment
 
-		-- Create a mock set of user mappings.
-		local userTable = {
-			['zf'] = "echo 'Hello!'",
-			['zfo'] = "tabnew"
-		}
-
-		-- Create a new `ParseTable`
-		local parseTable = libmodal.mode.ParseTable.new(userTable)
-
-		-- Print the `parseTable`.
-		print(vim.inspect(parseTable))
+		api.nvim_lecho({
+			HighlightSegment.new('ModeMsg', '-- '),
+			HighlightSegment.new('None', 'FOO')
+			HighlightSegment.new('ModeMsg', ' --'),
+		})
 <
 
-	See Also: ~
-		|char2nr|, |nr2char|  For character to number conversion and vice
-		                      versa.
+==============================================================================
+6. `libmodal.Mode`                                           *libmodal-lua-mode*
 
-		|libmodal-mode|       For information about {userTable}.
+While `libmodal.mode.enter()` may enter a mode, it silently creates a `Mode`
+underneath: >
+	function mode.enter(...)
+		Mode.new(...):enter()
+	end
+<
 
+If you wish to have more control over a mode, such as the text of an
+`Indicator`, one may manually create a `Mode` with `Mode.new()` and then
+change some of the properties in order to make the mode do what you want.
 
-`self`:get({keyDict})                            *libmodal-lua-ParseTable.get()*
+Additionally, one may alter the actual `function`s that are used by a `Mode`
+without forking |libmodal|. By using `setmetatable`, and `vim.inspect()`, one
+can grab code from the |nvim-libmodal| repository and change whatever they
+want to for their mode specifically. >
+	local libmodal         = require('libmodal')
+	local Mode             = libmodal.Mode
+	local HighlightSegment = libmodal.Indicator.HighlightSegment
 
-	Get a value from an instance of `ParseTable`.
+	local fooMode = Mode.new(…)
+	fooMode.indicator = {
+		HighlightSegment.new('Error', '*'),
+		HighlightSegment.new('None', ' Something a duck walks on '),
+		HighlightSegment.new('Error', '>'),
+		HighlightSegment.new('None', ' ')
+	}
+	fooMode
+	fooMode:enter()
+< (The specifications for these functions can be found at other places in this
+  document.)
 
-	Parameters: ~
-		{keyDict}  a string of key characters as bytes.
+------------------------------------------------------------------------------
+functions                                        *libmodal-lua-Mode-functions*
+
+`self`.indicator                                   *libmodal-lua-Mode.indicator*
+
+	The message that is shown in the bottom-left corner of the screen while the
+	mode is active.
+
+	Note: this value may be replaced with any `table` of `HighlightSegment`s
+	      (as shown in |libmodal-lua-Mode|). That will allow you to change the
+		  message that a mode has from the vim-default "-- {name} --" to
+		  something else.
+
+	Type: ~
+		`libmodal.Indicator`/array-like `table` of `HighlightSegment`s.
+
+	Value: ~
+		`libmodal.Indicator.mode(`{name}`)`
+
+`self`.input                                           *libmodal-lua-Mode.input*
+
+	A liason to `g:`{name}`ModeInput`.
+
+	Note: you may use {ModeInstance}`.input:nvimGet()` and `:nvimSet()` to
+	      consistently read and write to the mode's unique variable.
+
+	Type: ~
+		`libmodal.Vars`
+
+	Value: ~
+		`libmodal.Vars.new('input', `{name}`)`
+
+`self`.inputBytes                                 *libmodal-lua-Mode.inputBytes*
+
+	The history of user input, stored as |char2nr|s.
+
+	Note: This variable is inert when `libmodal.Mode.new()`'s {instruction}
+	      parameter is a `function`. Feel free to use it rather than creating
+		  your own, to make your code more familiar to others.
+
+	Type: ~
+		array-like `table` of |char2nr|s.
+
+	Value: ~
+		* `nil` => {instruction} is a `function`.
+		* `{}` => {instruction} is a `table`.
+
+`self`.mappings                                     *libmodal-lua-Mode.mappings*
+
+	The mappings that have been processed by a `Mode` when
+	`libmodal.Mode.new()`'s {instruction} parameter is a `table`.
+
+	Users may add or remove mappings at any time, and they will be reflected
+	in the next keypress.
+
+	Type: ~
+		`libmodal.collections.ParseTable`
+
+	Value: ~
+		`libmodal.collections.ParseTable.new(`{instruction}`)`
+
+	See also: ~
+		|libmodal-lua-ParseTable|  For information about how to use this
+		                         variable.
+
+------------------------------------------------------------------------------
+FUNCTIONS                                        *libmodal-lua-Mode-functions*
+
+`self`:enter()                                       *libmodal-lua-Mode.enter()*
+
+	Enter the `Mode` that was created.
+
+	Example: ~
+>
+		local Mode = require('libmodal').Mode
+
+		local fooMode = Mode.new('FOO', {zz = 'tabnew', gg = 'tabclose'})
+		fooMode:enter()
+<
+
+`Mode`.new({name}, {instruction} [, {supressExit}])    *libmodal-lua-Mode.new()*
+
+	Create a new `Mode` with a given {name}, using an {instruction} to perform
+	whenever a key is pressed, and whether or not to {supressExit} handling.
 
 	Return: ~
-		A `function`  {keyDict} is a full match.
-		A `table`     the {keyDict} partially matches.
-		* `false`     {keyDict} is not ANYWHERE.
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-
-		-- Simulate user input.
-		local userInput = {122, 102} -- {'z', 'f'}
-
-		-- Create a dummy `ParseTable`.
-		local parseTable = libmodal.mode.ParseTable.new({
-			['zfo'] = 'echo "Hello!"'
-		})
-		-- Inspect it.
-		print(vim.inspect(parseTable))
-
-		-- this will return a `table`
-		local tbl = parseTable:get(userInput)
-		-- Inspect it to show the difference.
-		print(vim.inspect(tbl))
-<
-
-
-`self`:parsePut({key}, {value})             *libmodal-lua-ParseTable.parsePut()*
-
-	Put `value` into the parse tree as `key`.
-
-	Parameters: ~
-		{key}    the key that {value} is reffered to by. A `char`, not a
-		         `byte`.
-
-		{value}  the value to store as {key}. A `string` to |execute|.
-
-	Example: ~
->
-		-- Create a dummy `ParseTable`.
-		local parseTable = libmodal.mode.ParseTable.new({
-			['zfo'] = 'echo "Hello!"'
-		})
-		-- Inspect it.
-		print(vim.inspect(parseTable))
-
-		-- this will return a `table`
-		parseTable:parsePut('zfc', 'split')
-		-- Inspect it to show the difference.
-		print(vim.inspect(parseTable))
-<
+		A new `Mode`.
 
 	See also: ~
-		|libmodal-lua-parsetable-parseputall| for how to put multiple {key}s
-		                                      and {value}s at a time.
+		|libmodal-mode|  For more information, as all of the parameters are
+		                 the same.
 
+==============================================================================
+6.1. `libmodal.Mode.Popup`                                  *libmodal-lua-Popup*
 
-`self`:parsePutAll({tableToUnite})       *libmodal-lua-ParseTable.parsePutAll()*
+When `:enter()`ing a `Mode`, an |api-floatwin| is displayed at the bottom
+right-hand corner of the screen. `libmodal.Mode.Popup` is responsible for
+opening it and keeping updated.
 
-	Create the union of `self` and `tableToUnite`
+Whenever a `Popup` is created, it is immediately opened. Additionally, it is
+opened with the following options: >
+	local _winOpenOpts = {
+		['anchor']    = 'SW',
+		['col']       = api.nvim_get_option('columns') - 1,
+		['focusable'] = false,
+		['height']    = 1,
+		['relative']  = 'editor',
+		['row']       = api.nvim_get_option('lines')
+		                - api.nvim_get_option('cmdheight')
+		                - 1,
+		['style']     = 'minimal',
+		['width']     = 25,
+	}
+<
 
-	Interally calls |libmodal-lua-parsetable-parseput| on every key:value pair
-	in {tableToUnite}.
+------------------------------------------------------------------------------
+FUNCTIONS                                       *libmodal-lua-Popup-functions*
+
+`self`:close()                                      *libmodal-lua-Popup.close()*
+
+	Close the window that this `Popup` represents.
+
+	Note: All variables of `Popup` are de-initialized after this method.
+
+`self`:refresh({inputBytes})                      *libmodal-lua-Popup.refresh()*
+
+	Update the content of the `Popup` using an array-like `table` of
+	|char2nr|s.
+
+	Note: This is normally used to add what the user is typing. If you have a
+	      `function` `Mode` {instruction}, then you can use `Popup` and this
+		  function to manually show user input as it is typed.
 
 	Parameters: ~
-		{tableToUnite}  the table to unite with `self.`
+		{inputBytes}  An array-like `table` of |char2nr|s to write to the
+		              `Popup`.
+
+`Popup`.new()                                         *libmodal-lua-Popup.new()*
+
+	Create a new `Popup` and immediately open it.
+
+	Return: ~
+		* A new `Popup`.
+
+	See also: ~
+		|libmodal-lua-Popup|  For the options used to spawn the window.
+
+==============================================================================
+7. `libmodal.Prompt`                                       *libmodal-lua-Prompt*
+
+While `libmodal.prompt.enter()` may enter a |libmodal-prompt|, itilently
+creates a `Mode` underneath: >
+	function prompt.enter(...)
+		Prompt.new(...):enter()
+	end
+<
+
+See |libmodal-lua-Mode| for more information about the possibilities that are
+enabled by using such a "class".
+
+------------------------------------------------------------------------------
+VARIABLES                                      *libmodal-lua-Prompt-variables*
+
+`self`.indicator                                 *libmodal-lua-Prompt.indicator*
+
+	The message that is shown in the bottom-left corner of the screen while the
+	mode is active.
+
+	Note: this value may be replaced with any `HighlightSegment`. That will
+	      allow you to change the message to something else.
+
+	Type: ~
+		`HighlightSegment`
+
+	Value: ~
+		`libmodal.Indicator.prompt(`{name}`)`
+
+`self`.input                                         *libmodal-lua-Prompt.input*
+
+	A liason to `g:`{name}`ModeInput`.
+
+	Note: you may use {ModeInstance}`.input:nvimGet()` and `:nvimSet()` to
+	      consistently read and write to the mode's unique variable.
+
+	Type: ~
+		`libmodal.Vars`
+
+	Value: ~
+		`libmodal.Vars.new('input', `{name}`)`
+
+------------------------------------------------------------------------------
+FUNCTIONS                                      *libmodal-lua-Prompt-functions*
+
+`self`:enter()                                     *libmodal-lua-Prompt.enter()*
+
+	Enter the `Prompt` that was created.
 
 	Example: ~
 >
-		-- Create an empty `ParseTable`.
-		local parseTable = libmodal.mode.ParseTable.new({})
-		-- Create some dummy keybindings.
-		local unparsedUserKeybinds = {
-			['zfo'] = 'echo "Hello!"',
-			['zfc'] = 'split'
-		}
+		local Prompt = require('libmodal').Prompt
 
-		-- Add the dummy keybindings.
-		parseTable:parsePutAll(unparsedUserKeybinds)
-
-		-- Inspect it to show the difference.
-		print(vim.inspect(parseTable))
+		local fooMode = Prompt.new('FOO', {new = 'tabnew', close = 'tabclose'})
+		fooMode:enter()
 <
 
-	See also: ~
-		|libmodal-lua-parsetable-parseput|  For more information on
-		                                    {tableToUnite}.
+                                                   *libmodal-lua-Prompt.new()*
+`Prompt`.new({name}, {instruction} [, {completions}])
 
-=============================================================================
-4. `libmodal.utils`                                         *libmodal-lua-utils*
+	User input is taken using |input()|. It is passed through a |g:var|
+	determined by the {name} of the mode. For example, if {name} is "FOO"
+	then the |g:var| is `g:fooModeInput`.
+
+	Return: ~
+		A new `Mode`.
+
+	See also: ~
+		|libmodal-prompt|  For more information, as all of the parameters are
+		                 the same.
+
+==============================================================================
+8. `libmodal.utils`                                         *libmodal-lua-utils*
 
 Provides extra utilities to the |libmodal| library.
 
 ------------------------------------------------------------------------------
 FUNCTIONS                                       *libmodal-lua-utils-functions*
 
-`utils`.showError({pcallErr})                   *libmodal-lua-utils.showError()*
+`utils`.show_error({pcall_err})                 *libmodal-lua-utils.show_error()*
 
 	Show an error from `pcall()`.
 
 	Parameters: ~
-		{pcallErr}  the error generated by `pcall()`.
+		{pcall_err}  the error generated by `pcall()`.
 
 	Example: ~
 >
 		local libmodal = require('libmodal')
 
 		-- Run `pcall` on an anonymous function.
-		local noErrors, pcallErr = pcall(function()
+		local noErrors, pcall_err = pcall(function()
 			-- This will always produce an error.
 			return "" .. true
 		end)
@@ -413,12 +852,12 @@ FUNCTIONS                                       *libmodal-lua-utils-functions*
 		-- If there were errors…
 		if not noErrors then
 			-- Show the error.
-			libmodal.utils.showError(pcallErr)
+			libmodal.utils.show_error(pcall_err)
 		end
 <
 
 =============================================================================
-4.1. `libmodal.utils.api`                                     *libmodal-lua-api*
+8.1. `libmodal.utils.api`                                     *libmodal-lua-api*
 
 Provides extensions to the `vim.api` |Lua| library.
 
@@ -549,7 +988,7 @@ FUNCTIONS                                         *libmodal-lua-api-functions*
 <
 
 ==============================================================================
-4.2. `libmodal.utils.Help`                                   *libmodal-lua-Help*
+8.2. `libmodal.utils.Help`                                   *libmodal-lua-Help*
 
 Allows for the creation of a default "Help" table.
 
@@ -618,208 +1057,7 @@ FUNCTIONS                                        *libmodal-lua-Help-functions*
 <
 
 ==============================================================================
-4.3. `libmodal.utils.Indicator`                         *libmodal-lua-Indicator*
-
-Provides creation sources for mode and prompt |echo| / |echohl| `string`s.
-
-------------------------------------------------------------------------------
-FUNCTIONS                                   *libmodal-lua-indicator-functions*
-
-`Indicator`.mode({modeName})                     *libmodal-lua-Indicator.mode()*
-
-	Create a new `Indicator` for a mode.
-
-	Parameters: ~
-		{modeName}  The name of the mode that this `Indicator` is for.
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-		local indicator = libmodal.utils.Indicator.mode('FOO')
-		libmodal.utils.api.nvim_lecho(indicator)
-<
-
-	See also: ~
-		|libmodal-mode|                 For this function's use.
-		|libmodal-lua-api.nvim_lecho()| For effective |echo|ing of this
-		                                function.
-
-`Indicator`.prompt({modeName})                 *libmodal-lua-Indicator.prompt()*
-
-	Create a new `Indicator` for a prompt.
-
-	Parameters: ~
-		{modeName}  The name of the mode that this `Indicator` is for.
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-		local indicator = libmodal.utils.Indicator.prompt('FOO')
-		print(indicator) -- you can't use `nvim_lecho` with this one.
-<
-
-	See also: ~
-		|libmodal-prompt|  For this function's use.
-
-==============================================================================
-4.4. `libmodal.utils.vars`                                   *libmodal-lua-vars*
-
-Provides an interface between Vimscript and Lua instance variables that are
-created during a |libmodal-mode| or |libmodal-prompt|'s execution.
-
-Several `vars` are created by default:
-
-Name                  Use
-------------------    -----------------------------------------------------
-`vars`.buffers          Buffers that hold |nvim_open_win()| text.
-`vars`.combos           `ParseTable`s when |libmodal-mode|'s {instruction} is a
-                           `table`.
-`vars`.completions      |libmodal-prompt| completions.
-`vars`.exit             |libmodal-mode|'s {supressExit}.
-`vars`.input            Keeping user input history during |libmodal-mode|.
-`vars`.timeouts          Tracks if |libmodal-timeouts| are enabled for a mode.
-`vars`.timer            Tracks if there is an active |timer| for a mode.
-`vars`.windows          Tracks |nvim_open_win()| handles.
-
-------------------------------------------------------------------------------
-VARIABLES                                        *libmodal-lua-vars-variables*
-
-`vars`.libmodalTimeouts                     *libmodal-lua-vars.libmodalTimeouts*
-
-	The value of `g:libmodalTimeouts`.
-
-	Type: ~
-		`boolean`/`number`
-
-	Value: ~
-		`vim.api.nvim_get_var('libmodalTimeouts')`
-
-`self`.instances                                   *libmodal-lua-vars.instances*
-
-	Instances of variables pertaining to a certain mode.
-
-	Type: ~
-		`table`
-
-	Value: ~
-		Starts as `{}`.
-
-------------------------------------------------------------------------------
-FUNCTIONS                                        *libmodal-lua-vars-functions*
-
-`self`:name({modeName})                               *libmodal-lua-vars.name()*
-
-	Get the name of this variable's global setting for a specific {modeName}.
-
-	Note: not all variables have a global setting. See |libmodal-usage| and
-	      |libmodal-configuration| for what is pertinent.
-
-	Note: This function is case insensitive. {modeName} will always come out
-	      lower case.
-
-	Parameters: ~
-		{modeName}  The name of the mode that this global setting is for.
-
-	Return: ~
-		The name of this variable's global setting for a specific {modeName}.
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-		-- Get the |libmodal-timeouts| variable for `FOO` mode.
-		print(libmodal.utils.vars.exit:name('FOO'))
-<
-
-`vars`.nvim_get({var}, {modeName})                *libmodal-lua-vars.nvim_get()*
-
-	Retrieve a {var} value for {modeName} from |nvim_get_var()|.
-
-	Parameters: ~
-		{var}       The `vars` table to retrieve the value of.
-		            (e.g. `vars.input`)
-		{modeName}  The mode name this value is being retrieved for.
-
-	Return: ~
-		`vim.api.nvim_get_var( {var}:name({modeName}) )`
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-
-		-- Set the 'g:fooModeExit' variable.
-		vim.api.nvim_set_var('fooModeExit', 1)
-
-		-- Get the `g:fooModeExit` variable.
-		print( libmodal.utils.vars.nvim_get(libmodal.utils.vars.exit, 'FOO') )
-<
-
-`vars`.nvim_set({var}, {modeName}, {val})         *libmodal-lua-vars.nvim_set()*
-
-	Set a {var} {val} for {modeName} with |nvim_set_var()|.
-
-	Parameters: ~
-		{var}       The `vars` table to retrieve the value of.
-		            (e.g. `vars.input`)
-		{modeName}  The mode name this value is being retrieved for.
-		{val}       The value to set {var} to.
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-
-		-- Set the 'g:fooModeExit' variable.
-		libmodal.utils.vars.nvim_set(libmodal.utils.vars.exit, 'FOO', 1)
-
-		-- Get the `g:fooModeExit` variable.
-		print(vim.api.nvim_get_var('fooModeExit'))
-<
-
-`vars`:tearDown({modeName})                       *libmodal-lua-vars.tearDown()*
-
-	Remove temporary variables created by the |libmodal-mode| {modeName}.
-
-	Parameters: ~
-		{modeName}  The name of the |libmodal-mode| that created the variables.
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-
-	-- Create a mock name for a mode.
-	local mode = 'foo'
-
-	-- Define a function to display all of the `vars`.
-	function print_vars()
-		for k, v in pairs(libmodal.utils.vars) do
-			if type(v) == libmodal.globals.TYPE_TBL and v['instances'] then
-				print(k)
-				print(vim.inspect(v))
-				print('===============')
-			end
-		end
-	end
-
-
-	-- Add some variable values for the mode.
-	libmodal.utils.vars.input.instances[mode]    = {}
-	libmodal.utils.vars.timeouts.instances[mode] = true
-	libmodal.utils.vars.timer.instances[mode]   = vim.loop.new_timer()
-
-	-- Print the `vars` with our new assigned values.
-	print_vars()
-	libmodal.utils.vars:tearDown(mode)
-	-- Print the `vars` after `tearDown`.
-	print([[
-	 
-	<<<<<<AFTER TEARDOWN.>>>>>>
-	 
-	]])
-	print_vars()
-<
-
-
-==============================================================================
-4.5 `libmodal.utils.WindowState`                      *libmodal-lua-WindowState*
+8.3. `libmodal.utils.WindowState`                     *libmodal-lua-WindowState*
 
 Tracks 'winheight' and 'winwidth' when created, so that it can be modified
 freely and then restored later.
@@ -872,6 +1110,11 @@ FUNCTIONS                                 *libmodal-lua-WindowState-functions*
 		-- Print the 'winheight' after `restore()`ing.
 		print_height()
 <
+
+=============================================================================
+9. `libmodal.Vars`                                        *libmodal-lua-Vars*
+
+TODO.
 
 ==============================================================================
  vim:tw=78:ts=4:ft=help:norl:

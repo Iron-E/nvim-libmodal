@@ -36,22 +36,18 @@ local _winOpenOpts = {
 
 local _metaPopup = classes.new({})
 
-_metaPopup._buffer     = nil
-_metaPopup._inputChars = nil
-_metaPopup.window      = nil
-
 ---------------------------
 --[[ SUMMARY:
-	* Close `self.window`
+	* Close `self._window`
 	* The `self` is inert after calling this.
 ]]
 ---------------------------
 function _metaPopup:close()
-	api.nvim_win_close(self.window, false)
+	api.nvim_win_close(self._window, false)
 
 	self._buffer     = nil
 	self._inputChars = nil
-	self.window      = nil
+	self._window      = nil
 end
 
 ---------------------------------
