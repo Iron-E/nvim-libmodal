@@ -1,14 +1,3 @@
-let s:winOpenOpts = {
-\	'anchor'   : 'SW',
-\	'col'      : &columns - 1,
-\	'focusable': v:false,
-\	'height'   : 1,
-\	'relative' : 'editor',
-\	'row'      : &lines - &cmdheight - 1,
-\	'style'    : 'minimal',
-\	'width'    : 25,
-\}
-
 " SUMMARY:
 " * Get user input with some `completions`.
 " PARAMS:
@@ -38,6 +27,10 @@ function! libmodal#Enter(...) abort
 	call libmodal#_lua('mode', a:000)
 endfunction
 
+function! libmodal#Layer(...) abort
+	call libmodal#_lua('layer')
+endfunction
+
 " SUMMARY:
 " * Runs the nvim-libmodal command prompt loop. The function takes an optional
 "   argument specifying how many times to run (runs until exiting by default).
@@ -62,7 +55,7 @@ function! libmodal#_lua(lib, args)
 	\	[
 	\		a:args[0],
 	\		a:args[1],
-	\		len(a:args) > 2 ? a:args[2] : v:false
+	\		get(a:args, 2, v:null)
 	\	]
 	\)
 endfunction

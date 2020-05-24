@@ -657,6 +657,15 @@ When submitting an issue, please describe the following:
 ==============================================================================
 8. Changelog                                              *libmodal-changelog*
 
+0.6.0 ~
+
+	Additions: ~
+	* New module: |libmodal-layer|s.
+		* Allows for use of built-in modes with overwriting of keymaps.
+		* New class `libmodal.Layer`.
+		* New function `libmodal.layer.enter()`.
+	* New examples for new additions.
+
 0.5.0 ~
 
 	Additions: ~

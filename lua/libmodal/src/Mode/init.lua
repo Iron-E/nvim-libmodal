@@ -28,7 +28,7 @@ local _TIMEOUT = {
 	['CHAR'] = 'ø',
 	['LEN']  = api.nvim_get_option('timeoutlen'),
 	['SEND'] = function(__self)
-		api.nvim_feedkeys(__self.CHAR, '', false)
+		api.nvim_feedkeys(__self.CHAR, 'nt', false)
 	end
 }
 _TIMEOUT.NR = string.byte(_TIMEOUT.CHAR)
