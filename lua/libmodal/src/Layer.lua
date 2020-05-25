@@ -235,6 +235,7 @@ end
 ]]
 -----------------------------------------------------
 function Layer.new(name, mappings)
+	-- TODO: support libmodal-mode and libmodal-prompt layers.
 	return setmetatable(
 		{['_keymap'] = mappings, ['name'] = name},
 		_metaLayer

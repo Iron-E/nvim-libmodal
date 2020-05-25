@@ -126,7 +126,6 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 
 		|libmodal-mode|       For information about {userTable}.
 
-
 `self`:parseGet({keyDict})                  *libmodal-lua-ParseTable.parseGet()*
 
 	Get a value from an instance of `ParseTable`.
@@ -159,7 +158,6 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 		print(vim.inspect(tbl))
 <
 
-
 `self`:parsePut({key}, {value})             *libmodal-lua-ParseTable.parsePut()*
 
 	Put `value` into the parse tree as `key`.
@@ -189,7 +187,6 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 		|libmodal-lua-parsetable-parseputall| for how to put multiple {key}s
 		                                      and {value}s at a time.
 
-
 `self`:parsePutAll({tableToUnite})       *libmodal-lua-ParseTable.parsePutAll()*
 
 	Create the union of `self` and `tableToUnite`
@@ -216,7 +213,6 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 		-- Inspect it to show the difference.
 		print(vim.inspect(parseTable))
 <
-
 	See also: ~
 		|libmodal-lua-parsetable-parseput|  For more information on
 		                                    {tableToUnite}.
@@ -389,7 +385,6 @@ functions                                     *libmodal-lua-globals-functions*
 	Value: ~
 		1
 
-
 ------------------------------------------------------------------------------
 FUNCTIONS                                     *libmodal-lua-globals-functions*
 
@@ -473,7 +468,6 @@ FUNCTIONS                                     *libmodal-lua-globals-functions*
 		print(libmodal.globals.is_true(v_trueValue))
 		print(libmodal.globals.is_true(vim_trueValue))
 <
-
 
 ==============================================================================
 5. `libmodal.utils.Indicator`                           *libmodal-lua-Indicator*
@@ -586,13 +580,26 @@ and extend was is possible.
 ------------------------------------------------------------------------------
 FUNCTIONS                                         *libmodal-lua-Layer-functions*
 
-	*Todo	write examples
-
 `self`:enter()                                      *libmodal-lua-Layer.enter()*
 
 	Enter the `Layer`.
 
 	Note: mappings only get replaced for the current buffer.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local layer = libmodal.Layer.new('FOO', {
+			['n'] = {
+				['gg'] = {
+					['rhs'] = G
+				}
+			}
+		})
+
+		-- use `layer:exit()` or close the buffer to exit.
+		layer:enter()
+<
 
 	See also: ~
 		|libmodal-lua-Layer.exit()|  How to enter the `Layer`.
@@ -613,6 +620,28 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 		{rhs}      The right hand side of the mapping.
 		{options}  Options for the mapping.
 
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local layer = libmodal.Layer.new('FOO', {
+			['n'] = {
+				['gg'] = {
+					['rhs'] = G
+				}
+			}
+		})
+
+		-- this adds a binding for `G` to `gg` in normal mode.
+		layer:map('n', 'G', 'gg', {['noremap'] = true})
+
+		-- use `layer:exit()` or close the buffer to exit.
+		layer:enter()
+
+		-- you can also call `:map()` after entering.
+		-- this adds a binding for `o` to `gg` in visual mode.
+		layer:map('v', 'o', 'gg', {['noremap'] = true})
+<
+
 	See also: ~
 		|nvim_buf_set_keymap()|  For more information about the parameters.
 
@@ -627,12 +656,63 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 
 		{lhs}   The left hand side of the mapping.
 
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local layer = libmodal.Layer.new('FOO', {
+			['n'] = {
+				['gg'] = {
+					['rhs'] = G
+				}
+			}
+		})
+
+		-- This adds a binding for `G` to `gg` in normal mode.
+		layer:map('n', 'G', 'gg', {['noremap'] = true})
+
+		-- Unmap the initial `gg`.
+		layer:unmap('n', 'gg')
+
+		-- Use `layer:exit()` or close the buffer to exit.
+		layer:enter()
+
+		-- Start a timer for five seconds.
+		vim.loop.new_timer():start(5000, 0, vim.schedule_wrap(
+			-- You can also call `:unmap()` after entering.
+			function() layer:unmap('n', 'G') end
+			-- No bindings should be active now.
+		))
+
+<
+
 	See also: ~
 		|nvim_buf_del_keymap()|  For more information about the parameters.
 
 `self`:exit()                                        *libmodal-lua-Layer.exit()*
 
 	Exit the `Layer`.
+
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local layer = libmodal.Layer.new('FOO', {
+			['n'] = {
+				['gg'] = {
+					['rhs'] = G
+				}
+			}
+		})
+
+		-- Enter the layer.
+		layer:enter()
+
+		-- Start a timer for five seconds.
+		vim.loop.new_timer():start(5000, 0, vim.schedule_wrap(
+			-- Exit the layer. `gg` should return to normal.
+			function() layer:exit() end
+		))
+
+<
 
 	See also: ~
 		|libmodal-lua-Layer.enter()|  How to enter the `Layer`.
@@ -645,8 +725,21 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 		{name}      The name of the `Layer`.
 		{mappings}  The list of |map|pings to replace.
 
+	Example: ~
+>
+		local libmodal = require('libmodal')
+		local layer = libmodal.Layer.new('FOO', {
+			['n'] = {
+				['gg'] = {
+					['rhs'] = G
+				}
+			}
+		})
+
+
 	Returns: ~
 		* A new `Layer`.
+<
 
 ==============================================================================
 7. `libmodal.Mode`                                           *libmodal-lua-Mode*
@@ -969,7 +1062,6 @@ FUNCTIONS                                         *libmodal-lua-api-functions*
 		'errorbells'  For bell settings.
 		'visualbell'  For bell settings.
 
-
 `api`.nvim_exists({scope}, {var})               *libmodal-lua-api.nvim_exists()*
 
 	Check whether or not some |variable| exists.
@@ -1050,8 +1142,6 @@ FUNCTIONS                                         *libmodal-lua-api-functions*
 		-- Clear the screen.
 		libmodal.utils.api.nvim_redraw()
 <
-
-
 
 `api`.nvim_show_err({title}, {msg})           *libmodal-lua-api.nvim_show_err()*
 
