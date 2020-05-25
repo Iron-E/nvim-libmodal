@@ -13,22 +13,23 @@ See: |libmodal-usage|, |lua|, |lua-require-example|.
 ==============================================================================
 0. Table of Contents                                        *libmodal-lua-toc*
 
-1.   `libmodal` ............................. |libmodal-lua-libmodal|
-2.   `libmodal.classes` ..................... |libmodal-lua-classes|
-3.   `libmodal.collections` ................. |libmodal-lua-collections|
-3.1. `libmodal.collections.ParseTable` ...... |libmodal-lua-ParseTable|
-3.2. `libmodal.collections.Stack` ........... |libmodal-lua-Stack|
-4.   `libmodal.globals` ..................... |libmodal-lua-globals|
-5.   `libmodal.Indicator` ................... |libmodal-lua-Indicator|
-5.1. `libmodal.Indicator.HighlightSegment` .. |libmodal-lua-HighlightSegment|
-6.   `libmodal.Mode` ........................ |libmodal-lua-Mode|
-6.1. `libmodal.Mode.Popup` .................. |libmodal-lua-Popup|
-7.   `libmodal.Prompt` ...................... |libmodal-lua-Prompt|
-8.   `libmodal.utils` ....................... |libmodal-lua-utils|
-8.1. `libmodal.utils.api` ................... |libmodal-lua-api|
-8.2. `libmodal.utils.Help` .................. |libmodal-lua-Help|
-8.3. `libmodal.utils.WindowState` ........... |libmodal-lua-Windowstate|
-9.   `libmodal.Vars` ........................ |libmodal-lua-Vars|
+ 1.   `libmodal` ............................. |libmodal-lua-libmodal|
+ 2.   `libmodal.classes` ..................... |libmodal-lua-classes|
+ 3.   `libmodal.collections` ................. |libmodal-lua-collections|
+ 3.1. `libmodal.collections.ParseTable` ...... |libmodal-lua-ParseTable|
+ 3.2. `libmodal.collections.Stack` ........... |libmodal-lua-Stack|
+ 4.   `libmodal.globals` ..................... |libmodal-lua-globals|
+ 5.   `libmodal.Indicator` ................... |libmodal-lua-Indicator|
+ 5.1. `libmodal.Indicator.HighlightSegment` .. |libmodal-lua-HighlightSegment|
+ 6.   `libmodal.Layer` ....................... |libmodal-lua-Layer|
+ 6.   `libmodal.Mode` ........................ |libmodal-lua-Mode|
+ 7.1. `libmodal.Mode.Popup` .................. |libmodal-lua-Popup|
+ 8.   `libmodal.Prompt` ...................... |libmodal-lua-Prompt|
+ 9.   `libmodal.utils` ....................... |libmodal-lua-utils|
+ 9.1. `libmodal.utils.api` ................... |libmodal-lua-api|
+ 9.2. `libmodal.utils.Help` .................. |libmodal-lua-Help|
+ 9.3. `libmodal.utils.WindowState` ........... |libmodal-lua-Windowstate|
+10.   `libmodal.Vars` ........................ |libmodal-lua-Vars|
 
 ==============================================================================
 1. `libmodal`                                            *libmodal-lua-libmodal*
@@ -572,7 +573,83 @@ FUNCTIONS                            *libmodal-lua-HighlightSegment-Functions*
 <
 
 ==============================================================================
-6. `libmodal.Mode`                                           *libmodal-lua-mode*
+6. `libmodal.Layer`                                         *libmodal-lua-Layer*
+
+The libmodal `Layer` class provides many additional features to the base
+`libmodal.layer.enter()`.
+
+As there is no default mapping to leave a `Layer`, `libmodal.layer.enter()`
+returns an anonymous `Layer`'s `:exit()` `function`. By directly having a
+reference to a `Layer`, one can use the other `function`s that are provided,
+and extend was is possible.
+
+------------------------------------------------------------------------------
+FUNCTIONS                                         *libmodal-lua-Layer-functions*
+
+	*Todo	write examples
+
+`self`:enter()                                      *libmodal-lua-Layer.enter()*
+
+	Enter the `Layer`.
+
+	Note: mappings only get replaced for the current buffer.
+
+	See also: ~
+		|libmodal-lua-Layer.exit()|  How to enter the `Layer`.
+
+`self`:map({mode}, {lhs}, {rhs}, {options})         *libmodal-lua-Layer.enter()*
+
+	Add a mapping to the `Layer`.
+
+	Note: if the layer has been `:enter()`ed, then the current buffer's
+	      mappings will be updated.
+
+	Parameters: ~
+		{mode}     The |mode| that this mapping for.
+
+			Note: |libmodal-mode| support is coming.
+
+		{lhs}      The left hand side of the mapping.
+		{rhs}      The right hand side of the mapping.
+		{options}  Options for the mapping.
+
+	See also: ~
+		|nvim_buf_set_keymap()|  For more information about the parameters.
+
+`self`:unmap({mode}, {lhs})                         *libmodal-lua-Layer.unmap()*
+
+	Remove a mapping from the `Layer`.
+
+	Parameters: ~
+		{mode}  The |mode| that this mapping for.
+
+			Note: |libmodal-mode| support is coming.
+
+		{lhs}   The left hand side of the mapping.
+
+	See also: ~
+		|nvim_buf_del_keymap()|  For more information about the parameters.
+
+`self`:exit()                                        *libmodal-lua-Layer.exit()*
+
+	Exit the `Layer`.
+
+	See also: ~
+		|libmodal-lua-Layer.enter()|  How to enter the `Layer`.
+
+`Layer`.new()                                         *libmodal-lua-Layer.new()*
+
+	Create a new `Layer` for `mappings`.
+
+	Parameters: ~
+		{name}      The name of the `Layer`.
+		{mappings}  The list of |map|pings to replace.
+
+	Returns: ~
+		* A new `Layer`.
+
+==============================================================================
+7. `libmodal.Mode`                                           *libmodal-lua-Mode*
 
 While `libmodal.mode.enter()` may enter a mode, it silently creates a `Mode`
 underneath: >
@@ -708,7 +785,7 @@ FUNCTIONS                                        *libmodal-lua-Mode-functions*
 		                 the same.
 
 ==============================================================================
-6.1. `libmodal.Mode.Popup`                                  *libmodal-lua-Popup*
+7.1. `libmodal.Mode.Popup`                                  *libmodal-lua-Popup*
 
 When `:enter()`ing a `Mode`, an |api-floatwin| is displayed at the bottom
 right-hand corner of the screen. `libmodal.Mode.Popup` is responsible for
@@ -763,7 +840,7 @@ FUNCTIONS                                       *libmodal-lua-Popup-functions*
 		|libmodal-lua-Popup|  For the options used to spawn the window.
 
 ==============================================================================
-7. `libmodal.Prompt`                                       *libmodal-lua-Prompt*
+8. `libmodal.Prompt`                                       *libmodal-lua-Prompt*
 
 While `libmodal.prompt.enter()` may enter a |libmodal-prompt|, itilently
 creates a `Mode` underneath: >
@@ -835,7 +912,7 @@ FUNCTIONS                                      *libmodal-lua-Prompt-functions*
 		                 the same.
 
 ==============================================================================
-8. `libmodal.utils`                                         *libmodal-lua-utils*
+9. `libmodal.utils`                                         *libmodal-lua-utils*
 
 Provides extra utilities to the |libmodal| library.
 
@@ -867,7 +944,7 @@ FUNCTIONS                                       *libmodal-lua-utils-functions*
 <
 
 =============================================================================
-8.1. `libmodal.utils.api`                                     *libmodal-lua-api*
+9.1. `libmodal.utils.api`                                     *libmodal-lua-api*
 
 Provides extensions to the `vim.api` |Lua| library.
 
@@ -998,7 +1075,7 @@ FUNCTIONS                                         *libmodal-lua-api-functions*
 <
 
 ==============================================================================
-8.2. `libmodal.utils.Help`                                   *libmodal-lua-Help*
+9.2. `libmodal.utils.Help`                                   *libmodal-lua-Help*
 
 Allows for the creation of a default "Help" table.
 
@@ -1067,7 +1144,7 @@ FUNCTIONS                                        *libmodal-lua-Help-functions*
 <
 
 ==============================================================================
-8.3. `libmodal.utils.WindowState`                     *libmodal-lua-WindowState*
+9.3. `libmodal.utils.WindowState`                     *libmodal-lua-WindowState*
 
 Tracks 'winheight' and 'winwidth' when created, so that it can be modified
 freely and then restored later.
@@ -1121,16 +1198,16 @@ FUNCTIONS                                 *libmodal-lua-WindowState-functions*
 		print_height()
 <
 
-=============================================================================
-9. `libmodal.Vars`                                          *libmodal-lua-Vars*
+==============================================================================
+10. `libmodal.Vars`                                          *libmodal-lua-Vars*
 
 A `Var`'s purpose is to act as an intermediary between |global-variables| and
 the modes that use them.
 
------------------------------------------------------------------------------
-FUNCTIONS                                       *libmodal-lua-Vars.functions*
+------------------------------------------------------------------------------
+FUNCTIONS                                        *libmodal-lua-Vars.functions*
 
-`self`:name()                                        *libmodal-lua-Vars.name()*
+`self`:name()                                         *libmodal-lua-Vars.name()*
 
 	Get the name of `modeName`s global setting.
 
@@ -1148,7 +1225,7 @@ FUNCTIONS                                       *libmodal-lua-Vars.functions*
 		print(input:name()) -- 'fooModeInput'
 <
 
-`self`:nvimGet()                                  *libmodal-lua-Vars.nvimGet()*
+`self`:nvimGet()                                   *libmodal-lua-Vars.nvimGet()*
 
 	Retrieve a variable value.
 
@@ -1167,7 +1244,7 @@ FUNCTIONS                                       *libmodal-lua-Vars.functions*
 		print(input:nvimGet())
 <
 
-`self`:nvimSet({val})                             *libmodal-lua-Vars.nvimSet()*
+`self`:nvimSet({val})                              *libmodal-lua-Vars.nvimSet()*
 
 	Set a |variable| value.
 
@@ -1184,7 +1261,7 @@ FUNCTIONS                                       *libmodal-lua-Vars.functions*
 		print(input:nvimGet())
 <
 
-`Vars`.new(keyName, modeName)                         *libmodal-lua-Vars.new()*
+`Vars`.new(keyName, modeName)                          *libmodal-lua-Vars.new()*
 
 	Create a new `Var`.
 

@@ -206,10 +206,6 @@ end
 --[[ SUMMARY:
 	* Exit the layer.
 ]]
---[[
-	* This function is regenerated every time that `enter` is called,
-	  because what it must do depends on the state of Vim upon calling `enter()`.
-]]
 --------------------------
 function _metaLayer:exit()
 	for mode, mappings in pairs(self._keymap) do
