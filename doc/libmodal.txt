@@ -95,7 +95,7 @@ See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode,
 ------------------------------------------------------------------------------
 FUNCTIONS                                           *libmodal-usage-functions*
 
-                    *libmodal-mode* *libmodal#Enter()* *libmodal.mode.enter()*
+                        *libmodal-mode* *libmodal#Enter()* *libmodal.mode.enter()*
 `libmodal.mode`.enter({name}, {instruction} [, {supressExit}])
 `libmodal`#Enter({name}, {instruction} [, {supressExit}])
 
@@ -171,11 +171,34 @@ FUNCTIONS                                           *libmodal-usage-functions*
 			  desired. See |libmodal-examples-supress-exit|.
 
 	See also: ~
-		|lua-eval|                For type conversions between Vimscript to |Lua|.
+		|lua-eval|                For type conversions between Vimscript to
+		                        |Lua|.
 		|libmodal-examples-mode|  For examples of this function.
 
 
-              *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
+`libmodal.layer`.enter({name}, {keymap})                        *libmodal-layer*
+
+	While a |libmodal-mode| ignores behavior that has not been explicitly
+	defined, a |libmodal-layer| allows unrecognized input to be passed back into
+	Neovim for analysis.
+
+	So, if you have only defined a few keybindings, all of the remaining ones
+	from a user's configuration would still work— only new keymaps will be
+	overwritten.
+
+	Parameters: ~
+		{name}    p
+		{keymap}  p
+
+	Return: ~
+		* The `function` used to undo changes made by the layer.
+
+	Example: ~
+>
+		TODO.
+<
+
+                  *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
 `libmodal.prompt`.enter({name}, {instruction} [, {completions}])
 `libmodal`#Prompt({name}, {instruction} [, {completions}])
 
