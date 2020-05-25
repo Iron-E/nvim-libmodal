@@ -27,10 +27,6 @@ function! libmodal#Enter(...) abort
 	call libmodal#_lua('mode', a:000)
 endfunction
 
-function! libmodal#Layer(...) abort
-	call libmodal#_lua('layer')
-endfunction
-
 " SUMMARY:
 " * Runs the nvim-libmodal command prompt loop. The function takes an optional
 "   argument specifying how many times to run (runs until exiting by default).
