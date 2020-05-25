@@ -8,11 +8,19 @@ local classes = require('libmodal/src/classes')
 
 --[[
 	/*
+	 * MODULE
+	 */
+--]]
+
+local Help = {['TYPE'] = 'libmodal-help'}
+
+--[[
+	/*
 	 * META `Help`
 	 */
 --]]
 
-local _metaHelp = classes.new({})
+local _metaHelp = classes.new(Help.TYPE)
 
 -------------------------
 --[[ SUMMARY:
@@ -32,7 +40,6 @@ end
 	 */
 --]]
 
-local Help = {}
 
 ----------------------------------------
 --[[ SUMMARY:

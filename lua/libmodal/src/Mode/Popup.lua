@@ -13,7 +13,7 @@ local classes = require('libmodal/src/classes')
 	 */
 --]]
 
-local Popup = {}
+local Popup = {['TYPE'] = 'libmodal-popup'}
 
 local _winOpenOpts = {
 	['anchor']    = 'SW',
@@ -34,7 +34,7 @@ local _winOpenOpts = {
 	 */
 --]]
 
-local _metaPopup = classes.new({})
+local _metaPopup = classes.new(Popup.TYPE)
 
 ---------------------------
 --[[ SUMMARY:

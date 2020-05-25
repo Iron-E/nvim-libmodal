@@ -19,9 +19,10 @@ local api  = utils.api
 	 */
 --]]
 
-local Mode = {}
-
-Mode.Popup      = require('libmodal/src/Mode/Popup')
+local Mode = {
+	['Popup'] = require('libmodal/src/Mode/Popup'),
+	['TYPE']  = 'libmodal-mode'
+}
 
 local _HELP = '?'
 local _TIMEOUT = {
@@ -39,9 +40,9 @@ _TIMEOUT.NR = string.byte(_TIMEOUT.CHAR)
 	 */
 --]]
 
-local _metaMode = classes.new({})
+local _metaMode = classes.new(Mode.TYPE)
 
-local _metaInputBytes = classes.new({
+local _metaInputBytes = classes.new(nil, {
 	['clear'] = function(__self)
 		for i, _ in ipairs(__self) do
 			__self[i] = nil
@@ -64,21 +65,21 @@ function _metaMode:_checkInputForMapping()
 	inputBytes[#inputBytes + 1] = self.input:nvimGet()
 
 	-- Get the command based on the users input.
-	local cmd = self.mappings:parseGet(inputBytes)
+	local cmd = self.mappings:get(ParseTable.tableReverse(inputBytes))
 
 	-- Get the type of the command.
 	local commandType = type(cmd)
 	local clearInputBytes = false
 
 	-- if there was no matching command
-	if cmd == false then
+	if not cmd then
 		if #inputBytes < 2 and inputBytes[1] == string.byte(_HELP) then
 			self._help:show()
 		end
 		inputBytes:clear()
 	-- The command was a table, meaning that it MIGHT match.
 	elseif commandType == globals.TYPE_TBL
-	       and globals.is_true(self._timeouts.enabled)
+		and globals.is_true(self._timeouts.enabled)
 	then
 		-- Create a new timer
 

@@ -17,7 +17,8 @@ local globals = require('libmodal/src/globals')
 local _TIMEOUT_GLOBAL_NAME = 'libmodalTimeouts'
 
 local Vars = {
-	[_TIMEOUT_GLOBAL_NAME] = api.nvim_get_var(_TIMEOUT_GLOBAL_NAME)
+	[_TIMEOUT_GLOBAL_NAME] = api.nvim_get_var(_TIMEOUT_GLOBAL_NAME),
+	['TYPE'] = 'libmodal-vars'
 }
 
 --[[
@@ -26,11 +27,7 @@ local Vars = {
 	 */
 --]]
 
-local _metaVars = classes.new({})
-
--- Instances of variables pertaining to a certain mode.
-_metaVars._varName = nil
-_metaVars._modeName = nil
+local _metaVars = classes.new(Vars.TYPE)
 
 ---------------------------------
 --[[ SUMMARY:

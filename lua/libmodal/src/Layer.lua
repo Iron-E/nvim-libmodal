@@ -13,7 +13,7 @@ local classes = require('libmodal/src/classes')
 	 */
 --]]
 
-local Layer = {}
+local Layer = {['TYPE'] = 'libmodal-layer'}
 
 local _BUFFER_CURRENT = 0
 local _RESTORED       = nil
@@ -38,7 +38,7 @@ end
 	 */
 --]]
 
-local _metaLayer = classes.new({})
+local _metaLayer = classes.new(Layer.TYPE)
 
 ---------------------------
 --[[ SUMMARY:
@@ -235,7 +235,6 @@ end
 ]]
 -----------------------------------------------------
 function Layer.new(name, mappings)
-	-- TODO: support libmodal-mode and libmodal-prompt layers.
 	return setmetatable(
 		{['_keymap'] = mappings, ['name'] = name},
 		_metaLayer

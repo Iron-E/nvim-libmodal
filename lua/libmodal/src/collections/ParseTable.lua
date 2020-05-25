@@ -14,10 +14,67 @@ local globals    = require('libmodal/src/globals')
 	 */
 --]]
 
-local ParseTable = {}
+local _REGEX_ALL = '.'
 
--- The number corresponding to <CR> in vim.
-ParseTable.CR = 13
+local ParseTable = {
+	['CR']    = 13, -- The number corresponding to <CR> in vim.
+	['TYPE']  = 'libmodal-parse-table'
+}
+
+-------------------------------------------
+--[[ SUMMARY:
+	* Split some `str` over a `regex`.
+]]
+--[[ PARAMS:
+	* `str` => the string to split.
+	* `regex` => the regex to split `str` with.
+]]
+--[[ RETURNS:
+	* The split `str`.
+]]
+-------------------------------------------
+function ParseTable.stringSplit(str, regex)
+	local split = {}
+	for char in string.gmatch(str, regex) do
+		split[#split + 1] = char
+	end
+	return split
+end
+
+-------------------------------------
+--[[ SUMMARY:
+	* Reverse the elements of some table.
+]]
+--[[ PARAMS:
+	* `tbl` => the table to reverse.
+]]
+--[[ RETURNS:
+	* The reversed `tbl`.
+]]
+-------------------------------------
+function ParseTable.tableReverse(tbl)
+	local reversed = {}
+	while #reversed < #tbl do
+		-- look, no variables!
+		reversed[#reversed + 1] = tbl[#tbl - #reversed]
+	end
+	return reversed
+end
+
+------------------------------
+--[[ SUMMARY:
+	* Parse a `key`.
+]]
+--[[ PARAMS:
+	* `key` => the key to parse.
+]]
+--[[ RETURNS:
+	* The parsed `key`.
+]]
+------------------------------
+function ParseTable.parse(key)
+	return ParseTable.stringSplit(string.reverse(key), _REGEX_ALL)
+end
 
 -----------------------------------------
 --[[ SUMMARY
@@ -55,7 +112,7 @@ local function _get(parseTable, splitKey)
 			return val
 		end
 	end
-	return false
+	return nil
 end
 
 -----------------------------------------
@@ -88,47 +145,13 @@ local function _put(parseTable, splitKey, value) -- †
 	end
 end -- ‡
 
---------------------------------------
---[[ SUMMARY:
-	* Split some `str` over a `regex`.
-]]
---[[ PARAMS:
-	* `str` => the string to split.
-	* `regex` => the regex to split `str` with.
-]]
---------------------------------------
-local function _string_split(str, regex)
-	local split = {}
-	for char in string.gmatch(str, regex) do
-		split[#split + 1] = char
-	end
-	return split
-end
-
-----------------------------------
---[[ SUMMARY:
-	* Reverse the elements of some table.
-]]
---[[ PARAMS:
-	* `tbl` => the table to reverse.
-]]
-----------------------------------
-local function _table_reverse(tbl)
-	local reversed = {}
-	while #reversed < #tbl do
-		-- look, no variables!
-		reversed[#reversed + 1] = tbl[#tbl - #reversed]
-	end
-	return reversed
-end
-
 --[[
 	/*
 	 * META `ParseTable`
 	 */
 --]]
 
-local _metaParseTable = classes.new({})
+local _metaParseTable = classes.new(ParseTable.TYPE)
 
 ------------------------------------------
 --[[ SUMMARY:
@@ -137,14 +160,38 @@ local _metaParseTable = classes.new({})
 --[[ PARAMS:
 	* `key` => the PARSED key to get.
 ]]
---[[
+--[[ RETURNS:
 	* `function` => when `key` is a full match.
 	* `table`    => when the `key` partially mathes.
 	* `false`    => when `key` is not ANYWHERE.
 ]]
 ------------------------------------------
-function _metaParseTable:parseGet(keyDict)
-	return _get(self, _table_reverse(keyDict))
+function _metaParseTable:get(keyDict)
+	return _get(self, keyDict)
+end
+
+--------------------------------------
+--[[ SUMMARY:
+	* Get a value from this `ParseTable`.
+]]
+--[[ PARAMS:
+	* `key` => the key to get.
+]]
+--[[ RETURNS:
+	* `function` => when `key` is a full match.
+	* `table`    => when the `key` partially mathes.
+	* `false`    => when `key` is not ANYWHERE.
+]]
+--------------------------------------
+function _metaParseTable:parseGet(key)
+	local parsedTable = ParseTable.parse(key)
+
+	-- convert all of the strings to bytes.
+	for i, v in ipairs(parsedTable) do
+		parsedTable[i] = string.byte(v)
+	end
+
+	return _get(self, parsedTable)
 end
 
 ---------------------------------------------
@@ -157,10 +204,7 @@ end
 ]]
 ---------------------------------------------
 function _metaParseTable:parsePut(key, value)
-	_put(self,
-		_string_split(string.reverse(key), '.'),
-		value
-	)
+	_put(self, ParseTable.parse(key), value)
 end
 
 --------------------------------------------------

@@ -18,7 +18,7 @@ local api  = utils.api
 	 */
 --]]
 
-local Prompt = {}
+local Prompt = {['TYPE'] = 'libmodal-prompt'}
 
 local _HELP = 'help'
 local _REPLACEMENTS = {
@@ -36,7 +36,7 @@ end
 	 */
 --]]
 
-local _metaPrompt = classes.new({})
+local _metaPrompt = classes.new(Prompt.TYPE)
 
 ---------------------------------
 --[[ SUMMARY:

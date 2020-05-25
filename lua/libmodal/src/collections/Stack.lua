@@ -12,7 +12,7 @@ local classes = require('libmodal/src/classes')
 	 */
 --]]
 
-local Stack = {}
+local Stack = {['TYPE'] = 'libmodal-stack'}
 
 --[[
 	/*
@@ -20,7 +20,7 @@ local Stack = {}
 	 */
 --]]
 
-local _metaStack = classes.new({})
+local _metaStack = classes.new(Stack.TYPE)
 
 _metaStack._len = 0
 _metaStack._top = nil
