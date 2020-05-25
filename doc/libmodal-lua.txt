@@ -126,7 +126,7 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 
 		|libmodal-mode|       For information about {userTable}.
 
-`self`:parseGet({keyDict})                  *libmodal-lua-ParseTable.parseGet()*
+`self`:get({keyDict})                            *libmodal-lua-ParseTable.get()*
 
 	Get a value from an instance of `ParseTable`.
 
@@ -136,7 +136,7 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 	Return: ~
 		A `function`  {keyDict} is a full match.
 		A `table`     the {keyDict} partially matches.
-		* `false`     {keyDict} is not ANYWHERE.
+		* `nil`       {keyDict} is not ANYWHERE.
 
 	Example: ~
 >
@@ -153,7 +153,7 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 		print(vim.inspect(parseTable))
 
 		-- this will return a `table`
-		local tbl = parseTable:parseGet(userInput)
+		local tbl = parseTable:get(userInput)
 		-- Inspect it to show the difference.
 		print(vim.inspect(tbl))
 <
