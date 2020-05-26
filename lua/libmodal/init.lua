@@ -12,8 +12,8 @@ local libmodal = require('libmodal/src')
 	 */
 --]]
 
-libmodal.layer = {['enter'] = function(name, mappings)
-	local layer = libmodal.Layer.new(name, mappings)
+libmodal.layer = {['enter'] = function(keymap)
+	local layer = libmodal.Layer.new(keymap)
 	layer:enter()
 	return function() layer:exit() end
 end}

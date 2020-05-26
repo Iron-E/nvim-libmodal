@@ -1,7 +1,7 @@
 local libmodal = require('libmodal')
 
 -- create a new layer.
-local exitFunc = libmodal.layer.enter('FOO', {
+local exitFunc = libmodal.layer.enter({
 	['n'] = { -- normal mode mappings
 		['gg'] = { -- remap `gg`
 			['rhs'] = 'G', -- map it to `G`

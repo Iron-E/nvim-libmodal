@@ -176,7 +176,7 @@ FUNCTIONS                                           *libmodal-usage-functions*
 		|libmodal-examples-mode|  For examples of this function.
 
 
-`libmodal.layer`.enter({name}, {keymap}) *libmodal-layer* *libmodal.layer.enter()*
+`libmodal.layer`.enter({keymap})         *libmodal-layer* *libmodal.layer.enter()*
 
 	While a |libmodal-mode| ignores behavior that has not been explicitly
 	defined, a |libmodal-layer| allows unrecognized |input| to be passed back
@@ -187,14 +187,27 @@ FUNCTIONS                                           *libmodal-usage-functions*
 	overwritten.
 
 	Parameters: ~
-		{name}    The name of the layer.
-		{keymap}  The keymap for the layer.
+		{keymap}  The keymap for the layer. General template is this: >
+			{
+				[<mode>] = {
+					[<lhs>] = {
+						['rhs'] = <rhs>,
+						<opts>
+					},
+					…
+				},
+				…
+			}
+<			Where {mode}, {lhs}, {rhs}, and {opts} are the same as in
+			|nvim_set_keymap()|
+
 
 	Return: ~
 		* The `function` used to undo changes made by the layer.
 
 	See also: ~
 		|libmodal-examples-layers|  For an example.
+		|nvim_set_keymap()|         For more information about {keymap}.
 
                   *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
 `libmodal.prompt`.enter({name}, {instruction} [, {completions}])
@@ -437,23 +450,19 @@ LAYERS                                              *libmodal-examples-layers*
 >
 	local libmodal = require('libmodal')
 
-	-- create the keymap
-	-- `gg` and `G` will be switched.
-	local layerKeymap = {
-		['n'] = {
-			['gg'] = {
-				['rhs'] = 'G',
-				['noremap'] = true
+	-- save the exit function
+	local exitFunc = libmodal.layer.enter({
+		['n'] = { -- normal mode
+			['gg'] = { -- remap `gg`
+				['rhs'] = 'G', -- map it to `G`
+				['noremap'] = true -- don't remap
 			},
-			['G'] = {
-				['rhs'] = 'gg',
-				['noremap'] = true
+			['G'] = { -- remap `G`
+				['rhs'] = 'gg', -- map it to `gg`
+				['noremap'] = true -- don't remap
 			}
 		}
-	}
-
-	-- save the exit function
-	local exitFunc = libmodal.layer.exit()
+	})
 
 	-- exit the mode in five seconds
 	vim.loop.new_timer():start(5000, 0,

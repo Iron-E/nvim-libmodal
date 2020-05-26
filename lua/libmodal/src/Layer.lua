@@ -48,7 +48,7 @@ local _metaLayer = require('libmodal/src/classes').new(Layer.TYPE)
 ---------------------------
 function _metaLayer:enter()
 	if self._priorKeymap then
-		error('This layer has already been entered.')
+		error('This layer has already been entered. `:exit()` before entering again.')
 	end
 
 	-- add local aliases.
@@ -227,19 +227,18 @@ end
 
 -----------------------------------------------------
 --[[ SUMMARY:
-	* Create a new `Layer` for `commands`, `mappings`, and `options`.
+	* Create a new `Layer` for the buffer-local keymap.
 ]]
 --[[ PARAMS:
-	* `name` => the name of the layer.
 	* `mappings` => the list of user mappings to replace.
 ]]
 --[[ RETURNS:
 	* A new `Layer`.
 ]]
 -----------------------------------------------------
-function Layer.new(name, mappings)
+function Layer.new(keymap)
 	return setmetatable(
-		{['_keymap'] = mappings, ['name'] = name},
+		{['_keymap'] = keymap},
 		_metaLayer
 	)
 end

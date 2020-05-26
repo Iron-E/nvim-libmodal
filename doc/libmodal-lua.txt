@@ -780,7 +780,7 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 	Example: ~
 >
 		local libmodal = require('libmodal')
-		local layer = libmodal.Layer.new('FOO', {
+		local layer = libmodal.Layer.new({
 			['n'] = {
 				['gg'] = {
 					['rhs'] = G
@@ -814,7 +814,7 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 	Example: ~
 >
 		local libmodal = require('libmodal')
-		local layer = libmodal.Layer.new('FOO', {
+		local layer = libmodal.Layer.new({
 			['n'] = {
 				['gg'] = {
 					['rhs'] = G
@@ -850,7 +850,7 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 	Example: ~
 >
 		local libmodal = require('libmodal')
-		local layer = libmodal.Layer.new('FOO', {
+		local layer = libmodal.Layer.new({
 			['n'] = {
 				['gg'] = {
 					['rhs'] = G
@@ -888,7 +888,7 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 	Example: ~
 >
 		local libmodal = require('libmodal')
-		local layer = libmodal.Layer.new('FOO', {
+		local layer = libmodal.Layer.new({
 			['n'] = {
 				['gg'] = {
 					['rhs'] = G
@@ -910,29 +910,18 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 	See also: ~
 		|libmodal-lua-Layer.enter()|  How to enter the `Layer`.
 
-`Layer`.new()                                         *libmodal-lua-Layer.new()*
+`Layer`.new({keymap})                                 *libmodal-lua-Layer.new()*
 
 	Create a new `Layer` for `mappings`.
 
 	Parameters: ~
-		{name}      The name of the `Layer`.
-		{mappings}  The list of |map|pings to replace.
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-		local layer = libmodal.Layer.new('FOO', {
-			['n'] = {
-				['gg'] = {
-					['rhs'] = G
-				}
-			}
-		})
-
+		{keymap}  The list of |map|pings to replace.
 
 	Returns: ~
 		* A new `Layer`.
-<
+
+	See also: ~
+		|libmodal-layer|  For more information about the parameters.
 
 ==============================================================================
 7. `libmodal.Mode`                                           *libmodal-lua-Mode*

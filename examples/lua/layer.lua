@@ -1,7 +1,7 @@
 local libmodal = require('libmodal')
 
 -- create a new layer.
-local layer = libmodal.Layer.new('FOO', {
+local layer = libmodal.Layer.new({
 	['n'] = { -- normal mode mappings
 		['gg'] = { -- remap `gg`
 			['rhs'] = 'G', -- map it to `G`
