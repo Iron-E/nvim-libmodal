@@ -972,6 +972,26 @@ VARIABLES                                       *libmodal-lua-Popup-variables*
 	}
 <
 
+`self`.buffer                                        *libmodal-lua-Popup.buffer*
+
+	The scratch buffer used by `Popup` to display text.
+
+	Type: ~
+		|nvim_create_buf| handle.
+
+	Value: ~
+		`vim.api.nvim_create_buf(false, true)`
+
+`self`.window                                        *libmodal-lua-Popup.window*
+
+	The window used to display the contents of `Popup.buffer`.
+
+	Type: ~
+		|nvim_open_win| handle.
+
+	Value: ~
+		`vim.api.nvim_open_win(self.buffer, false, Popup.config)`
+
 ------------------------------------------------------------------------------
 FUNCTIONS                                       *libmodal-lua-Popup-functions*
 

@@ -4,7 +4,7 @@
 	 */
 --]]
 
-local api = vim.api
+local api  = require('libmodal/src/utils/api')
 
 --[[
 	/*
@@ -15,8 +15,8 @@ local api = vim.api
 local Layer = {['TYPE'] = 'libmodal-layer'}
 
 local _BUFFER_CURRENT = 0
+local _ERR_NO_MAP     = 'E5555: API call: E31: No such mapping'
 local _RESTORED       = nil
-local _ERR_NO_MAP = 'E5555: API call: E31: No such mapping'
 
 local function convertKeymap(keymapEntry)
 	local lhs = keymapEntry.lhs
@@ -82,11 +82,6 @@ function _metaLayer:enter()
 	end
 
 	self._priorKeymap = priorKeymap
-
-	local Popup = require('libmodal/src/collections/Popup')
-	-- TODO: configure `Popup.options` and add the text.
-
-	self._popup = Popup.new()
 end
 
 --------------------------------------------------------
@@ -222,9 +217,6 @@ function _metaLayer:exit()
 		end
 	end
 	self._priorKeymap = _RESTORED
-
-	self._popup:close()
-	self._popup = nil
 end
 
 --[[
