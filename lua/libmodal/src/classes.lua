@@ -1,3 +1,9 @@
+--[[
+	/*
+	 * MODULE
+	 */
+--]]
+
 local classes = {}
 
 --------------------------
@@ -28,5 +34,11 @@ end
 function classes.type(v)
 	return v.__type or type(v)
 end
+
+--[[
+	/*
+	 * PUBLICIZE `classes`
+	 */
+--]]
 
 return classes

@@ -4,8 +4,6 @@
 	 */
 --]]
 
-local api        = vim.api
-local classes    = require('libmodal/src/classes')
 local globals    = require('libmodal/src/globals')
 
 --[[
@@ -151,7 +149,7 @@ end -- ‡
 	 */
 --]]
 
-local _metaParseTable = classes.new(ParseTable.TYPE)
+local _metaParseTable = require('libmodal/src/classes').new(ParseTable.TYPE)
 
 ------------------------------------------
 --[[ SUMMARY:

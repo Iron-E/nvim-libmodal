@@ -1,15 +1,5 @@
 --[[
 	/*
-	 * IMPORTS
-	 */
---]]
-
-local classes = require('libmodal/src/classes')
-local globals = require('libmodal/src/globals')
-local Mode    = require('libmodal/src/Mode')
-
---[[
-	/*
 	 * MODULE
 	 */
 --]]
@@ -22,7 +12,7 @@ local ModeLayer = {['TYPE'] = 'libmodal-mode-layer'}
 	 */
 --]]
 
-local _metaModeLayer = classes.new(ModeLayer.TYPE)
+local _metaModeLayer = require('libmodal/src/classes').new(ModeLayer.TYPE)
 
 -------------------------------
 --[[ SUMMARY:
@@ -84,12 +74,12 @@ end
 ]]
 -----------------------------------------
 function ModeLayer.new(mode, instruction)
-	if classes.type(mode) == Mode.TYPE
+	if require('libmodal/src/classes').type(mode) == require('libmodal/src/Mode').TYPE
 		and type(mode._instruction) == type(instruction)
 	then
 		return setmetatable(
 			{
-				['_isTable'] = type(instruction) == globals.TYPE_TBL,
+				['_isTable'] = type(instruction) == require('libmodal/src/globals').TYPE_TBL,
 				['_instruction'] = instruction,
 				['_mode']        = mode
 			}, _metaModeLayer

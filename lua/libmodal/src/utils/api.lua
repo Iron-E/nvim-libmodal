@@ -1,14 +1,5 @@
 --[[
 	/*
-	 * IMPORTS
-	 */
---]]
-
-local globals = require('libmodal/src/globals')
-local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
-
---[[
-	/*
 	 * MODULE
 	 */
 --]]
@@ -34,7 +25,7 @@ end
 ]]
 ------------------------------------
 function api.nvim_exists(scope, var)
-	return api.nvim_call_function('exists', {scope .. ':' .. var}) == globals.VIM_TRUE
+	return api.nvim_call_function('exists', {scope .. ':' .. var}) == require('libmodal/src/globals').VIM_TRUE
 end
 
 -------------------------
@@ -114,6 +105,7 @@ end
 --------------------------------------
 -- local returnHighlightSegment = HighlightSegment.new('Question', '\nPress any key to return.')
 function api.nvim_show_err(title, msg)
+	local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
 	api.nvim_lecho({
 		HighlightSegment.new('Title', tostring(title) .. '\n'),
 		HighlightSegment.new('Error', tostring(msg)),

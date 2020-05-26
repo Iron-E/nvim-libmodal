@@ -1,13 +1,5 @@
 --[[
 	/*
-	 * IMPORTS
-	 */
---]]
-
-local classes = require('libmodal/src/classes')
-
---[[
-	/*
 	 * MODULE
 	 */
 --]]
@@ -20,7 +12,7 @@ local Help = {['TYPE'] = 'libmodal-help'}
 	 */
 --]]
 
-local _metaHelp = classes.new(Help.TYPE)
+local _metaHelp = require('libmodal/src/classes').new(Help.TYPE)
 
 -------------------------
 --[[ SUMMARY:

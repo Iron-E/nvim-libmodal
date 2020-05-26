@@ -4,11 +4,8 @@
 	 */
 --]]
 
-local classes   = require('libmodal/src/classes')
 local globals   = require('libmodal/src/globals')
-local Indicator = require('libmodal/src/Indicator')
 local utils     = require('libmodal/src/utils')
-local Vars      = require('libmodal/src/Vars')
 
 local api  = utils.api
 
@@ -36,7 +33,7 @@ end
 	 */
 --]]
 
-local _metaPrompt = classes.new(Prompt.TYPE)
+local _metaPrompt = require('libmodal/src/classes').new(Prompt.TYPE)
 
 ---------------------------------
 --[[ SUMMARY:
@@ -178,8 +175,8 @@ end
 function Prompt.new(name, instruction, ...)
 	local self = setmetatable(
 		{
-			['indicator']   = Indicator.prompt(name),
-			['input']       = Vars.new('input', name),
+			['indicator']    = require('libmodal/src/Indicator').prompt(name),
+			['input']        = require('libmodal/src/Vars').new('input', name),
 			['_instruction'] = instruction,
 			['_name']        = name
 		},

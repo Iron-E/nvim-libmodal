@@ -1,14 +1,5 @@
 --[[
 	/*
-	 * IMPORTS
-	 */
---]]
-
-local api = vim.api
-local globals = require('libmodal/src/globals')
-
---[[
-	/*
 	 * MODULE
 	 */
 --]]
@@ -35,7 +26,7 @@ utils.WindowState = require('libmodal/src/utils/WindowState')
 function utils.show_error(pcall_err)
 	utils.api.nvim_bell()
 	utils.api.nvim_show_err(
-		globals.DEFAULT_ERROR_TITLE,
+		require('libmodal/src/globals').DEFAULT_ERROR_TITLE,
 		api.nvim_get_vvar('throwpoint')
 		.. '\n' ..
 		api.nvim_get_vvar('exception')

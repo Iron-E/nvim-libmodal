@@ -6,7 +6,6 @@
 
 local classes     = require('libmodal/src/classes')
 local globals     = require('libmodal/src/globals')
-local Indicator   = require('libmodal/src/Indicator')
 local collections = require('libmodal/src/collections')
 local utils       = require('libmodal/src/utils')
 local Vars        = require('libmodal/src/Vars')
@@ -49,6 +48,8 @@ local _metaInputBytes = classes.new(nil, {
 		end
 	end
 })
+
+classes = nil
 
 -----------------------------------------------
 --[[ SUMMARY:
@@ -253,7 +254,7 @@ function Mode.new(name, instruction, ...)
 	local self = setmetatable(
 		{
 			['exit']         = Vars.new('exit', name),
-			['indicator']    = Indicator.mode(name),
+			['indicator']    = require('libmodal/src/Indicator').mode(name),
 			['input']        = Vars.new('input', name),
 			['_instruction'] = instruction,
 			['_name']        = name,

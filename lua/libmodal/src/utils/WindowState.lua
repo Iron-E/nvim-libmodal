@@ -4,9 +4,7 @@
 	 */
 --]]
 
-local api     = require('libmodal/src/utils/api')
-local classes = require('libmodal/src/classes')
-local globals = require('libmodal/src/globals')
+local api = require('libmodal/src/utils/api')
 
 --[[
 	/*
@@ -25,7 +23,7 @@ local width = 'winwidth'
 	 */
 --]]
 
-local _metaWindowState = classes.new(WindowState.TYPE)
+local _metaWindowState = require('libmodal/src/classes').new(WindowState.TYPE)
 
 -----------------------------------
 --[[ SUMMARY

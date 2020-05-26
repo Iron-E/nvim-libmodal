@@ -1,13 +1,5 @@
 --[[
 	/*
-	 * IMPORTS
-	 */
---]]
-
-local classes = require('libmodal/src/classes')
-
---[[
-	/*
 	 * MODULE `Stack`
 	 */
 --]]
@@ -20,10 +12,9 @@ local Stack = {['TYPE'] = 'libmodal-stack'}
 	 */
 --]]
 
-local _metaStack = classes.new(Stack.TYPE)
+local _metaStack = require('libmodal/src/classes').new(Stack.TYPE)
 
 _metaStack._len = 0
-_metaStack._top = nil
 
 --------------------------------
 --[[ SUMMARY:

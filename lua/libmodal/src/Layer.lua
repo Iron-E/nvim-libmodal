@@ -4,8 +4,7 @@
 	 */
 --]]
 
-local api     = vim.api
-local classes = require('libmodal/src/classes')
+local api = vim.api
 
 --[[
 	/*
@@ -38,7 +37,7 @@ end
 	 */
 --]]
 
-local _metaLayer = classes.new(Layer.TYPE)
+local _metaLayer = require('libmodal/src/classes').new(Layer.TYPE)
 
 ---------------------------
 --[[ SUMMARY:

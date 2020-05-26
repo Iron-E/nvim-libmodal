@@ -4,9 +4,7 @@
 	 */
 --]]
 
-local api     = vim.api
-local classes = require('libmodal/src/classes')
-local globals = require('libmodal/src/globals')
+local api = vim.api
 
 --[[
 	/*
@@ -27,7 +25,7 @@ local Vars = {
 	 */
 --]]
 
-local _metaVars = classes.new(Vars.TYPE)
+local _metaVars = require('libmodal/src/classes').new(Vars.TYPE)
 
 ---------------------------------
 --[[ SUMMARY:
