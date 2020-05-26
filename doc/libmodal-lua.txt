@@ -707,10 +707,10 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 		layer:enter()
 
 		-- Start a timer for five seconds.
-		vim.loop.new_timer():start(5000, 0, vim.schedule_wrap(
+		vim.loop.new_timer():start(5000, 0,
 			-- Exit the layer. `gg` should return to normal.
-			function() layer:exit() end
-		))
+			vim.schedule_wrap(layer:exit())
+		)
 
 <
 

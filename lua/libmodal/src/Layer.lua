@@ -16,6 +16,7 @@ local Layer = {['TYPE'] = 'libmodal-layer'}
 
 local _BUFFER_CURRENT = 0
 local _RESTORED       = nil
+local _ERR_NO_MAP = 'E5555: API call: E31: No such mapping'
 
 local function convertKeymap(keymapEntry)
 	local lhs = keymapEntry.lhs
@@ -76,7 +77,6 @@ function _metaLayer:enter()
 		end
 	end
 
-	print(vim.inspect(priorKeymap))
 	self._priorKeymap = priorKeymap
 end
 
@@ -139,7 +139,6 @@ function _metaLayer:map(mode, lhs, rhs, options)
 	self._keymap[mode][lhs] = vim.tbl_extend('force',
 		options, {['rhs'] = rhs}
 	)
-	print(vim.inspect(self._priorKeymap))
 end
 
 ----------------------------------------------
@@ -155,8 +154,6 @@ function _metaLayer:_unmapFromBuffer(mode, lhs)
 	local priorKeymap  = self._priorKeymap
 	local priorMapping = self._priorKeymap[mode][lhs]
 
-	print('unmapping ' .. mode .. ':' .. lhs)
-
 	if not priorKeymap then error(
 		"You can't undo a map from a buffer without activating the layer first."
 	) end
@@ -168,14 +165,13 @@ function _metaLayer:_unmapFromBuffer(mode, lhs)
 
 		-- set the prior mapping as restored.
 		priorKeymap[mode][lhs] = _RESTORED
-
-		print('reverted mapping')
 	else
 		-- just delete the buffer mapping.
 		local noErrors, err = pcall(api.nvim_buf_del_keymap, _BUFFER_CURRENT, mode, lhs)
 
-		if not noErrors then print(err) end
-		print('deleted mapping')
+		if not noErrors and err ~= _ERR_NO_MAP then
+			print(err)
+		end
 	end
 end
 

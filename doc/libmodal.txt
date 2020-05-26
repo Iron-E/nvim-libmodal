@@ -456,9 +456,9 @@ LAYERS                                              *libmodal-examples-layers*
 	local exitFunc = libmodal.layer.exit()
 
 	-- exit the mode in five seconds
-	vim.loop.new_timer():start(5000, 0, vim.schedule_wrap(
-		function() exitFunc() end
-	))
+	vim.loop.new_timer():start(5000, 0,
+		vim.schedule_wrap(exitFunc)
+	)
 <
 ------------------------------------------------------------------------------
 PROMPTS                                            *libmodal-examples-prompts*

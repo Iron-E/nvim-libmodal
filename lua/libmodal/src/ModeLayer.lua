@@ -14,6 +14,40 @@ local ModeLayer = {['TYPE'] = 'libmodal-mode-layer'}
 
 local _metaModeLayer = require('libmodal/src/classes').new(ModeLayer.TYPE)
 
+function _metaModeLayer:map(keys, mapping)
+	local priorInstruction = self._priorInstruction
+	local layerInstruction = self._instruction
+
+	if priorInstruction then
+		local modeInstruction = self._mode._instruction
+
+		-- only save the value from `mode` when adding a new mapping.
+		if not layerInstruction[keys] then
+			priorInstruction[keys] = modeInstruction:parseGet(keys)
+		end
+
+		-- map the keys to mode.
+		modeInstruction:parsePut(keys, mapping)
+	end
+
+	-- add the keys to the instruction.
+	layerInstruction[keys] = mapping
+end
+
+function _metaModeLayer:unmap(keys)
+	local priorInstruction = self._priorInstruction or {}
+	local layerInstruction = self._instruction
+
+	if priorInstruction[keys] then
+		self._mode._instruction:parsePut(keys, priorInstruction[keys])
+		priorInstruction[keys] = nil
+	end
+
+	-- remove `keys` from the instruction.
+	layerInstruction[keys] = nil
+end
+
+
 -------------------------------
 --[[ SUMMARY:
 	* Enter the `ModeLayer`, replacing any conflicting mappings.
