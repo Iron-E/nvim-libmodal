@@ -10,9 +10,7 @@ local ParseTable = require('libmodal/src/collections/ParseTable')
 local utils      = require('libmodal/src/utils')
 local Vars       = require('libmodal/src/Vars')
 
-local api        = utils.api
-
-local collections = nil
+local api = utils.api
 
 --[[
 	/*
@@ -65,7 +63,7 @@ function _metaMode:_checkInputForMapping()
 	inputBytes[#inputBytes + 1] = self.input:nvimGet()
 
 	-- Get the command based on the users input.
-	local cmd = self.mappings:get(ParseTable.tableReverse(inputBytes))
+	local cmd = self.mappings:get(inputBytes)
 
 	-- Get the type of the command.
 	local commandType = type(cmd)

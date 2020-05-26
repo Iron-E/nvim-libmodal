@@ -714,6 +714,23 @@ When submitting an issue, please describe the following:
 		* New class `libmodal.Layer`.
 		* New function `libmodal.layer.enter()`.
 	* New examples for new additions.
+	* `libmodal.collections.ParseTable`:
+		* Added new `:parseGet()` method to replace the `:get()`
+		  implementation.
+		*
+	* Added new `libmodal.collections.ParseTable.parse()` method.
+		* You can override it to change how the `ParseTable` parses its keys.
+	* Added `ParseTable.stringSplit()`.
+
+	Breaking Changes: ~
+	* Moved `libmodal.Mode.Popup` to `libmodal.collections.Popup`.
+	* Changed `libmodal.collections.ParseTable.parseGet()` back to
+	  `libmodal.collections.ParseTable.get()`.
+	  * `:get()` requires that keys have been parsed according to
+	    `.parse()`.
+
+	Changes: ~
+	* Exposed more functionality of `libmodal.collections.Popup`.
 
 0.5.0 ~
 

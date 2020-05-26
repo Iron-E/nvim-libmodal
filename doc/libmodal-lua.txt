@@ -17,13 +17,13 @@ See: |libmodal-usage|, |lua|, |lua-require-example|.
  2.   `libmodal.classes` ..................... |libmodal-lua-classes|
  3.   `libmodal.collections` ................. |libmodal-lua-collections|
  3.1. `libmodal.collections.ParseTable` ...... |libmodal-lua-ParseTable|
- 3.2. `libmodal.collections.Stack` ........... |libmodal-lua-Stack|
+ 3.2. `libmodal.collections.Popup` ........... |libmodal-lua-Popup|
+ 3.3. `libmodal.collections.Stack` ........... |libmodal-lua-Stack|
  4.   `libmodal.globals` ..................... |libmodal-lua-globals|
  5.   `libmodal.Indicator` ................... |libmodal-lua-Indicator|
  5.1. `libmodal.Indicator.HighlightSegment` .. |libmodal-lua-HighlightSegment|
  6.   `libmodal.Layer` ....................... |libmodal-lua-Layer|
- 6.   `libmodal.Mode` ........................ |libmodal-lua-Mode|
- 7.1. `libmodal.Mode.Popup` .................. |libmodal-lua-Popup|
+ 7.   `libmodal.Mode` ........................ |libmodal-lua-Mode|
  8.   `libmodal.Prompt` ...................... |libmodal-lua-Prompt|
  9.   `libmodal.utils` ....................... |libmodal-lua-utils|
  9.1. `libmodal.utils.api` ................... |libmodal-lua-api|
@@ -129,6 +129,51 @@ functions                                  *libmodal-lua-ParseTable-functions*
 
 ------------------------------------------------------------------------------
 FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
+
+`ParseTable`.stringSplit({str}, {regex}) *libmodal-lua-ParseTable.stringSplit()*
+
+	Split some {str} into a `table` with a {regex} expression.
+
+	Parameters: ~
+		{str}    The `string` to split.
+		{regex}  The regex expression to split {str} with.
+
+	Return: ~
+		* The split {str} as a `table`.
+
+	Example: ~
+>
+		local ParseTable = require('libmodal').collections.ParseTable
+
+		print(vim.inspect(ParseTable.stringSplit('testing split', ' ')))
+<
+
+`ParseTable`.parse({key})                      *libmodal-lua-ParseTable.parse()*
+
+	Parse some {key} so that it can be stored by a `ParseTable` instance.
+
+	Note: this method can be locally overridden in order to change the
+	      `ParseTable`'s behavior. Example:
+>
+		local ParseTable = require('libmodal').collections.ParseTable
+
+		ParseTable.parse = function(key)
+			return ParseTable.splitString(key, ' ')
+		end
+<
+
+	Parameters: ~
+		{key}  The key of the `table` to parse.
+
+	Return: ~
+		* The parsed {key}. Should be a `table`.
+
+	Example: ~
+>
+		local ParseTable = require('libmodal').collections.ParseTable
+
+		print(vim.inspect(ParseTable.parse('testkey')))
+<
 
 `ParseTable`.new({userTable})                    *libmodal-lua-ParseTable.new()*
 
@@ -258,7 +303,111 @@ FUNCTIONS                                  *libmodal-lua-ParseTable-functions*
 		                                    {tableToUnite}.
 
 ==============================================================================
-3.2. `libmodal.collections.Stack`                           *libmodal-lua-Stack*
+3.2. `libmodal.collections.Popup`                           *libmodal-lua-Popup*
+
+When `:enter()`ing a `Mode`, an |api-floatwin| is displayed at the bottom
+right-hand corner of the screen. `libmodal.Mode.Popup` is responsible for
+opening it and keeping updated.
+
+Whenever a `Popup` is created, it is immediately opened. Additionally, it is
+opened with the following options: >
+	local _winOpenOpts = {
+		['anchor']    = 'SW',
+		['col']       = api.nvim_get_option('columns') - 1,
+		['focusable'] = false,
+		['height']    = 1,
+		['relative']  = 'editor',
+		['row']       = api.nvim_get_option('lines')
+		                - api.nvim_get_option('cmdheight')
+		                - 1,
+		['style']     = 'minimal',
+		['width']     = 25,
+	}
+<
+
+------------------------------------------------------------------------------
+VARIABLES                                       *libmodal-lua-Popup-variables*
+
+`Popup`.config                                   *libmodal-lua-Popup.apiOptions*
+
+	The options used when opening a `Popup`.
+
+	Note: this can be overwritten to change the default behavior of `Popup`.
+
+	Type: ~
+		|nvim_open_win| {config} `table`.
+
+	Value: ~
+>
+	{
+		['anchor']    = 'SW',
+		['col']       = api.nvim_get_option('columns') - 1,
+		['focusable'] = false,
+		['height']    = 1,
+		['relative']  = 'editor',
+		['row']       = api.nvim_get_option('lines')
+		                - api.nvim_get_option('cmdheight')
+		                - 1,
+		['style']     = 'minimal',
+		['width']     = 25
+	}
+<
+
+`self`.buffer                                        *libmodal-lua-Popup.buffer*
+
+	The scratch buffer used by `Popup` to display text.
+
+	Type: ~
+		|nvim_create_buf| handle.
+
+	Value: ~
+		`vim.api.nvim_create_buf(false, true)`
+
+`self`.window                                        *libmodal-lua-Popup.window*
+
+	The window used to display the contents of `Popup.buffer`.
+
+	Type: ~
+		|nvim_open_win| handle.
+
+	Value: ~
+		`vim.api.nvim_open_win(self.buffer, false, Popup.config)`
+
+------------------------------------------------------------------------------
+FUNCTIONS                                       *libmodal-lua-Popup-functions*
+
+`self`:close()                                      *libmodal-lua-Popup.close()*
+
+	Close the window that this `Popup` represents.
+
+	Note: All variables of `Popup` are de-initialized after this method.
+
+`self`:refresh({inputBytes})                      *libmodal-lua-Popup.refresh()*
+
+	Update the content of the `Popup` using an array-like `table` of
+	|char2nr|s.
+
+	Note: This is normally used to add what the user is typing. If you have a
+	      `function` `Mode` {instruction}, then you can use `Popup` and this
+		  function to manually show user input as it is typed.
+
+	Parameters: ~
+		{inputBytes}  An array-like `table` of |char2nr|s to write to the
+		              `Popup`.
+
+`Popup`.new()                                         *libmodal-lua-Popup.new()*
+
+	Create a new `Popup` and immediately open it.
+
+	Return: ~
+		* A new `Popup`.
+
+	See also: ~
+		|libmodal-lua-Popup|  For the options used to spawn the window.
+
+
+==============================================================================
+4.2. `libmodal.collections.Stack`                           *libmodal-lua-Stack*
 
 The `libmodal.collections.Stack` is a simple implementation of a Stack data
 structure. It is designed with reuse of resources in mind, as
@@ -920,109 +1069,6 @@ FUNCTIONS                                        *libmodal-lua-Mode-functions*
 	See also: ~
 		|libmodal-mode|  For more information, as all of the parameters are
 		                 the same.
-
-==============================================================================
-7.1. `libmodal.Mode.Popup`                                  *libmodal-lua-Popup*
-
-When `:enter()`ing a `Mode`, an |api-floatwin| is displayed at the bottom
-right-hand corner of the screen. `libmodal.Mode.Popup` is responsible for
-opening it and keeping updated.
-
-Whenever a `Popup` is created, it is immediately opened. Additionally, it is
-opened with the following options: >
-	local _winOpenOpts = {
-		['anchor']    = 'SW',
-		['col']       = api.nvim_get_option('columns') - 1,
-		['focusable'] = false,
-		['height']    = 1,
-		['relative']  = 'editor',
-		['row']       = api.nvim_get_option('lines')
-		                - api.nvim_get_option('cmdheight')
-		                - 1,
-		['style']     = 'minimal',
-		['width']     = 25,
-	}
-<
-
-------------------------------------------------------------------------------
-VARIABLES                                       *libmodal-lua-Popup-variables*
-
-`Popup`.config                                   *libmodal-lua-Popup.apiOptions*
-
-	The options used when opening a `Popup`.
-
-	Note: this can be overwritten to change the default behavior of `Popup`.
-
-	Type: ~
-		|nvim_open_win| {config} `table`.
-
-	Value: ~
->
-	{
-		['anchor']    = 'SW',
-		['col']       = api.nvim_get_option('columns') - 1,
-		['focusable'] = false,
-		['height']    = 1,
-		['relative']  = 'editor',
-		['row']       = api.nvim_get_option('lines')
-		                - api.nvim_get_option('cmdheight')
-		                - 1,
-		['style']     = 'minimal',
-		['width']     = 25
-	}
-<
-
-`self`.buffer                                        *libmodal-lua-Popup.buffer*
-
-	The scratch buffer used by `Popup` to display text.
-
-	Type: ~
-		|nvim_create_buf| handle.
-
-	Value: ~
-		`vim.api.nvim_create_buf(false, true)`
-
-`self`.window                                        *libmodal-lua-Popup.window*
-
-	The window used to display the contents of `Popup.buffer`.
-
-	Type: ~
-		|nvim_open_win| handle.
-
-	Value: ~
-		`vim.api.nvim_open_win(self.buffer, false, Popup.config)`
-
-------------------------------------------------------------------------------
-FUNCTIONS                                       *libmodal-lua-Popup-functions*
-
-`self`:close()                                      *libmodal-lua-Popup.close()*
-
-	Close the window that this `Popup` represents.
-
-	Note: All variables of `Popup` are de-initialized after this method.
-
-`self`:refresh({inputBytes})                      *libmodal-lua-Popup.refresh()*
-
-	Update the content of the `Popup` using an array-like `table` of
-	|char2nr|s.
-
-	Note: This is normally used to add what the user is typing. If you have a
-	      `function` `Mode` {instruction}, then you can use `Popup` and this
-		  function to manually show user input as it is typed.
-
-	Parameters: ~
-		{inputBytes}  An array-like `table` of |char2nr|s to write to the
-		              `Popup`.
-
-`Popup`.new()                                         *libmodal-lua-Popup.new()*
-
-	Create a new `Popup` and immediately open it.
-
-	Return: ~
-		* A new `Popup`.
-
-	See also: ~
-		|libmodal-lua-Popup|  For the options used to spawn the window.
 
 ==============================================================================
 8. `libmodal.Prompt`                                       *libmodal-lua-Prompt*
