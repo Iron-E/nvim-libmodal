@@ -82,6 +82,11 @@ function _metaLayer:enter()
 	end
 
 	self._priorKeymap = priorKeymap
+
+	local Popup = require('libmodal/src/collections/Popup')
+	-- TODO: configure `Popup.options` and add the text.
+
+	self._popup = Popup.new()
 end
 
 --------------------------------------------------------
@@ -217,6 +222,9 @@ function _metaLayer:exit()
 		end
 	end
 	self._priorKeymap = _RESTORED
+
+	self._popup:close()
+	self._popup = nil
 end
 
 --[[
