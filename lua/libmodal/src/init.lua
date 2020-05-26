@@ -1,24 +1,10 @@
---[[
-	/*
-	 * MODULE
-	 */
---]]
-
-local libmodal = {}
-
-libmodal.classes     = require('libmodal/src/classes')
-libmodal.collections = require('libmodal/src/collections')
-libmodal.globals     = require('libmodal/src/globals')
-libmodal.Indicator   = require('libmodal/src/Indicator')
-libmodal.Layer       = require('libmodal/src/Layer')
-libmodal.Mode        = require('libmodal/src/Mode')
-libmodal.Prompt      = require('libmodal/src/Prompt')
-libmodal.utils       = require('libmodal/src/utils')
-
---[[
-	/*
-	 * PUBLICIZE MODULE
-	 */
---]]
-
-return libmodal
+return {
+	['classes']     = require('libmodal/src/classes'),
+	['collections'] = require('libmodal/src/collections'),
+	['globals']     = require('libmodal/src/globals'),
+	['Indicator']   = require('libmodal/src/Indicator'),
+	['Layer']       = require('libmodal/src/Layer'),
+	['Mode']        = require('libmodal/src/Mode'),
+	['Prompt']      = require('libmodal/src/Prompt'),
+	['utils']       = require('libmodal/src/utils')
+}

@@ -4,13 +4,15 @@
 	 */
 --]]
 
-local classes     = require('libmodal/src/classes')
-local globals     = require('libmodal/src/globals')
-local collections = require('libmodal/src/collections')
-local utils       = require('libmodal/src/utils')
-local Vars        = require('libmodal/src/Vars')
+local classes    = require('libmodal/src/classes')
+local globals    = require('libmodal/src/globals')
+local ParseTable = require('libmodal/src/collections/ParseTable')
+local utils      = require('libmodal/src/utils')
+local Vars       = require('libmodal/src/Vars')
 
-local api  = utils.api
+local api        = utils.api
+
+local collections = nil
 
 --[[
 	/*
@@ -18,10 +20,7 @@ local api  = utils.api
 	 */
 --]]
 
-local Mode = {
-	['Popup'] = require('libmodal/src/Mode/Popup'),
-	['TYPE']  = 'libmodal-mode'
-}
+local Mode = {['TYPE']  = 'libmodal-mode'}
 
 local _HELP = '?'
 local _TIMEOUT = {
@@ -90,8 +89,8 @@ function _metaMode:_checkInputForMapping()
 				-- Send input to interrupt a blocking `getchar`
 				_TIMEOUT:SEND()
 				-- if there is a command, execute it.
-				if cmd[collections.ParseTable.CR] then
-					api.nvim_command(cmd[collections.ParseTable.CR])
+				if cmd[ParseTable.CR] then
+					api.nvim_command(cmd[ParseTable.CR])
 				end
 				-- clear input
 				inputBytes:clear()
@@ -117,7 +116,7 @@ function _metaMode:enter()
 	-- intialize variables that are needed for each recurse of a function
 	if type(self._instruction) == globals.TYPE_TBL then
 		-- Initialize the input history variable.
-		self._popups:push(Mode.Popup.new())
+		self._popups:push(require('libmodal/src/collections/Popup').new())
 	end
 
 
@@ -156,10 +155,10 @@ function _metaMode:_initMappings()
 	self.inputBytes = setmetatable({}, _metaInputBytes)
 
 	-- Build the parse tree.
-	self.mappings = collections.ParseTable.new(self._instruction)
+	self.mappings = ParseTable.new(self._instruction)
 
 	-- Create a table for mode-specific data.
-	self._popups = collections.Stack.new()
+	self._popups = require('libmodal/src/collections/Stack').new()
 
 	-- Create a variable for whether or not timeouts are enabled.
 	self._timeouts = Vars.new('timeouts', self._name)

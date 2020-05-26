@@ -4,9 +4,9 @@
 	 */
 --]]
 
-local Indicator = {}
-
-Indicator.HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
+local Indicator = {
+	['HighlightSegment'] = require('libmodal/src/Indicator/HighlightSegment')
+}
 
 -- highlight group names
 local _HL_GROUP_MODE    = 'LibmodalPrompt'

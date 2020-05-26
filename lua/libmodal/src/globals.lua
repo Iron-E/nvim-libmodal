@@ -1,41 +1,25 @@
---[[
-	/*
-	 * MODULE
-	 */
---]]
+local _VIM_FALSE = 0
+local _VIM_TRUE  = 1
 
-local globals = {}
+return {
+	['DEFAULT_ERROR_TITLE'] = 'vim-libmodal error',
 
---[[
-	/*
-	 * TABLE `globals`
-	 */
---]]
+	['ESC_NR'] = 27,
 
-globals.DEFAULT_ERROR_TITLE = 'vim-libmodal error'
+	['TYPE_FUNC'] = 'function',
+	['TYPE_NUM']  = 'number',
+	['TYPE_STR'] = 'string',
+	['TYPE_TBL'] = 'table',
 
-globals.ESC_NR = 27
+	['VIM_FALSE'] = _VIM_FALSE,
+	['VIM_TRUE']  = _VIM_TRUE,
 
-globals.TYPE_FUNC = 'function'
-globals.TYPE_NUM  = 'number'
-globals.TYPE_STR = 'string'
-globals.TYPE_TBL = 'table'
+	is_false = function(val)
+		return val == false or val == _VIM_FALSE
+	end,
 
-globals.VIM_FALSE = 0
-globals.VIM_TRUE  = 1
+	is_true = function(val)
+		return val == true  or val == _VIM_TRUE
+	end
+}
 
-function globals.is_false(val)
-	return val == false or val == globals.VIM_FALSE
-end
-
-function globals.is_true(val)
-	return val == true or val == globals.VIM_TRUE
-end
-
---[[
-	/*
-	 * PUBLICIZE MODULE
-	 */
---]]
-
-return globals

@@ -47,6 +47,10 @@ local _metaLayer = require('libmodal/src/classes').new(Layer.TYPE)
 ]]
 ---------------------------
 function _metaLayer:enter()
+	if self._priorKeymap then
+		error('This layer has already been entered.')
+	end
+
 	-- add local aliases.
 	local layerKeymap = self._keymap
 	local priorKeymap = {}
@@ -203,6 +207,10 @@ end
 ]]
 --------------------------
 function _metaLayer:exit()
+	if not self._priorKeymap then
+		error('This layer has not been entered yet.')
+	end
+
 	for mode, mappings in pairs(self._keymap) do
 		for lhs, _ in pairs(mappings) do
 			self:_unmapFromBuffer(mode, lhs)

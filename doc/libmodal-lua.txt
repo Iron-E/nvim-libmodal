@@ -61,6 +61,46 @@ MODULES                                                 *libmodal-lua-modules*
 └──   `.Vars`
 
 ==============================================================================
+2. `libmodal.classes`                                     *libmodal-lua-classes*
+
+`libmodal.classes` is a small library to help shorten the amount of
+boilerplate code that it takes to set up a `metatable` and subsequent
+subtables.
+
+There aren't an astounding amount of functions: the intent is not to implement
+object orientation into Lua, rather it is to help facilitate the emulation of
+object orientation through `metatable`s.
+
+------------------------------------------------------------------------------
+FUNCTIONS                                     *libmodal-lua-classes-functions*
+
+`classes`.new({name}, {base})                       *libmodal-lua-classes.new()*
+
+	Define a class-metatable.
+
+	Parameters: ~
+		{name}  The name of the class.
+
+			Note: this value is used for `classes.type()`.
+
+		{base}  Optional. The base class to use.
+
+	Return: ~
+		A table set up to for use as a `metatable`.
+
+`classes`.type({value})                            *libmodal-lua-classes.type()*
+
+	Get the type of some {value}.
+
+	Parameters: ~
+		{value}  The value to get the type of.
+
+	Return: ~
+		* If {value} is a `table` and it has a `__type` attribute, return
+		  `__type`.
+		* Else, return `type(`{value}`)`
+
+==============================================================================
 3. `libmodal.collections`                             *libmodal-lua-collections*
 
 The `libmodal.collections` module consists of a few data structures that
@@ -586,6 +626,8 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 
 	Note: mappings only get replaced for the current buffer.
 
+	*Error	when the Layer has been entered previously but hasn't been exited.
+
 	Example: ~
 >
 		local libmodal = require('libmodal')
@@ -691,6 +733,8 @@ FUNCTIONS                                         *libmodal-lua-Layer-functions*
 `self`:exit()                                        *libmodal-lua-Layer.exit()*
 
 	Exit the `Layer`.
+
+	*Error	when the Layer has not been entered yet.
 
 	Example: ~
 >
@@ -897,6 +941,34 @@ opened with the following options: >
 		                - 1,
 		['style']     = 'minimal',
 		['width']     = 25,
+	}
+<
+
+------------------------------------------------------------------------------
+VARIABLES                                       *libmodal-lua-Popup-variables*
+
+`Popup`.config                                   *libmodal-lua-Popup.apiOptions*
+
+	The options used when opening a `Popup`.
+
+	Note: this can be overwritten to change the default behavior of `Popup`.
+
+	Type: ~
+		|nvim_open_win| {config} `table`.
+
+	Value: ~
+>
+	{
+		['anchor']    = 'SW',
+		['col']       = api.nvim_get_option('columns') - 1,
+		['focusable'] = false,
+		['height']    = 1,
+		['relative']  = 'editor',
+		['row']       = api.nvim_get_option('lines')
+		                - api.nvim_get_option('cmdheight')
+		                - 1,
+		['style']     = 'minimal',
+		['width']     = 25
 	}
 <
 

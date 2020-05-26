@@ -1,7 +1,7 @@
 let s:barModeCombos = {
 \	'zf': 'split',
 \	'zfo': 'vsplit',
-\	'zfc': 'tabnew'
+\	'zfc': 'q'
 \}
 
 call libmodal#Enter('BAR', s:barModeCombos)

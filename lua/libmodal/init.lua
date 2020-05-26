@@ -4,7 +4,7 @@
 	 */
 --]]
 
-local libmodal  = require('libmodal/src')
+local libmodal = require('libmodal/src')
 
 --[[
 	/*

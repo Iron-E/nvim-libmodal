@@ -12,19 +12,20 @@ local api = vim.api
 	 */
 --]]
 
-local Popup = {['TYPE'] = 'libmodal-popup'}
-
-local _winOpenOpts = {
-	['anchor']    = 'SW',
-	['col']       = api.nvim_get_option('columns') - 1,
-	['focusable'] = false,
-	['height']    = 1,
-	['relative']  = 'editor',
-	['row']       = api.nvim_get_option('lines')
-	                - api.nvim_get_option('cmdheight')
-	                - 1,
-	['style']     = 'minimal',
-	['width']     = 25,
+local Popup = {
+	['TYPE'] = 'libmodal-popup',
+	['config'] = {
+		['anchor']    = 'SW',
+		['col']       = api.nvim_get_option('columns') - 1,
+		['focusable'] = false,
+		['height']    = 1,
+		['relative']  = 'editor',
+		['row']       = api.nvim_get_option('lines')
+		                - api.nvim_get_option('cmdheight')
+		                - 1,
+		['style']     = 'minimal',
+		['width']     = 25
+	}
 }
 
 --[[
@@ -85,13 +86,14 @@ end
 
 function Popup.new()
 	local buf = api.nvim_create_buf(false, true)
+	local Popup = require('libmodal/src/Mode/Popup')
 
 	return setmetatable(
 		{
 			['_buffer']     = buf,
 			['_inputChars'] = {},
 			['_window']      = api.nvim_call_function(
-				'nvim_open_win', {buf, false, _winOpenOpts}
+				'nvim_open_win', {buf, false, Popup.config}
 			)
 		},
 		_metaPopup

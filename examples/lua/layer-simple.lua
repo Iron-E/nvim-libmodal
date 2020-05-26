@@ -14,6 +14,7 @@ local exitFunc = libmodal.layer.enter('FOO', {
 	}
 })
 
+-- the layer will deactivate in 5 seconds.
 vim.loop.new_timer():start(5000, 0, vim.schedule_wrap(
 	function() exitFunc(); print('EXITED.') end
 ))
