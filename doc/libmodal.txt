@@ -715,6 +715,12 @@ When submitting an issue, please describe the following:
 ==============================================================================
 8. Changelog                                              *libmodal-changelog*
 
+0.6.1 ~
+
+	Fixes: ~
+	* Mode names with spaces or underscores are now represented correctly
+	  by |libmodal-lua-Vars.name()|.
+
 0.6.0 ~
 
 	Additions: ~
