@@ -5,6 +5,7 @@
 --]]
 
 local api = vim.api
+local _splitString = require('libmodal/src/collections/ParseTable').splitString
 
 --[[
 	/*
@@ -81,10 +82,28 @@ end
 function Vars.new(keyName, modeName)
 	local self = setmetatable({}, _metaVars)
 
-	self._modeName = modeName
-	self._varName  = 'Mode' .. string.upper(
-		string.sub(keyName, 0, 1)
-	) .. string.sub(keyName, 2)
+	local function noSpaces(str, firstLetterModifier)
+		local splitStr = _splitString(
+			string.gsub(
+				modeName,
+				vim.pesc('_'),
+				vim.pesc(' ')
+			), ' '
+		)
+
+		for i, subStr in ipairs(splitStr) do
+			splitStr[i] = firstLetterModifier(
+				string.sub(subStr, 0, 1)
+			) .. string.lower(
+				string.sub(subStr, 2)
+			)
+		end
+
+		return splitStr
+	end
+
+	self._modeName = noSpaces(modeName, string.lower)
+	self._varName  = 'Mode' .. noSpaces(keyName, string.upper)
 
 	return self
 end
