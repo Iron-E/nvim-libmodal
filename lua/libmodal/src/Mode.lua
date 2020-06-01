@@ -247,6 +247,8 @@ end
 ]]
 -----------------------------------------
 function Mode.new(name, instruction, ...)
+	name = vim.trim(name)
+
 	-- Inherit the metatable.
 	local self = setmetatable(
 		{

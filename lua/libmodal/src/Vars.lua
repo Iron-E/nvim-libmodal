@@ -5,7 +5,6 @@
 --]]
 
 local api = vim.api
-local _stringSplit = require('libmodal/src/collections/ParseTable').stringSplit
 
 --[[
 	/*
@@ -37,7 +36,7 @@ local _metaVars = require('libmodal/src/classes').new(Vars.TYPE)
 ]]
 ---------------------------------
 function _metaVars:name()
-	return string.lower(self._modeName) .. self._varName
+	return self._modeName .. self._varName
 end
 
 ------------------------------------
@@ -82,27 +81,28 @@ end
 function Vars.new(keyName, modeName)
 	local self = setmetatable({}, _metaVars)
 
-	local function noSpaces(str, firstLetterModifier)
-		local splitStr = _stringSplit(
-			string.gsub(
-				modeName,
-				vim.pesc('_'),
-				vim.pesc(' ')
-			), ' '
+	local function noSpaces(strWithSpaces, firstLetterModifier)
+		local splitStr = vim.split(
+			string.gsub(strWithSpaces, vim.pesc('_'), vim.pesc(' ')),
+			' '
 		)
 
-		for i, subStr in ipairs(splitStr) do
-			splitStr[i] = firstLetterModifier(
-				string.sub(subStr, 0, 1)
-			) .. string.lower(
-				string.sub(subStr, 2)
-			)
+		local function camelCase(str, func)
+			return func(string.sub(str, 0, 1) or '')
+				.. string.lower(string.sub(str, 2) or '')
 		end
 
-		return splitStr
+		splitStr[1] = camelCase(splitStr[1], firstLetterModifier)
+
+		for i = 2, #splitStr do splitStr[i] =
+			camelCase(splitStr[i], string.upper)
+		end
+
+		return table.concat(splitStr)
 	end
 
 	self._modeName = noSpaces(modeName, string.lower)
+
 	self._varName  = 'Mode' .. noSpaces(keyName, string.upper)
 
 	return self

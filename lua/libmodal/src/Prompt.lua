@@ -173,6 +173,8 @@ end
 ]]
 -------------------------------------------
 function Prompt.new(name, instruction, ...)
+	name = vim.trim(name)
+
 	local self = setmetatable(
 		{
 			['indicator']    = require('libmodal/src/Indicator').prompt(name),
