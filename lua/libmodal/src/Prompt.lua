@@ -98,7 +98,7 @@ function _metaPrompt:enter()
 		-- if there were errors.
 		if not noErrors then
 			utils.show_error(promptResult)
-			continueMode = false
+			continueMode = true
 		else
 			continueMode = promptResult
 		end
@@ -127,7 +127,7 @@ end
 ]]
 ------------------------------------------------------
 function Prompt.createCompletionsProvider(completions)
-	return function(argLead, cmdLine, cursorPos)
+	return function(argLead, cmdLine, _)
 		if string.len(cmdLine) < 1 then return completions
 		end
 

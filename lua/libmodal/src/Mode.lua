@@ -67,7 +67,6 @@ function _metaMode:_checkInputForMapping()
 
 	-- Get the type of the command.
 	local commandType = type(cmd)
-	local clearInputBytes = false
 
 	-- if there was no matching command
 	if not cmd then
@@ -127,7 +126,7 @@ function _metaMode:enter()
 		-- If there were errors, handle them.
 		if not noErrors then
 			utils.show_error(modeResult)
-			continueMode = false
+			continueMode = true
 		else
 			continueMode = modeResult
 		end
