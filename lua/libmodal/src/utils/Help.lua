@@ -46,17 +46,17 @@ end
 ----------------------------------------
 function Help.new(commandsOrMaps, title)
 	-- find the longest key in the table.
-	local longestKey = 0
-	for k, v in pairs(commandsOrMaps) do
-		local len = string.len(k)
-		if len > longestKey then
-			longestKey = len
+	local longestKeyLen = 0
+	for key, _ in pairs(commandsOrMaps) do
+		local keyLen = string.len(key)
+		if keyLen > longestKeyLen then
+			longestKeyLen = keyLen
 		end
 	end
 
 	-- adjust the longest key length if the table header is longer.
-	if longestKey < string.len(title) then
-		longestKey = string.len(title)
+	if longestKeyLen < string.len(title) then
+		longestKeyLen = string.len(title)
 	end
 
 	-- define the separator for entries in the help table.
@@ -73,7 +73,7 @@ function Help.new(commandsOrMaps, title)
 		* The aligned `tbl`.
 	]]
 	----------------------
-	function tabAlign(tbl)
+	local function tabAlign(tbl)
 		local toPrint = {}
 		for k, v in pairs(tbl) do
 			toPrint[#toPrint + 1] = k
@@ -83,7 +83,7 @@ function Help.new(commandsOrMaps, title)
 			if byte <= 32 or byte == 127 then len = len + 1
 			end
 
-			for i = len, longestKey do
+			for _ = len, longestKeyLen do
 				toPrint[#toPrint + 1] = ' '
 			end
 			toPrint[#toPrint + 1] = table.concat(SEPARATOR_TEMPLATE, v)

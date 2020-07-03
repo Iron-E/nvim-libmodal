@@ -2,7 +2,7 @@ local libmodal = require('libmodal')
 local api = vim.api
 local commandList = {'new', 'close', 'last'}
 
-function fooMode()
+function FooMode()
 	local userInput = vim.api.nvim_get_var('fooModeInput')
 	if userInput == 'new' then
 		api.nvim_command('tabnew')
@@ -13,4 +13,4 @@ function fooMode()
 	end
 end
 
-libmodal.prompt.enter('FOO', fooMode, commandList)
+libmodal.prompt.enter('FOO', FooMode, commandList)
