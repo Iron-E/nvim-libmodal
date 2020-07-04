@@ -19,7 +19,6 @@ return {
 	end,
 
 	is_true = function(val)
-		return val == true  or val == _VIM_TRUE
+		return val == true or val == _VIM_TRUE
 	end
 }
-

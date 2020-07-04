@@ -18,7 +18,7 @@ local layer = libmodal.Layer.new({
 layer:enter()
 
 -- add a global function for exiting the mode.
-function libmodal_layer_example_exit()
+function LibmodalLayerExampleExit()
 	layer:exit()
 end
 
@@ -27,7 +27,7 @@ layer:map('n', 'z', 'gg', {['noremap'] = true})
 
 -- add an additional mapping for `q`.
 layer:map(
-	'n', 'q', ':lua libmodal_layer_example_exit()<CR>',
+	'n', 'q', ':lua LibmodalLayerExampleExit()<CR>',
 	{['noremap'] = true, ['silent']  = true}
 )
 
