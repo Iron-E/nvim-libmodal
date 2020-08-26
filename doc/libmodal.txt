@@ -716,6 +716,8 @@ When submitting an issue, please describe the following:
 	Additions: ~
 	* Ability to pass `function`s into |libmodal-mode| from Vimscript.
 	* Ability to pass `function`s into |libmodal-prompt| from Vimscript.
+	* Add examples for doing almost everything that this plugin can do, from
+	  Vimscript (although I still think Lua makes it easier).
 
 0.6.2 ~
 
