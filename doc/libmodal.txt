@@ -144,11 +144,9 @@ FUNCTIONS                                           *libmodal-usage-functions*
 			  that |getchar()| completes. The user input is received through
 			  `g:{name}ModeInput` (see above).
 
-			*Error	you cannot pass a function to Lua from Vimscript!
-			      	- If you try to use a |funcref()| for {instruction}, it
-			      	  will fail, GUARANTEED. This is because of |E5004|.
-			      	- If you want to use a |funcref()| for {instruction}, you
-			      	  must use a |Lua| `function` instead.
+			*Error	you cannot pass a funcref to Lua from Vimscript!
+			      	- If you want to use a |funcref()| for {instruction}, it
+			      	  must be the name of the function as a `string`.
 
 			Note: Some QoL features are available by default when
 			      specifying a `dict`/`table` value for {instruction} that
@@ -249,11 +247,9 @@ FUNCTIONS                                           *libmodal-usage-functions*
 			  every time that |input()| completes. The user input
 			  is received through `g:{name}ModeInput` (see above).
 
-			*Error	you cannot pass a function to Lua from Vimscript!
-			      	- If you try to use a |funcref()| for {instruction}, it
-			      	  will fail, GUARANTEED. This is because of |E5004|.
-			      	- If you want to use a |funcref()| for {instruction}, you
-			      	  must use a |Lua| `function` instead.
+			*Error	you cannot pass a funcref to Lua from Vimscript!
+			      	- If you want to use a |funcref()| for {instruction}, it
+			      	  must be the name of the function as a `string`.
 
 			Note: If you want to create commands with arguments, you will
 			      need to use a `function`.
@@ -714,6 +710,17 @@ When submitting an issue, please describe the following:
 
 ==============================================================================
 8. Changelog                                              *libmodal-changelog*
+
+0.7.0 ~
+
+	Additions: ~
+	* Ability to pass `function`s into |libmodal-mode| from Vimscript.
+	* Ability to pass `function`s into |libmodal-prompt| from Vimscript.
+
+0.6.2 ~
+
+	Fixes: ~
+	* Remove unused variables
 
 0.6.1 ~
 
