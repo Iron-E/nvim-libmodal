@@ -4,7 +4,8 @@
 	 */
 --]]
 
-local api = require('libmodal/src/utils/api')
+local api = vim.api
+local libmodal_api = require('libmodal/src/utils/api')
 
 --[[
 	/*
@@ -33,7 +34,7 @@ local _metaWindowState = require('libmodal/src/classes').new(WindowState.TYPE)
 function _metaWindowState:restore()
 	api.nvim_set_option(height, self.height)
 	api.nvim_set_option(width, self.width)
-	api.nvim_redraw()
+	libmodal_api.nvim_redraw()
 end
 
 --[[

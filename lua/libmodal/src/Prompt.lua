@@ -7,7 +7,7 @@
 local globals   = require('libmodal/src/globals')
 local utils     = require('libmodal/src/utils')
 
-local api  = utils.api
+local api  = vim.api
 
 --[[
 	/*
@@ -42,7 +42,7 @@ local _metaPrompt = require('libmodal/src/classes').new(Prompt.TYPE)
 ---------------------------------
 function _metaPrompt:_inputLoop()
 	-- clear previous `echo`s.
-	api.nvim_redraw()
+	utils.api.nvim_redraw()
 
 	-- define a placeholder for user input
 	local userInput = ''
@@ -72,7 +72,7 @@ function _metaPrompt:_inputLoop()
 			elseif userInput == _HELP then -- the user did not define a 'help' command, so use the default.
 				self._help:show()
 			else -- show an error.
-				api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
+				utils.api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
 			end
 		else -- attempt to call the instruction.
 			instruction()
