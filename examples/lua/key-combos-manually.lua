@@ -1,8 +1,11 @@
+-- Imports
 local api      = vim.api
 local libmodal = require('libmodal')
 
+-- Keep track of the user's input history manually.
 local _inputHistory = {}
 
+-- Clear the input history if it grows too long for our usage.
 function _inputHistory:clear(indexToCheck)
 	if #self >= indexToCheck then
 		for i, _ in ipairs(self) do
@@ -11,11 +14,15 @@ function _inputHistory:clear(indexToCheck)
 	end
 end
 
+-- This is the function that will be called whenever the user presses a button.
 local function fooMode()
+	-- Append to the input history, the latest button press.
 	_inputHistory[#_inputHistory + 1] = string.char(
+		-- The input is a character number.
 		api.nvim_get_var('fooModeInput')
 	)
 
+	-- Custom logic to test for each character index to see if it matches the 'zfo' mapping.
 	local index = 1
 	if _inputHistory[1] == 'z' then
 		if _inputHistory[2] == 'f' then
@@ -30,4 +37,5 @@ local function fooMode()
 	_inputHistory:clear(index)
 end
 
+-- Enter the mode to begin the demo.
 libmodal.mode.enter('FOO', fooMode)

@@ -1,17 +1,15 @@
-local api = vim.api
-local libmodal = require('libmodal')
+" Function which is called every time the user presses a button.
+function! s:fooMode() abort
+	let l:userInput = nr2char(g:fooModeInput)
 
-local function fooMode()
-	local userInput = string.char(
-		api.nvim_get_var('fooModeInput')
-	)
+	if l:userInput == ''
+		echom 'You cant leave using <Esc>.'
+	elseif l:userInput == 'q'
+		let g:fooModeExit = v:true
+	endif
+endfunction
 
-	if userInput == '' then
-		api.nvim_command("echom 'You cant leave using <Esc>.'")
-	elseif userInput == 'q' then
-		api.nvim_set_var('fooModeExit', true)
-	end
-end
-
-api.nvim_set_var('fooModeExit', 0)
-libmodal.mode.enter('FOO', fooMode, true)
+" Tell the mode not to exit automatically.
+let g:fooModeExit = v:false
+" Begin the mode.
+lua require('libmodal').mode.enter('FOO', 's:fooMode', true)
