@@ -14,8 +14,8 @@ See [vim-libmodal][libmodal] and the [docs](./doc) for more information. Alterna
 
 # Requirements
 
-* Neovim 0.4+
-	* Eventually 0.5 will be required.
+* Neovim 0.4+.
+	* For compatability with `vim-libmodal`, Neovim 0.5+.
 * `vim-libmodal` is _not_ installed.
 
 [libmodal]: https://github.com/Iron-E/vim-libmodal

@@ -7,6 +7,7 @@
 local globals   = require('libmodal/src/globals')
 local utils     = require('libmodal/src/utils')
 
+local vim = vim
 local api  = vim.api
 
 --[[
@@ -64,16 +65,18 @@ function _metaPrompt:_inputLoop()
 	local instruction = self._instruction
 
 	-- determine what to do with the input
-	if string.len(userInput) > 0 then -- the user actually entered something
+	if string.len(userInput) > 0 then -- The user actually entered something.
 		self.input:nvimSet(userInput)
-		if type(instruction) == globals.TYPE_TBL then -- the instruction is a command table.
-			if instruction[userInput] then -- there is a defined command for the input.
+		if type(instruction) == globals.TYPE_TBL then -- The instruction is a command table.
+			if instruction[userInput] then -- There is a defined command for the input.
 				api.nvim_command(instruction[userInput])
-			elseif userInput == _HELP then -- the user did not define a 'help' command, so use the default.
+			elseif userInput == _HELP then -- The user did not define a 'help' command, so use the default.
 				self._help:show()
 			else -- show an error.
 				utils.api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
 			end
+		elseif type(instruction) == globals.TYPE_STR and vim.fn then -- The instruction is a function. Works on Neovim 0.5+.
+			vim.fn[instruction]()
 		else -- attempt to call the instruction.
 			instruction()
 		end
