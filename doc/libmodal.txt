@@ -147,6 +147,14 @@ FUNCTIONS                                           *libmodal-usage-functions*
 			*Error	you cannot pass a funcref to Lua from Vimscript!
 			      	- If you want to use a |funcref()| for {instruction}, it
 			      	  must be the name of the function as a `string`.
+			      	- This only works on Neovim 0.5+. Example: >
+			      	" VIMSCRIPT
+			      	function! s:foo() abort
+			      		echo 'It works'
+			      		call getchar()
+			      	endfunction
+			      	lua require('libmodal').mode.enter('FOO', 's:foo')
+<
 
 			Note: Some QoL features are available by default when
 			      specifying a `dict`/`table` value for {instruction} that
@@ -250,6 +258,14 @@ FUNCTIONS                                           *libmodal-usage-functions*
 			*Error	you cannot pass a funcref to Lua from Vimscript!
 			      	- If you want to use a |funcref()| for {instruction}, it
 			      	  must be the name of the function as a `string`.
+			      	- This only works on Neovim 0.5+. Example: >
+			      	" VIMSCRIPT
+			      	function! s:foo() abort
+			      		echo 'It works'
+			      		call getchar()
+			      	endfunction
+			      	lua require('libmodal').prompt.enter('FOO', 's:foo')
+<
 
 			Note: If you want to create commands with arguments, you will
 			      need to use a `function`.
@@ -718,6 +734,12 @@ When submitting an issue, please describe the following:
 	* Ability to pass `function`s into |libmodal-prompt| from Vimscript.
 	* Add examples for doing almost everything that this plugin can do, from
 	  Vimscript (although I still think Lua makes it easier).
+
+0.6.3 ~
+
+	Fixes: ~
+	* Fix being unable to paste into Vim's command line after importing
+	  the `libmodal.util.api` table.
 
 0.6.2 ~
 
