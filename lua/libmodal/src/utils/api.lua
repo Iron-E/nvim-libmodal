@@ -4,7 +4,8 @@
 	 */
 --]]
 
-local api = vim.api
+local api = {}
+local vim_api = vim.api
 
 ------------------------
 --[[ SUMMARY:
@@ -12,7 +13,7 @@ local api = vim.api
 ]]
 ------------------------
 function api.nvim_bell()
-	api.nvim_command('normal ' .. string.char(27)) -- escape char
+	vim_api.nvim_command('normal '..string.char(27)) -- escape char
 end
 
 ------------------------------------
@@ -25,7 +26,7 @@ end
 ]]
 ------------------------------------
 function api.nvim_exists(scope, var)
-	return api.nvim_call_function('exists', {scope .. ':' .. var}) == require('libmodal/src/globals').VIM_TRUE
+	return vim_api.nvim_call_function('exists', {scope..':'..var}) == require('libmodal/src/globals').VIM_TRUE
 end
 
 -------------------------
@@ -53,7 +54,17 @@ end
 ]]
 -------------------------
 function api.nvim_input()
-	return api.nvim_call_function('getchar', {})
+	return vim_api.nvim_call_function('getchar', {})
+end
+
+--------------------------
+--[[ SUMMARY:
+	* Run `mode` to refresh the screen.
+	* The function was not named `nvim_mode` because that would be really confusing given the name of this plugin.
+]]
+--------------------------
+function api.nvim_redraw()
+	vim_api.nvim_command('mode')
 end
 
 ---------------------------------
@@ -79,19 +90,9 @@ function api.nvim_lecho(hlTables)
 		lecho_template[2] = tostring(hlTable.hl)
 		lecho_template[4] = tostring(hlTable.str)
 
-		api.nvim_command(table.concat(lecho_template))
+		vim_api.nvim_command(table.concat(lecho_template))
 	end
-	api.nvim_command('echohl None')
-end
-
---------------------------
---[[ SUMMARY:
-	* Run `mode` to refresh the screen.
-	* The function was not named `nvim_mode` because that would be really confusing given the name of this plugin.
-]]
---------------------------
-function api.nvim_redraw()
-	api.nvim_command('mode')
+	vim_api.nvim_command('echohl None')
 end
 
 --------------------------------------
@@ -107,10 +108,10 @@ end
 function api.nvim_show_err(title, msg)
 	local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
 	api.nvim_lecho({
-		HighlightSegment.new('Title', tostring(title) .. '\n'),
+		HighlightSegment.new('Title', tostring(title)..'\n'),
 		HighlightSegment.new('Error', tostring(msg)),
 	})
-	api.nvim_call_function('getchar', {})
+	vim_api.nvim_call_function('getchar', {})
 end
 
 --[[

@@ -10,7 +10,7 @@ local ParseTable = require('libmodal/src/collections/ParseTable')
 local utils      = require('libmodal/src/utils')
 local Vars       = require('libmodal/src/Vars')
 
-local api = utils.api
+local api = vim.api
 
 --[[
 	/*
@@ -161,7 +161,7 @@ function _metaMode:_initMappings()
 	self._timeouts = Vars.new('timeouts', self._name)
 
 	-- Read the correct timeout variable.
-	if api.nvim_exists('g', self._timeouts:name())
+	if utils.api.nvim_exists('g', self._timeouts:name())
 	then self._timeouts.enabled =
 		self._timeouts:nvimGet()
 	else self._timeouts.enabled =
@@ -186,10 +186,10 @@ function _metaMode:_inputLoop()
 	end
 
 	-- Echo the indicator.
-	api.nvim_lecho(self.indicator)
+	utils.api.nvim_lecho(self.indicator)
 
 	-- Capture input.
-	local userInput = api.nvim_input()
+	local userInput = utils.api.nvim_input()
 
 	-- Return if there was a timeout event.
 	if userInput == _TIMEOUT.NR then
@@ -226,7 +226,7 @@ function _metaMode:_tearDown()
 	end
 
 	self._winState:restore()
-	api.nvim_redraw()
+	utils.api.nvim_redraw()
 end
 
 --[[

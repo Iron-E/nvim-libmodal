@@ -4,7 +4,8 @@
 	 */
 --]]
 
-local api  = require('libmodal/src/utils/api')
+local api          = vim.api
+local libmodal_api = require('libmodal/src/utils/api')
 
 --[[
 	/*
