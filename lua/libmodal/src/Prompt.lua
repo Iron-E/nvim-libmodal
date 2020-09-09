@@ -36,6 +36,38 @@ end
 
 local _metaPrompt = require('libmodal/src/classes').new(Prompt.TYPE)
 
+---------------------------------------------------
+--[[ SUMMARY:
+	* Execute the specified instruction based on user input.
+]]
+--[[ PARAMS:
+	* `userInput` => the input from the user, used to determine how to execute the `self._instruction`.
+]]
+---------------------------------------------------
+function _metaPrompt:_executeInstruction(userInput)
+	-- get the instruction for the mode.
+	local instruction = self._instruction
+
+	if type(instruction) == globals.TYPE_TBL then -- The instruction is a command table.
+		if instruction[userInput] then -- There is a defined command for the input.
+			local to_execute = instruction[userInput]
+			if type(to_execute) == globals.TYPE_FUNC then
+				to_execute()
+			else
+				api.nvim_command(instruction[userInput])
+			end
+		elseif userInput == _HELP then -- The user did not define a 'help' command, so use the default.
+			self._help:show()
+		else -- show an error.
+			utils.api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
+		end
+	elseif type(instruction) == globals.TYPE_STR and vim.fn then -- The instruction is a function. Works on Neovim 0.5+.
+		vim.fn[instruction]()
+	else -- attempt to call the instruction.
+		instruction()
+	end
+end
+
 ---------------------------------
 --[[ SUMMARY:
 	* Loop to get user input with `input()`.
@@ -61,25 +93,10 @@ function _metaPrompt:_inputLoop()
 		api.nvim_call_function('input', {self.indicator})
 	end
 
-	-- get the instruction for the mode.
-	local instruction = self._instruction
-
 	-- determine what to do with the input
 	if string.len(userInput) > 0 then -- The user actually entered something.
 		self.input:nvimSet(userInput)
-		if type(instruction) == globals.TYPE_TBL then -- The instruction is a command table.
-			if instruction[userInput] then -- There is a defined command for the input.
-				api.nvim_command(instruction[userInput])
-			elseif userInput == _HELP then -- The user did not define a 'help' command, so use the default.
-				self._help:show()
-			else -- show an error.
-				utils.api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
-			end
-		elseif type(instruction) == globals.TYPE_STR and vim.fn then -- The instruction is a function. Works on Neovim 0.5+.
-			vim.fn[instruction]()
-		else -- attempt to call the instruction.
-			instruction()
-		end
+		self:_executeInstruction(userInput)
 	else -- indicate we want to leave the prompt
 		return false
 	end

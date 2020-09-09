@@ -49,6 +49,22 @@ local _metaInputBytes = classes.new(nil, {
 
 classes = nil
 
+-----------------------------------------------------------
+--[[ SUMMARY:
+	* Execute some `proposedInstruction` according to a set of determined logic.
+]]
+--[[ PARAMS:
+	* `proposedInstruction` => The instruction that is desired to be executed.
+]]
+-----------------------------------------------------------
+function _metaMode._executeInstruction(proposedInstruction)
+	if type(proposedInstruction) == globals.TYPE_FUNC then
+		proposedInstruction()
+	else
+		api.nvim_command(proposedInstruction)
+	end
+end
+
 -----------------------------------------------
 --[[ SUMMARY:
 	* Parse `self.mappings` and see if there is any command to execute.
@@ -79,8 +95,6 @@ function _metaMode:_checkInputForMapping()
 	elseif commandType == globals.TYPE_TBL
 		and globals.is_true(self._timeouts.enabled)
 	then
-		-- Create a new timer
-
 		-- start the timer
 		self._flushInputTimer:start(
 			_TIMEOUT.LEN, 0, vim.schedule_wrap(function()
@@ -88,7 +102,7 @@ function _metaMode:_checkInputForMapping()
 				_TIMEOUT:SEND()
 				-- if there is a command, execute it.
 				if cmd[ParseTable.CR] then
-					api.nvim_command(cmd[ParseTable.CR])
+					self._executeInstruction(cmd[ParseTable.CR])
 				end
 				-- clear input
 				inputBytes:clear()
@@ -98,7 +112,7 @@ function _metaMode:_checkInputForMapping()
 
 	-- The command was an actual vim command.
 	else
-		api.nvim_command(cmd)
+		self._executeInstruction(cmd)
 		inputBytes:clear()
 	end
 
