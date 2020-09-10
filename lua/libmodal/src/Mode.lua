@@ -51,18 +51,18 @@ classes = nil
 
 -----------------------------------------------------------
 --[[ SUMMARY:
-	* Execute some `proposedInstruction` according to a set of determined logic.
+	* Execute some `selection` according to a set of determined logic.
+]]
+--[[ REMARKS:
+	* Only provides logic for when `self._instruction` is a table of commands.
 ]]
 --[[ PARAMS:
-	* `proposedInstruction` => The instruction that is desired to be executed.
+	* `selection` => The instruction that is desired to be executed.
 ]]
 -----------------------------------------------------------
-function _metaMode._executeInstruction(proposedInstruction)
-	if type(proposedInstruction) == globals.TYPE_FUNC then
-		proposedInstruction()
-	else
-		api.nvim_command(proposedInstruction)
-	end
+function _metaMode._commandTableExecute(instruction)
+	if type(instruction) == globals.TYPE_FUNC then instruction()
+	else api.nvim_command(instruction) end
 end
 
 -----------------------------------------------
@@ -102,7 +102,7 @@ function _metaMode:_checkInputForMapping()
 				_TIMEOUT:SEND()
 				-- if there is a command, execute it.
 				if cmd[ParseTable.CR] then
-					self._executeInstruction(cmd[ParseTable.CR])
+					self._commandTableExecute(cmd[ParseTable.CR])
 				end
 				-- clear input
 				inputBytes:clear()
@@ -112,7 +112,7 @@ function _metaMode:_checkInputForMapping()
 
 	-- The command was an actual vim command.
 	else
-		self._executeInstruction(cmd)
+		self._commandTableExecute(cmd)
 		inputBytes:clear()
 	end
 
