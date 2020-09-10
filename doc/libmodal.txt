@@ -1,9 +1,9 @@
-*libmodal.txt*             Create modes for Neovim
+*libmodal.txt*                Create modes for Neovim
 *libmodal*
 *nvim-libmodal*
 
-=============================================================================
-0. Table of Contents                                           *libmodal-toc*
+================================================================================
+0. Table of Contents                                              *libmodal-toc*
 
 1. About ................ |libmodal-about|
 2. Usage ................ |libmodal-usage|
@@ -15,8 +15,8 @@
 8. Changelog ............ |libmodal-changelog|
 9. Credits .............. |libmodal-credits|
 
-==============================================================================
-1. About                                                      *libmodal-about*
+================================================================================
+1. About                                                        *libmodal-about*
 
 |nvim-libmodal|:
 - Author, Iron-E @ https://github.com/Iron-E & https://gitlab.com/Iron_E
@@ -33,8 +33,8 @@ modes is also creator-defined, and is outlined in |libmodal-usage|.
 
 See: |vim-modes|
 
-------------------------------------------------------------------------------
-USE CASE                                           *libmodal-use-case-example*
+--------------------------------------------------------------------------------
+USE CASE                                             *libmodal-use-case-example*
 
 As an |init.vim| configuration grows, it becomes harder to create keybindings
 that alphabetically represent the action that they perform. To get around
@@ -69,8 +69,8 @@ buffers persevere).
 
 See: |libmodal-usage|
 
-==============================================================================
-2. Usage                                                      *libmodal-usage*
+================================================================================
+2. Usage                                                        *libmodal-usage*
 
 The |libmodal| interface is designed completely in |Lua|. It is compatable
 with Vimscript, and so one may either:
@@ -92,8 +92,8 @@ Note: Examples for all topics covered here can be found in the "examples"
 See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode,
      https://gist.github.com/Iron-E/f36116e8862ea03fd195e4e0a48cb05d
 
-------------------------------------------------------------------------------
-FUNCTIONS                                           *libmodal-usage-functions*
+--------------------------------------------------------------------------------
+FUNCTIONS                                             *libmodal-usage-functions*
 
                         *libmodal-mode* *libmodal#Enter()* *libmodal.mode.enter()*
 `libmodal.mode`.enter({name}, {instruction} [, {supressExit}])
@@ -127,7 +127,8 @@ FUNCTIONS                                           *libmodal-usage-functions*
 			      local modeInstruction = {
 			          ['zf'] = 'split',
 			          ['zfo'] = 'vsplit',
-			          ['zfc'] = 'tabnew'
+			          -- You can also use lua functions
+			          ['zfc'] = function() return 'tabnew' end
 			      }
 
 			    " VIMSCRIPT
@@ -286,8 +287,8 @@ FUNCTIONS                                           *libmodal-usage-functions*
 		|libmodal-examples-prompt|  For examples of this function.
 
 
-==============================================================================
-3. Examples                                                *libmodal-examples*
+================================================================================
+3. Examples                                                  *libmodal-examples*
 
 Below are examples written in |Lua| to help show how specific features of
 |libmodal| may be implemented. In each example, the name of the mode is
@@ -300,8 +301,8 @@ all be tested using the |luafile| |command|.
 
 See: |libmodal-usage|, |libmodal-use-case|, |lua-require-example|.
 
-------------------------------------------------------------------------------
-MODES                                                *libmodal-examples-modes*
+--------------------------------------------------------------------------------
+MODES                                                  *libmodal-examples-modes*
 
 Using a callback `function`: >
 	local api = vim.api
@@ -356,7 +357,7 @@ Using a |key-mapping| `table`: >
 <
 
 Exit Supression ~
-                                              *libmodal-examples-supress-exit*
+                                                *libmodal-examples-supress-exit*
 
 Using a callback `function`: >
 	local libmodal = require('libmodal')
@@ -399,7 +400,7 @@ Using a |key-mapping| `table`: >
 <
 
 Submodes ~
-                                                  *libmodal-examples-submodes*
+                                                    *libmodal-examples-submodes*
 
 Using a callback `function`: >
 	local libmodal = require('libmodal')
@@ -457,8 +458,8 @@ Using a |key-mapping| `table`: >
 	fooMode()
 <
 
-------------------------------------------------------------------------------
-LAYERS                                              *libmodal-examples-layers*
+--------------------------------------------------------------------------------
+LAYERS                                                *libmodal-examples-layers*
 >
 	local libmodal = require('libmodal')
 
@@ -481,8 +482,8 @@ LAYERS                                              *libmodal-examples-layers*
 		vim.schedule_wrap(exitFunc)
 	)
 <
-------------------------------------------------------------------------------
-PROMPTS                                            *libmodal-examples-prompts*
+--------------------------------------------------------------------------------
+PROMPTS                                              *libmodal-examples-prompts*
 
 Using a callback `function`: >
 	local libmodal = require('libmodal')
@@ -524,14 +525,14 @@ Using a |command| `table`: >
 	libmodal.prompt.enter('BAR', commands)
 <
 
-==============================================================================
-4. Configuration                                      *libmodal-configuration*
+================================================================================
+4. Configuration                                        *libmodal-configuration*
 
 The following specifies what settings may be used to configure
 |libmodal-mode|s and |libmodal-prompt|s.
 
-------------------------------------------------------------------------------
-HIGHLIGHT GROUPS                                   *libmodal-highlight-groups*
+--------------------------------------------------------------------------------
+HIGHLIGHT GROUPS                                     *libmodal-highlight-groups*
 
 
 The following |highlight-groups| can be |config|ured to change a mode's |color|s:
@@ -548,8 +549,8 @@ Note: `LibmodalStar`'s name — while not indicative of its use — is used for
 		when Neovim 0.5 launches that will introduce interoperaability between
 		the two.
 
-------------------------------------------------------------------------------
-TIMEOUTS                              *libmodal-timeouts* *g:libmodalTimeouts*
+--------------------------------------------------------------------------------
+TIMEOUTS                                *libmodal-timeouts* *g:libmodalTimeouts*
 
 When `libmodal.mode.enter()`'s {instruction} argument is a `table`, mode
 creators may also enable the use of Vim's built-in 'timeout' feature.
@@ -631,8 +632,8 @@ then reset it upon exit. Example:
 Mode creators who use `function` {instruction}s may define timeouts manually
 using |timers|, which is how |libmodal| implements them internally.
 
-==============================================================================
-5. License                                                  *libmodal-license*
+================================================================================
+5. License                                                    *libmodal-license*
 
 `nvim-libmodal` – Create new "modes" for Neovim.
 Copyright © 2020 Iron-E
@@ -650,57 +651,57 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-==============================================================================
-6. Bugs                                                        *libmodal-bugs*
+================================================================================
+6. Bugs                                                          *libmodal-bugs*
 
 * `libmodal#Enter()` does not work when {instruction} is a |funcref|.
 	* See |E5004|.
 * `libmodal#Prompt()` does not work when {instruction} is a |funcref|.
 	* See |E5004|.
 
-==============================================================================
-7. Contributing                                        *libmodal-contributing*
+================================================================================
+7. Contributing                                          *libmodal-contributing*
 
 The following describes what should be done if an individual wishes to
 contribute something to the `Iron-E/nvim-libmodal` repository.
 
-------------------------------------------------------------------------------
-CODE                                              *libmodal-contributing-code*
+--------------------------------------------------------------------------------
+CODE                                                *libmodal-contributing-code*
 
-	Bugfixes ~
+Bugfixes ~
 
-	If you discover a bug and believe you know the solution to fixing it, then
-	submit a bug report and state that you are working on a fix (and what that
-	fix might be), and what general timeframe the fix may be completed in
-	(months, weeks, days, etc.).
+If you discover a bug and believe you know the solution to fixing it, then
+submit a bug report and state that you are working on a fix (and what that
+fix might be), and what general timeframe the fix may be completed in
+(months, weeks, days, etc.).
 
-	When the fix is complete, submit a PR that references the issue you
-	submitted.
+When the fix is complete, submit a PR that references the issue you
+submitted.
 
-	Features ~
+Features ~
 
-	If there is a feature you would like to be a part of |libmodal|, the best
-	thing you can do is submit a feature request, and then state that you are
-	working on a pull request (PR) so others don't attempt to do the same work
-	at the same time.
+If there is a feature you would like to be a part of |libmodal|, the best
+thing you can do is submit a feature request, and then state that you are
+working on a pull request (PR) so others don't attempt to do the same work
+at the same time.
 
-	When you believe your feature is complete, write some examples for it in
-	the `examples/lua` folder, and add them to |libmodal-examples| as
-	appropriate.
+When you believe your feature is complete, write some examples for it in
+the `examples/lua` folder, and add them to |libmodal-examples| as
+appropriate.
 
-	Assure that all existing |libmodal-examples| continue to work with your
-	feature, unless a breaking change was discussed on the feature request.
-	If you need help getting them to pass, you can ask for help on the PR.
+Assure that all existing |libmodal-examples| continue to work with your
+feature, unless a breaking change was discussed on the feature request.
+If you need help getting them to pass, you can ask for help on the PR.
 
-	Reference the issue you submitted on the PR so that the two show up
-	together when looking back at the history.
+Reference the issue you submitted on the PR so that the two show up
+together when looking back at the history.
 
-	Contributing documentation is not necessary but appreciated, since the
-	person who knows the most about the feature being implemented is most
-	likely the one implementing it.
+Contributing documentation is not necessary but appreciated, since the
+person who knows the most about the feature being implemented is most
+likely the one implementing it.
 
-------------------------------------------------------------------------------
-DOCUMENTATION                            *libmodal-contributing-documentation*
+--------------------------------------------------------------------------------
+DOCUMENTATION                              *libmodal-contributing-documentation*
 
 If there is a problem with the documentation, or you see an area where it
 could be improved, don't hesitate to submit an issue and a PR. At the very
@@ -708,8 +709,8 @@ least it will exist in history if such an issue comes up again, and likely it
 will serve to help yourself and others with more clear and concise wording, or
 with more helpful and practical examples.
 
-------------------------------------------------------------------------------
-ISSUES                                          *libmodal-contributing-issues*
+--------------------------------------------------------------------------------
+ISSUES                                            *libmodal-contributing-issues*
 
 Issues are greatly welcomed on the GitHub repository, whether they are bug
 reports, feature requests, documentation improvements, or misunderstandings:
@@ -724,8 +725,18 @@ When submitting an issue, please describe the following:
 4. Expected behavior (if applicable).
 5. Attached media (screenshots, logs, etc.) (if applicable).
 
-==============================================================================
-8. Changelog                                              *libmodal-changelog*
+================================================================================
+8. Changelog                                                *libmodal-changelog*
+
+0.8.0 ~
+
+	Additions: ~
+	* Ability to use |lua| `function`s as values in a |libmodal-mode|
+	  {instruction} `table` .
+	* Ability to use |lua| `function`s as values in a |libmodal-prompt|
+	  {instruction} `table` .
+	* Add |libmodal-mode| and |libmodal-prompt| kill functions
+	  (|libmodal-lua-utils-exit|).
 
 0.7.0 ~
 
@@ -837,8 +848,8 @@ When submitting an issue, please describe the following:
 0.3.1 ~
 
 	Fixes: ~
-	* Fix bug where everytime `api.nvim_lecho()` was called, its {hlTables} would
-	  infinitely grow with placeholder "None" entries.
+	* Fix bug where everytime `api.nvim_lecho()` was called, its {hlTables}
+	  would infinitely grow with placeholder "None" entries.
 
 0.3.0 ~
 
@@ -866,8 +877,8 @@ When submitting an issue, please describe the following:
 	Additions: ~
 	* |libmodal-mode| implementation from |vim-libmodal|.
 
-==============================================================================
-9. Credits                                                  *libmodal-credits*
+================================================================================
+9. Credits                                                    *libmodal-credits*
 
 Credit                      Reason
 ---------------------       ----------------------------------
@@ -883,5 +894,5 @@ u/oryiesis                  Inspiration.
 www.lua-users.org           |Lua| reference.
 www.stackoverflow.com       Vimscript and |Lua| reference.
 
-==============================================================================
-vim:tw=78:ts=4:ft=help:norl:
+================================================================================
+vim:tw=80:ts=4:ft=help:norl:
