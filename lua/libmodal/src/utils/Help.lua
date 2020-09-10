@@ -1,5 +1,13 @@
 --[[
 	/*
+	 * IMPORTS
+	 */
+--]]
+local vim = vim
+local globals = require('libmodal/src/globals')
+
+--[[
+	/*
 	 * MODULE
 	 */
 --]]
@@ -75,18 +83,21 @@ function Help.new(commandsOrMaps, title)
 	----------------------
 	local function tabAlign(tbl)
 		local toPrint = {}
-		for k, v in pairs(tbl) do
-			toPrint[#toPrint + 1] = k
-			local len = string.len(k)
-			local byte = string.byte(k)
+		for key, value in pairs(tbl) do
+			toPrint[#toPrint + 1] = key
+			local len = string.len(key)
+			local byte = string.byte(key)
 			-- account for ASCII chars that take up more space.
-			if byte <= 32 or byte == 127 then len = len + 1
-			end
+			if byte <= 32 or byte == 127 then len = len + 1 end
 
 			for _ = len, longestKeyLen do
 				toPrint[#toPrint + 1] = ' '
 			end
-			toPrint[#toPrint + 1] = table.concat(SEPARATOR_TEMPLATE, v)
+
+			toPrint[#toPrint + 1] = table.concat(
+				SEPARATOR_TEMPLATE,
+				(type(value) == globals.TYPE_STR) and value or '<lua function>'
+			)
 		end
 		return toPrint
 	end

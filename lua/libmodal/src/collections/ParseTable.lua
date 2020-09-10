@@ -106,7 +106,7 @@ local function _get(parseTable, splitKey)
 			else
 				return _get(val, splitKey)
 			end
-		elseif valType == globals.TYPE_STR and #splitKey < 1 then
+		elseif valType == globals.TYPE_STR or valType == globals.TYPE_FUNC and #splitKey < 1 then
 			return val
 		end
 	end
@@ -129,9 +129,11 @@ local function _put(parseTable, splitKey, value)
 	if #splitKey > 0 then -- there are still characters left in the key.
 		if not parseTable[k] then parseTable[k] = {}
 		-- If there is a previous command mapping in place
-		elseif type(parseTable[k]) == globals.TYPE_STR then
-			-- Swap the mapping to a `CR`
-			parseTable[k] = {[ParseTable.CR] = parseTable[k]}
+		else local valueType = type(parseTable[k])
+			if valueType == globals.TYPE_STR or valueType == globals.TYPE_FUNC then
+				-- Swap the mapping to a `CR`
+				parseTable[k] = {[ParseTable.CR] = parseTable[k]}
+			end
 		end
 
 		-- run _update() again

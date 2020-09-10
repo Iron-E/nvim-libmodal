@@ -5,7 +5,27 @@
 --]]
 
 local api = {}
+local globals = require('libmodal/src/globals')
 local vim_api = vim.api
+
+---------------------------------
+--[[ SUMMARY:
+	* Send a character to exit a mode.
+]]
+--[[ PARAMS:
+	* `exit_char` => the character used to exit the mode, or ESCAPE if none was provided.
+]]
+---------------------------------
+function api.mode_exit(exit_char)
+	-- If there was no provided `exit_char`, or it is a character code.
+	if not exit_char or type(exit_char) == globals.TYPE_NUM then
+		-- Translate the character code or default to escape.
+		exit_char = string.char(exit_char or globals.ESC_NR)
+	end
+
+	-- Exit the prompt by sending an escape key.
+	vim_api.nvim_feedkeys(exit_char, 'nt', false)
+end
 
 ------------------------
 --[[ SUMMARY:

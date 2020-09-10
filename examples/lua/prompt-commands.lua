@@ -5,7 +5,8 @@ local libmodal = require('libmodal')
 local commands = {
 	['new']   = 'tabnew',
 	['close'] = 'tabclose',
-	['last']  = 'tablast'
+	['last']  = 'tablast',
+	['exit'] = libmodal.utils.api.mode_exit
 }
 
 -- Begin the prompt.
