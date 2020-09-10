@@ -24,7 +24,7 @@ function api.mode_exit(exit_char)
 	end
 
 	-- Exit the prompt by sending an escape key.
-	api.nvim_feedkeys(exit_char, 'nt', false)
+	vim_api.nvim_feedkeys(exit_char, 'nt', false)
 end
 
 ------------------------
