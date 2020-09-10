@@ -15,5 +15,8 @@ function FooMode()
 	fooModeRecurse = fooModeRecurse - 1
 end
 
+-- Define the character 'f' as the function we defined— but directly through lua, instead of vimL.
+fooModeCombos['f'] = FooMode
+
 -- Call FooMode() initially to begin the demo.
 FooMode()
