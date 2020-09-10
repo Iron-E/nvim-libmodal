@@ -736,7 +736,7 @@ When submitting an issue, please describe the following:
 	* Ability to use |lua| `function`s as values in a |libmodal-prompt|
 	  {instruction} `table` .
 	* Add |libmodal-mode| and |libmodal-prompt| kill functions
-	  (|libmodal-lua-utils-exit|).
+	  (|libmodal-lua-api.mode_exit()|).
 
 0.7.0 ~
 
