@@ -10,7 +10,21 @@ Unfortunately, during `vim-libmodal`'s development several problems with Vimscri
 
 Note that cross-compatability does not mean that `vim-libmodal` and `nvim-libmodal` can be installed at the same time— as a matter of fact, they are developed specifically to replace each other for specific platforms. If you use Vim, use `vim-libmodal`. If you use Neovim, use `nvim-libmodal`. If you are a plugin creator, all code that works for `vim-libmodal` will work with `nvim-libmodal`, but the reverse is not true.
 
-See [vim-libmodal][libmodal] and the [docs](./doc) for more information. Alternatively, you may see [`nvim-tabmode`](https://github.com/Iron-E/nvim-tabmode) and [this gist](https://gist.github.com/Iron-E/f36116e8862ea03fd195e4e0a48cb05d) for more examples.
+# Usage
+
+The following plugins have been constructed using `nvim-libmodal`:
+
+* [`nvim-tabmode`](https://github.com/Iron-E/nvim-tabmode)
+* [`nvim-typora`](https://github.com/Iron-E/nvim-typora)
+
+The following samples have been constructed using `nvim-libmodal`:
+
+* [`mode-codedoc`](https://gitlab.com/Iron_E/dotfiles/-/blob/master/.config/nvim/lua/mode-codedoc.lua)
+* [`mode-fugidiff`](https://gitlab.com/Iron_E/dotfiles/-/blob/master/.config/nvim/lua/mode-fugidiff.lua)
+* [The Official Lua Examples](https://github.com/Iron-E/nvim-libmodal/tree/master/examples/lua)
+* [The Official Vimscript Examples](https://github.com/Iron-E/nvim-libmodal/tree/master/examples)
+
+See [vim-libmodal][libmodal] and the [docs](./doc) for more information.
 
 # Requirements
 
