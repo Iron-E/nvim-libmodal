@@ -95,7 +95,7 @@ See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode,
 --------------------------------------------------------------------------------
 VARIABLES                                               *libmodal-usage-variables*
 
-`vim.b`.libmodalActiveModeName
+`vim.g`.libmodalActiveModeName
 
 	The name of the currently active |libmodal-mode|.
 
@@ -108,8 +108,8 @@ VARIABLES                                               *libmodal-usage-variable
 		`nil`
 
 	See also: ~
-		|b:|     For more information about buffer variables.
-		|vim.b|  For info about accessing |b:| from lua.
+		|g:|     For more information about global variables.
+		|vim.g|  For info about accessing |g:| from lua.
 
 --------------------------------------------------------------------------------
 FUNCTIONS                                               *libmodal-usage-functions*

@@ -131,9 +131,9 @@ function _metaMode:enter()
 		self._popups:push(require('libmodal/src/collections/Popup').new())
 	end
 
-	if vim.b then -- requires neovim 0.5
-		self._previousModeName = vim.b.libmodalActiveModeName
-		vim.b.libmodalActiveModeName = self._name
+	if vim.g then -- requires neovim 0.5
+		self._previousModeName = vim.g.libmodalActiveModeName
+		vim.g.libmodalActiveModeName = self._name
 	end
 
 	--[[ MODE LOOP. ]]
@@ -251,8 +251,8 @@ function _metaMode:_tearDown()
 		self._popups:pop():close()
 	end
 
-	if vim.b then -- this step requires 0.5
-		vim.b.libmodalActiveModeName = self._previousModeName
+	if vim.g then -- this step requires 0.5
+		vim.g.libmodalActiveModeName = self._previousModeName
 	end
 
 	self._winState:restore()

@@ -97,8 +97,8 @@ require('galaxyline').section.left =
 			local mode_color = nil
 			local mode_name = nil
 
-			if vim.b.libmodalActiveModeName then
-				mode_name = vim.b.libmodalActiveModeName
+			if vim.g.libmodalActiveModeName then
+				mode_name = vim.g.libmodalActiveModeName
 				mode_color = _MODES[mode_name]
 			else
 				local current_mode = _MODES[vim.fn.mode(true)]
