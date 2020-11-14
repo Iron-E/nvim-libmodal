@@ -10,6 +10,15 @@ Unfortunately, during `vim-libmodal`'s development several problems with Vimscri
 
 Note that cross-compatability does not mean that `vim-libmodal` and `nvim-libmodal` can be installed at the same time— as a matter of fact, they are developed specifically to replace each other for specific platforms. If you use Vim, use `vim-libmodal`. If you use Neovim, use `nvim-libmodal`. If you are a plugin creator, all code that works for `vim-libmodal` will work with `nvim-libmodal`, but the reverse is not true.
 
+# Requirements
+
+* Neovim 0.4+.
+	* For compatability with `vim-libmodal`, Neovim 0.5+.
+	* For statusbar integration, Neovim 0.5+.
+* `vim-libmodal` is _not_ installed.
+
+[libmodal]: https://github.com/Iron-E/vim-libmodal
+
 # Usage
 
 The following plugins have been constructed using `nvim-libmodal`:
@@ -26,10 +35,87 @@ The following samples have been constructed using `nvim-libmodal`:
 
 See [vim-libmodal][libmodal] and the [docs](./doc) for more information.
 
-# Requirements
+## Statusline
 
-* Neovim 0.4+.
-	* For compatability with `vim-libmodal`, Neovim 0.5+.
-* `vim-libmodal` is _not_ installed.
+You can add `libmodal` modes to your status line by using [galaxyline.nvim](https://github.com/glepnir/galaxyline.nvim.git). Here is an example configuration:
 
-[libmodal]: https://github.com/Iron-E/vim-libmodal
+```lua
+local _COLORS =
+{
+	black  = {'#202020', 0,   'black'},
+	red    = {'#ee4a59', 196, 'red'},
+	orange = {'#ff8900', 208, 'darkyellow'},
+	yellow = {'#f0df33', 220, 'yellow'},
+	green  = {'#77ff00', 72, 'green'},
+	blue   = {'#7090ff', 63, 'darkblue'},
+	purple = {'#cf55f0', 129, 'magenta'},
+}
+
+-- Statusline color
+_COLORS.bar = {middle=_COLORS.gray_dark, side=_COLORS.black}
+
+-- Text color
+_COLORS.text = _COLORS.gray_light
+
+-- Table which gets hex values from _COLORS.
+local _HEX_COLORS = setmetatable(
+	{['bar'] = setmetatable({}, {['__index'] = function(_, key) return _COLORS.bar[key] and _COLORS.bar[key][1] or nil end})},
+	{['__index'] = function(_, key) local color = _COLORS[key] return color and color[1] or nil end}
+)
+
+local _MODES =
+{
+	['c']  = {'COMMAND-LINE',      _COLORS.red},
+	['ce'] = {'NORMAL EX',         _COLORS.red},
+	['cv'] = {'EX',                _COLORS.red},
+	['i']  = {'INSERT',            _COLORS.green},
+	['ic'] = {'INS-COMPLETE',      _COLORS.green},
+	['n']  = {'NORMAL',            _COLORS.purple},
+	['no'] = {'OPERATOR-PENDING',  _COLORS.purple},
+	['r']  = {'HIT-ENTER',         _COLORS.blue},
+	['r?'] = {':CONFIRM',          _COLORS.blue},
+	['rm'] = {'--MORE',            _COLORS.blue},
+	['R']  = {'REPLACE',           _COLORS.red},
+	['Rv'] = {'VIRTUAL',           _COLORS.red},
+	['s']  = {'SELECT',            _COLORS.blue},
+	['S']  = {'SELECT',            _COLORS.blue},
+	['t']  = {'TERMINAL',          _COLORS.orange},
+	['v']  = {'VISUAL',            _COLORS.blue},
+	['V']  = {'VISUAL LINE',       _COLORS.blue},
+	['!']  = {'SHELL',             _COLORS.yellow},
+
+	-- libmodal
+	['TABS']    = _COLORS.tan,
+	['BUFFERS'] = _COLORS.teal,
+	['TABLES']  = _COLORS.orange_light,
+}
+
+require('galaxyline').section.left =
+{
+	{ViMode = {
+		provider = function() -- auto change color according the vim mode
+			local mode_color = nil
+			local mode_name = nil
+
+			if vim.b.libmodalActiveModeName then
+				mode_name = vim.b.libmodalActiveModeName
+				mode_color = _MODES[mode_name]
+			else
+				local current_mode = _MODES[vim.fn.mode(true)]
+
+				mode_name = current_mode[1]
+				mode_color = current_mode[2]
+			end
+
+			-- If you have Iron-E/nvim-highlite, use this step.
+			-- If not, just manually highlight it with vim.cmd()
+			require('highlite').highlight('GalaxyViMode', {fg=mode_color, style='bold'})
+
+			return '▊ '..mode_name..' '
+		end,
+		highlight = {_HEX_COLORS.bar.side, _HEX_COLORS.bar.side},
+		separator = _SEPARATORS.right,
+		separator_highlight = {_HEX_COLORS.bar.side, get_file_icon_color}
+	}}
+}
+```
