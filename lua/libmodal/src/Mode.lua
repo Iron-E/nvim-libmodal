@@ -252,7 +252,11 @@ function _metaMode:_tearDown()
 	end
 
 	if vim.g then -- this step requires 0.5
-		vim.g.libmodalActiveModeName = self._previousModeName
+		if self._previousModeName and #vim.trim(self._previousModeName) < 1 then
+			vim.g.libmodalActiveModeName = nil
+		else
+			vim.g.libmodalActiveModeName = self._previousModeName
+		end
 	end
 
 	self._winState:restore()
