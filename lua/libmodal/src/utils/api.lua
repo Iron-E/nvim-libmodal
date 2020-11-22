@@ -124,7 +124,6 @@ end
 	* `msg` => the message of the error.
 ]]
 --------------------------------------
--- local returnHighlightSegment = HighlightSegment.new('Question', '\nPress any key to return.')
 function api.nvim_show_err(title, msg)
 	local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
 	api.nvim_lecho({
