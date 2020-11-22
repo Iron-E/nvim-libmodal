@@ -53,7 +53,7 @@ end
 
 local _metaPopup = require('libmodal/src/classes').new(Popup.TYPE)
 
---------------------------------------
+-------------------------------------
 --[[ SUMMARY:
 	* Close `self.window`
 	* The `self` is inert after calling this.
@@ -61,14 +61,14 @@ local _metaPopup = require('libmodal/src/classes').new(Popup.TYPE)
 --[[ PARAMS:
 	* `keep_buffer` => whether or not to keep `self.buffer`.
 ]]
---------------------------------------
-function _metaPopup:close(keep_buffer)
+-------------------------------------
+function _metaPopup:close(keepBuffer)
 	if valid(self.window) then
 		api.nvim_win_close(self.window, false)
 		self.window = nil
 	end
 
-	if not keep_buffer then
+	if not keepBuffer then
 		self.buffer = nil
 		self._inputChars = nil
 	end

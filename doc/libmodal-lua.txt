@@ -349,7 +349,7 @@ VARIABLES                                         *libmodal-lua-Popup-variables*
 		                - api.nvim_get_option('cmdheight')
 		                - 1,
 		['style']     = 'minimal',
-		['width']     = 25
+		['width']     = 1
 	}
 <
 
@@ -376,11 +376,22 @@ VARIABLES                                         *libmodal-lua-Popup-variables*
 --------------------------------------------------------------------------------
 FUNCTIONS                                         *libmodal-lua-Popup-functions*
 
-`self`:close()                                        *libmodal-lua-Popup.close()*
+`self`:close({keepBuffer})                            *libmodal-lua-Popup.close()*
 
-	Close the window that this `Popup` represents.
+	Close the |Popup.window|.
 
-	Note: All variables of `Popup` are de-initialized after this method.
+	Note: Variables of |Popup| are de-initialized after this method.
+
+	Parameters: ~
+		{keepBuffer}  A `boolean` that (when `true`) indicates the underlying
+		              |scratch-buffer| should be kept
+
+`self`:open()                                          *libmodal-lua-Popup.open()*
+
+	Open the |Popup.window|.
+
+	Note: if the |Popup.window| is already open, then it will be reopened in
+	      case the |current_tabpage| has changed.
 
 `self`:refresh({inputBytes})                        *libmodal-lua-Popup.refresh()*
 
