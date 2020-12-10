@@ -969,7 +969,7 @@ want to for their mode specifically. >
   document.)
 
 --------------------------------------------------------------------------------
-FUNCTIONS                                          *libmodal-lua-Mode-functions*
+VARIABLES                                          *libmodal-lua-Mode-variables*
 
 `self`.exit                                               *libmodal-lua-Mode.exit*
 
@@ -1043,6 +1043,8 @@ FUNCTIONS                                          *libmodal-lua-Mode-functions*
 		|libmodal-lua-ParseTable|  For information about how to use this
 		                         variable.
 
+--------------------------------------------------------------------------------
+FUNCTIONS                                          *libmodal-lua-Mode-functions*
 
 `self`:enter()                                         *libmodal-lua-Mode.enter()*
 
