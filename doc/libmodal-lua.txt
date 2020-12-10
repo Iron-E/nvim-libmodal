@@ -115,7 +115,7 @@ keybinding:expression pairs.
 See: |libmodal-mode| for more information.
 
 --------------------------------------------------------------------------------
-FUNCTIONS                                    *libmodal-lua-ParseTable-functions*
+VARIABLES                                    *libmodal-lua-ParseTable-variables*
 
 `ParseTable`.CR                                       *libmodal-lua-ParseTable.CR*
 
@@ -127,6 +127,8 @@ FUNCTIONS                                    *libmodal-lua-ParseTable-functions*
 	Value: ~
 		13
 
+--------------------------------------------------------------------------------
+FUNCTIONS                                    *libmodal-lua-ParseTable-functions*
 
 `ParseTable`.stringSplit({str}, {regex})   *libmodal-lua-ParseTable.stringSplit()*
 
@@ -503,7 +505,7 @@ These are global functions used throughout the project. They are never
 modified and never meant TO be modified.
 
 --------------------------------------------------------------------------------
-FUNCTIONS                                       *libmodal-lua-globals-functions*
+VARIABLES                                       *libmodal-lua-globals-variables*
 
 `globals`.DEFAULT_ERROR_TITLE           *libmodal-lua-globals.DEFAULT_ERROR_TITLE*
 
@@ -583,6 +585,8 @@ FUNCTIONS                                       *libmodal-lua-globals-functions*
 	Value: ~
 		1
 
+--------------------------------------------------------------------------------
+FUNCTIONS                                       *libmodal-lua-globals-functions*
 
 `globals`.is_false({val})                        *libmodal-lua-globals.is_false()*
 
