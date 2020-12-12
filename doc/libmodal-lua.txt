@@ -115,7 +115,7 @@ keybinding:expression pairs.
 See: |libmodal-mode| for more information.
 
 --------------------------------------------------------------------------------
-FUNCTIONS                                    *libmodal-lua-ParseTable-functions*
+VARIABLES                                    *libmodal-lua-ParseTable-variables*
 
 `ParseTable`.CR                                       *libmodal-lua-ParseTable.CR*
 
@@ -505,7 +505,7 @@ These are global functions used throughout the project. They are never
 modified and never meant TO be modified.
 
 --------------------------------------------------------------------------------
-FUNCTIONS                                       *libmodal-lua-globals-functions*
+VARIABLES                                       *libmodal-lua-globals-variables*
 
 `globals`.DEFAULT_ERROR_TITLE           *libmodal-lua-globals.DEFAULT_ERROR_TITLE*
 
@@ -806,7 +806,7 @@ FUNCTIONS                                           *libmodal-lua-Layer-function
 	See also: ~
 		|libmodal-lua-Layer.exit()|  How to enter the `Layer`.
 
-`self`:map({mode}, {lhs}, {rhs}, {options})           *libmodal-lua-Layer.enter()*
+`self`:map({mode}, {lhs}, {rhs}, {options})           *libmodal-lua-Layer.map()*
 
 	Add a mapping to the `Layer`.
 
@@ -969,7 +969,7 @@ want to for their mode specifically. >
   document.)
 
 --------------------------------------------------------------------------------
-FUNCTIONS                                          *libmodal-lua-Mode-functions*
+VARIABLES                                          *libmodal-lua-Mode-variables*
 
 `self`.exit                                               *libmodal-lua-Mode.exit*
 
