@@ -81,8 +81,8 @@ end
 	* If the popup was already open, close it and re-open it.
 ]]
 --------------------------
-function _metaPopup:open()
-	local config = Popup.config
+function _metaPopup:open(config)
+	if not config then config = Popup.config end
 
 	if valid(self.window) then
 		config = vim.tbl_extend('force', config, api.nvim_win_get_config(self.window))

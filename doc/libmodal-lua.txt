@@ -386,12 +386,19 @@ FUNCTIONS                                         *libmodal-lua-Popup-functions*
 		{keepBuffer}  A `boolean` that (when `true`) indicates the underlying
 		              |scratch-buffer| should be kept
 
-`self`:open()                                          *libmodal-lua-Popup.open()*
+`self`:open({config})                                  *libmodal-lua-Popup.open()*
 
 	Open the |Popup.window|.
 
 	Note: if the |Popup.window| is already open, then it will be reopened in
 	      case the |current_tabpage| has changed.
+
+	      In this case, it will also override the default options with the
+	      options in the window so there is no need to pass in {config} a
+	      second time.
+
+	Parameters: ~
+		{config}  Same as |nvim_open_win| {config}.
 
 `self`:refresh({inputBytes})                        *libmodal-lua-Popup.refresh()*
 
