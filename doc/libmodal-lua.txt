@@ -328,7 +328,7 @@ opened with the following options: >
 --------------------------------------------------------------------------------
 VARIABLES                                         *libmodal-lua-Popup-variables*
 
-`Popup`.config                                     *libmodal-lua-Popup.apiOptions*
+`Popup`.config                                         *libmodal-lua-Popup.config*
 
 	The options used when opening a `Popup`.
 
@@ -413,9 +413,13 @@ FUNCTIONS                                         *libmodal-lua-Popup-functions*
 		{inputBytes}  An array-like `table` of |char2nr|s to write to the
 		              `Popup`.
 
-`Popup`.new()                                           *libmodal-lua-Popup.new()*
+`Popup`.new({config})                                   *libmodal-lua-Popup.new()*
 
 	Create a new `Popup` and immediately open it.
+
+	Parameters: ~
+		{config}  Same as |nvim_open_win| {config}.
+		          Note: defaults to |Popup.config|.
 
 	Return: ~
 		  * A new `Popup`.

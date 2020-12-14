@@ -85,7 +85,7 @@ function _metaPopup:open(config)
 	if not config then config = Popup.config end
 
 	if valid(self.window) then
-		config = vim.tbl_extend('force', config, api.nvim_win_get_config(self.window))
+		config = vim.tbl_extend('keep', config, api.nvim_win_get_config(self.window))
 		self:close(true)
 	end
 
@@ -141,7 +141,7 @@ end
 	* A new popup window.
 ]]
 --------------------
-function Popup.new()
+function Popup.new(config)
 	local buf = api.nvim_create_buf(false, true)
 
 	local self = setmetatable(
@@ -152,7 +152,7 @@ function Popup.new()
 		_metaPopup
 	)
 
-	self:open()
+	self:open(config)
 
 	return self
 end
