@@ -6,6 +6,7 @@
 
 local globals   = require('libmodal/src/globals')
 local utils     = require('libmodal/src/utils')
+local Vars      = require('libmodal/src/Vars')
 
 local vim = vim
 local api  = vim.api
@@ -74,6 +75,11 @@ end
 ]]
 ---------------------------------
 function _metaPrompt:_inputLoop()
+	-- If the mode is not handling exit events automatically and the global exit var is true.
+	if self.exit.supress and globals.is_true(self.exit:nvimGet()) then
+		return false
+	end
+
 	-- clear previous `echo`s.
 	utils.api.nvim_redraw()
 
@@ -197,6 +203,7 @@ function Prompt.new(name, instruction, ...)
 
 	local self = setmetatable(
 		{
+			['exit']         = Vars.new('exit', name),
 			['indicator']    = require('libmodal/src/Indicator').prompt(name),
 			['input']        = require('libmodal/src/Vars').new('input', name),
 			['_instruction'] = instruction,
@@ -206,7 +213,9 @@ function Prompt.new(name, instruction, ...)
 	)
 
 	-- get the arguments
-	local userCompletions = unpack({...})
+	local userCompletions, supressExit = unpack({...})
+
+	self.exit.supress = supressExit or false
 
 	-- get the completion list.
 	if type(instruction) == globals.TYPE_TBL then -- unload the keys of the mode command table.
