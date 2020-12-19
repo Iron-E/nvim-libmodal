@@ -236,8 +236,8 @@ FUNCTIONS                                               *libmodal-usage-function
 		|nvim_set_keymap()|         For more information about {keymap}.
 
                   *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
-`libmodal.prompt`.enter({name}, {instruction} [, {completions}])
-`libmodal`#Prompt({name}, {instruction} [, {completions}])
+`libmodal.prompt`.enter({name}, {instruction} [, {completions}, {supressExit}])
+`libmodal`#Prompt({name}, {instruction} [, {completions}, {supressExit}])
 
 	Besides accepting user input like keys in |Normal-mode|, |libmodal| is
 	also capable of prompting the user for |input| like |Cmdline-mode|. To
@@ -300,6 +300,17 @@ FUNCTIONS                                               *libmodal-usage-function
 
 			Note: If no `help` command is defined, one will be created
 			      automatically.
+
+		{supressExit}  Whether or not to automatically exit the mode upon an
+                       <Esc> press.
+
+			- If |v:false|/`false`, then <Esc> is automatically mapped to
+              exiting.
+			- If |v:true|/`true`, then <Esc> is ignored unless specified by
+			  the user. In such cases, the user should set the
+			  `g:`{name}`ModeExit` variable to `true` when exiting is
+			  desired. See |libmodal-examples-supress-exit|.
+
 
 	See also: ~
 		|lua-eval|                  For type conversions between Vimscript to |Lua|.

@@ -1140,7 +1140,7 @@ FUNCTIONS                                        *libmodal-lua-Prompt-functions*
 <
 
                                                      *libmodal-lua-Prompt.new()*
-`Prompt`.new({name}, {instruction} [, {completions}])
+`Prompt`.new({name}, {instruction} [, {completions}, {supressExit}])
 
 	User input is taken using |input()|. It is passed through a |g:var|
 	determined by the {name} of the mode. For example, if {name} is "FOO"
