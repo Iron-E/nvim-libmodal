@@ -1,11 +1,7 @@
---[[
-	/*
-	 * IMPORTS
-	 */
---]]
+--[[/* IMPORTS */]]
 
-local api = vim.api
-local libmodal_api = require('libmodal/src/utils/api')
+local go = vim.go
+local api = require('libmodal/src/utils/api')
 
 --[[
 	/*
@@ -13,10 +9,7 @@ local libmodal_api = require('libmodal/src/utils/api')
 	 */
 --]]
 
-local WindowState = {['TYPE'] = 'libmodal-window-state'}
-
-local height = 'winheight'
-local width = 'winwidth'
+local WindowState = {TYPE = 'libmodal-window-state'}
 
 --[[
 	/*
@@ -32,9 +25,9 @@ local _metaWindowState = require('libmodal/src/classes').new(WindowState.TYPE)
 ]]
 -----------------------------------
 function _metaWindowState:restore()
-	api.nvim_set_option(height, self.height)
-	api.nvim_set_option(width, self.width)
-	libmodal_api.nvim_redraw()
+	go.winheight = self.height
+	go.winwidth = self.width
+	api.nvim_redraw()
 end
 
 --[[
@@ -54,8 +47,8 @@ end
 function WindowState.new()
 	return setmetatable(
 		{
-			['height'] = api.nvim_get_option(height),
-			['width']  = api.nvim_get_option(width),
+			height = go.winheight,
+			width  = go.winwidth,
 		},
 		_metaWindowState
 	)

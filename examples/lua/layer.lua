@@ -3,14 +3,14 @@ local libmodal = require('libmodal')
 
 -- create a new layer.
 local layer = libmodal.Layer.new({
-	['n'] = { -- normal mode mappings
-		['gg'] = { -- remap `gg`
-			['rhs'] = 'G', -- map it to `G`
-			['noremap'] = true, -- don't recursively map.
+	n = { -- normal mode mappings
+		gg = { -- remap `gg`
+			rhs = 'G', -- map it to `G`
+			noremap = true, -- don't recursively map.
 		},
-		['G'] = { -- remap `G`
-			['rhs'] = 'gg', -- map it to `gg`
-			['noremap'] = true -- don't recursively map.
+		G = { -- remap `G`
+			rhs = 'gg', -- map it to `gg`
+			noremap = true -- don't recursively map.
 		}
 	}
 })
@@ -24,12 +24,12 @@ function LibmodalLayerExampleExit()
 end
 
 -- Add an additional mapping for `z`.
-layer:map('n', 'z', 'gg', {['noremap'] = true})
+layer:map('n', 'z', 'gg', {noremap = true})
 
 -- add an additional mapping for `q`.
 layer:map(
 	'n', 'q', ':lua LibmodalLayerExampleExit()<CR>',
-	{['noremap'] = true, ['silent']  = true}
+	{noremap = true, silent  = true}
 )
 
 --[[ unmap `gg` and `G`. Notice they both return to their defaults,

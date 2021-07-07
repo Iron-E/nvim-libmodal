@@ -23,8 +23,8 @@ local HighlightSegment = {}
 --------------------------------
 function HighlightSegment.new(hlgroup, str)
 	return {
-		['hl'] = hlgroup,
-		['str'] = str
+		hl = hlgroup,
+		str = str
 	}
 end
 

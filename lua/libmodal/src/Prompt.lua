@@ -1,15 +1,11 @@
---[[
-	/*
-	 * IMPORTS
-	 */
---]]
+--[[/* IMPORTS */]]
 
 local globals   = require('libmodal/src/globals')
 local utils     = require('libmodal/src/utils')
 local Vars      = require('libmodal/src/Vars')
 
-local vim = vim
 local api  = vim.api
+local fn = vim.fn
 
 --[[
 	/*
@@ -17,7 +13,7 @@ local api  = vim.api
 	 */
 --]]
 
-local Prompt = {['TYPE'] = 'libmodal-prompt'}
+local Prompt = {TYPE = 'libmodal-prompt'}
 
 local _HELP = 'help'
 local _REPLACEMENTS = {
@@ -62,7 +58,7 @@ function _metaPrompt:_executeInstruction(userInput)
 		else -- show an error.
 			utils.api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
 		end
-	elseif type(instruction) == globals.TYPE_STR and vim.fn then -- The instruction is a function. Works on Neovim 0.5+.
+	elseif type(instruction) == globals.TYPE_STR then -- The instruction is a function. Works on Neovim 0.5+.
 		vim.fn[instruction]()
 	else -- attempt to call the instruction.
 		instruction()
@@ -90,13 +86,10 @@ function _metaPrompt:_inputLoop()
 	api.nvim_command('echohl ' .. self.indicator.hl)
 
 	-- set the user input variable
-	if self._completions
-	then userInput =
-		api.nvim_call_function('libmodal#_inputWith', {
-			self.indicator.str, self._completions
-		})
+	if self._completions then userInput =
+		fn['libmodal#_inputWith'](self.indicator.str, self._completions)
 	else userInput =
-		api.nvim_call_function('input', {self.indicator})
+		fn.input(self.indicator)
 	end
 
 	-- determine what to do with the input
@@ -203,11 +196,11 @@ function Prompt.new(name, instruction, ...)
 
 	local self = setmetatable(
 		{
-			['exit']         = Vars.new('exit', name),
-			['indicator']    = require('libmodal/src/Indicator').prompt(name),
-			['input']        = require('libmodal/src/Vars').new('input', name),
-			['_instruction'] = instruction,
-			['_name']        = name
+			exit         = Vars.new('exit', name),
+			indicator    = require('libmodal/src/Indicator').prompt(name),
+			input        = require('libmodal/src/Vars').new('input', name),
+			_instruction = instruction,
+			_name        = name
 		},
 		_metaPrompt
 	)

@@ -4,8 +4,8 @@
 	 */
 --]]
 
-local vim = vim
 local api = vim.api
+local go = vim.go
 
 --[[
 	/*
@@ -15,17 +15,15 @@ local api = vim.api
 
 local Popup = require('libmodal/src/classes').new(
 	'libmodal-popup',
-	{['config'] = {
-		['anchor']    = 'SW',
-		['col']       = api.nvim_get_option('columns') - 1,
-		['focusable'] = false,
-		['height']    = 1,
-		['relative']  = 'editor',
-		['row']       = api.nvim_get_option('lines')
-		                - api.nvim_get_option('cmdheight')
-		                - 1,
-		['style']     = 'minimal',
-		['width']     = 1
+	{config = {
+		anchor    = 'SW',
+		col       = go.columns - 1,
+		focusable = false,
+		height    = 1,
+		relative  = 'editor',
+		row       = go.lines - go.cmdheight - 1,
+		style     = 'minimal',
+		width     = 1
 	}}
 )
 
@@ -146,8 +144,8 @@ function Popup.new(config)
 
 	local self = setmetatable(
 		{
-			['buffer'] = buf,
-			['_inputChars'] = {},
+			buffer = buf,
+			_inputChars = {},
 		},
 		_metaPopup
 	)

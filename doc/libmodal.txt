@@ -144,10 +144,10 @@ FUNCTIONS                                               *libmodal-usage-function
 			  map of user key-chord to Vim |command|s. Example: >
 			      -- LUA
 			      local modeInstruction = {
-			          ['zf'] = 'split',
-			          ['zfo'] = 'vsplit',
+			          zf = 'split',
+			          zfo = 'vsplit',
 			          -- You can also use lua functions
-			          ['zfc'] = function() return 'tabnew' end
+			          zfc = function() return 'tabnew' end
 			      }
 
 			    " VIMSCRIPT
@@ -217,7 +217,7 @@ FUNCTIONS                                               *libmodal-usage-function
 			{
 				[<mode>] = {
 					[<lhs>] = {
-						['rhs'] = <rhs>,
+						rhs = <rhs>,
 						<opts>
 					},
 					…
@@ -259,9 +259,9 @@ FUNCTIONS                                               *libmodal-usage-function
 			  map of user inputs to Vim |command|s. Example: >
 			      -- LUA
 			      local modeInstruction = {
-			          ['new']   = 'tabnew',
-			          ['close'] = 'tabclose',
-			          ['last']  = 'tablast'
+			          new   = 'tabnew',
+			          close = 'tabclose',
+			          last  = 'tablast'
 			      }
 
 			      " VIMSCRIPT
@@ -334,7 +334,6 @@ See: |libmodal-usage|, |libmodal-use-case|, |lua-require-example|.
 MODES                                                    *libmodal-examples-modes*
 
 Using a callback `function`: >
-	local api = vim.api
 	local libmodal = require('libmodal')
 	local fooModeInputHistory = {}
 
@@ -346,14 +345,14 @@ Using a callback `function`: >
 
 	function fooMode()
 		fooModeInputHistory[#fooModeInputHistory + 1] = string.char(
-			api.nvim_get_var('fooModeInput')
+			vim.g.fooModeInput
 		)
 
 		local index = 1
 		if fooModeInputHistory[1] == 'z' then
 			if fooModeInputHistory[2] == 'f' then
 				if fooModeInputHistory[3] == 'o' then
-					api.nvim_command("echom 'It works!'")
+					vim.api.nvim_command "echom 'It works!'"
 				else index = 3 end
 			else index = 2 end
 		end
@@ -377,9 +376,9 @@ using a |key-mapping| `dict`: >
 Using a |key-mapping| `table`: >
 	local libmodal = require('libmodal')
 	local fooModeCombos = {
-		['zf'] = 'split',
-		['zfo'] = 'vsplit',
-		['zfc'] = 'tabnew'
+		zf = 'split',
+		zfo = 'vsplit',
+		zfc = 'tabnew'
 	}
 
 	libmodal.mode.enter('FOO', fooModeCombos)
@@ -393,17 +392,17 @@ Using a callback `function`: >
 
 	function fooMode()
 		local userInput = string.char(
-			vim.api.nvim_get_var('fooModeInput')
+			vim.g.fooModeInput
 		)
 
 		if userInput == '' then
-			vim.api.nvim_command("echom 'You cant leave using <Esc>.'")
+			vim.api.nvim_command "echom 'You cant leave using <Esc>.'"
 		elseif userInput == 'q' then
-			vim.api.nvim_set_var('fooModeExit', true)
+			vim.g.fooModeExit = true
 		end
 	end
 
-	vim.api.nvim_set_var('fooModeExit', 0)
+	vim.g.fooModeExit = false
 	libmodal.mode.enter('FOO', fooMode, true)
 <
 
@@ -421,10 +420,10 @@ Using a |key-mapping| `table`: >
 	local libmodal = require('libmodal')
 	local fooModeCombos = {
 		[''] = 'echom "You cant exit using escape."',
-		['q'] = 'let g:fooModeExit = 1'
+		q = 'let g:fooModeExit = 1'
 	}
 
-	vim.api.nvim_set_var('fooModeExit', 0)
+	vim.g.fooModeExit = false
 	libmodal.mode.enter('FOO', fooModeCombos, true)
 <
 
@@ -436,9 +435,9 @@ Using a callback `function`: >
 	local fooModeRecurse = 0
 
 	function fooMode()
-		local userInput = string.char(vim.api.nvim_get_var(
-			'foo' .. tostring(fooModeRecurse) .. 'ModeInput'
-		))
+		local userInput = string.char(vim.g[
+			'foo'..tostring(fooModeRecurse)..'ModeInput'
+		])
 
 		if userInput == 'z' then
 			fooModeRecurse = fooModeRecurse + 1
@@ -475,7 +474,7 @@ Using a |key-mapping| `table`: >
 	local libmodal = require('libmodal')
 	local fooModeRecurse = 0
 	local fooModeCombos = {
-		['z'] = 'lua fooMode()'
+		z = 'lua fooMode()'
 	}
 
 	function fooMode()
@@ -494,14 +493,14 @@ LAYERS                                                  *libmodal-examples-layer
 
 	-- save the exit function
 	local exitFunc = libmodal.layer.enter({
-		['n'] = { -- normal mode
-			['gg'] = { -- remap `gg`
-				['rhs'] = 'G', -- map it to `G`
-				['noremap'] = true -- don't remap
+		n = { -- normal mode
+			gg = { -- remap `gg`
+				rhs = 'G', -- map it to `G`
+				noremap = true -- don't remap
 			},
-			['G'] = { -- remap `G`
-				['rhs'] = 'gg', -- map it to `gg`
-				['noremap'] = true -- don't remap
+			G = { -- remap `G`
+				rhs = 'gg', -- map it to `gg`
+				noremap = true -- don't remap
 			}
 		}
 	})
@@ -516,17 +515,17 @@ PROMPTS                                                *libmodal-examples-prompt
 
 Using a callback `function`: >
 	local libmodal = require('libmodal')
-	local api = vim.api
+	local cmd = vim.api.nvim_command
 	local commandList = {'new', 'close', 'last'}
 
 	function fooMode()
-		local userInput = vim.api.nvim_get_var('fooModeInput')
+		local userInput = vim.api.nvim_get_var 'fooModeInput'
 		if userInput == 'new' then
-			api.nvim_command('tabnew')
+			cmd 'tabnew'
 		elseif userInput == 'close' then
-			api.nvim_command('tabclose')
+			cmd 'tabclose'
 		elseif userInput == 'last' then
-			api.nvim_command('tablast')
+			cmd 'tablast'
 		end
 	end
 
@@ -546,9 +545,9 @@ Using a |command| `dict`: >
 Using a |command| `table`: >
 	local libmodal = require('libmodal')
 	local commands = {
-		['new']   = 'tabnew',
-		['close'] = 'tabclose',
-		['last']  = 'tablast'
+		new   = 'tabnew',
+		close = 'tabclose',
+		last  = 'tablast'
 	}
 
 	libmodal.prompt.enter('BAR', commands)
@@ -589,16 +588,16 @@ To enable 'timeout's, one may set the following |variables|:
 	Lua: ~
 >
 	" Set libmodal modes to turn timeouts on.
-	vim.api.nvim_set_var('libmodalTimeouts', true)
+	vim.g.libmodalTimeouts = true
 	" Enable timeouts for specific mode.
-	vim.api.nvim_set_var('{name}ModeTimeouts', true)
+	vim.g[name..'ModeTimeouts'] = true
 <
 	Vimscript: ~
 >
 	" Set libmodal modes to turn timeouts on.
-	let g:libmodalTimeouts = 1
+	let g:libmodalTimeouts = v:true
 	" Enable timeouts for specific mode.
-	let g:{name}ModeTimeouts = 1
+	let g:{name}ModeTimeouts = v:true
 <
 
 
@@ -648,13 +647,13 @@ then reset it upon exit. Example:
 
 		function fooMode()
 			-- Get the user's preferred timeout length.
-			local prevTimeoutLen = api.nvim_get_option('timeoutlen')
+			local prevTimeoutLen = vim.go.timeoutlen
 			-- Set it to something else, like 1500ms.
-			api.nvim_set_option('timeoutlen', 1500)
+			vim.go.timeoutlen = 1500
 			-- Enter a mode.
 			libmodal.mode.enter(…)
 			-- Restore the `timeoutlen`
-			api.nvim_set_option('timeoutlen', prevTimeoutLen)
+			vim.go.timeoutlen = prevTimeoutLen
 		end
 <
 

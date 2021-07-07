@@ -5,7 +5,7 @@
 --]]
 
 local Indicator = {
-	['HighlightSegment'] = require('libmodal/src/Indicator/HighlightSegment')
+	HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
 }
 
 -- highlight group names

@@ -59,35 +59,35 @@ _COLORS.text = _COLORS.gray_light
 
 -- Table which gets hex values from _COLORS.
 local _HEX_COLORS = setmetatable(
-	{['bar'] = setmetatable({}, {['__index'] = function(_, key) return _COLORS.bar[key] and _COLORS.bar[key][1] or nil end})},
-	{['__index'] = function(_, key) local color = _COLORS[key] return color and color[1] or nil end}
+	{bar = setmetatable({}, {__index = function(_, key) return _COLORS.bar[key] and _COLORS.bar[key][1] or nil end})},
+	{__index = function(_, key) local color = _COLORS[key] return color and color[1] or nil end}
 )
 
 local _MODES =
 {
-	['c']  = {'COMMAND-LINE',      _COLORS.red},
-	['ce'] = {'NORMAL EX',         _COLORS.red},
-	['cv'] = {'EX',                _COLORS.red},
-	['i']  = {'INSERT',            _COLORS.green},
-	['ic'] = {'INS-COMPLETE',      _COLORS.green},
-	['n']  = {'NORMAL',            _COLORS.purple},
-	['no'] = {'OPERATOR-PENDING',  _COLORS.purple},
-	['r']  = {'HIT-ENTER',         _COLORS.blue},
+	c  = {'COMMAND-LINE',      _COLORS.red},
+	ce = {'NORMAL EX',         _COLORS.red},
+	cv = {'EX',                _COLORS.red},
+	i  = {'INSERT',            _COLORS.green},
+	ic = {'INS-COMPLETE',      _COLORS.green},
+	n  = {'NORMAL',            _COLORS.purple},
+	no = {'OPERATOR-PENDING',  _COLORS.purple},
+	r  = {'HIT-ENTER',         _COLORS.blue},
 	['r?'] = {':CONFIRM',          _COLORS.blue},
-	['rm'] = {'--MORE',            _COLORS.blue},
-	['R']  = {'REPLACE',           _COLORS.red},
-	['Rv'] = {'VIRTUAL',           _COLORS.red},
-	['s']  = {'SELECT',            _COLORS.blue},
-	['S']  = {'SELECT',            _COLORS.blue},
-	['t']  = {'TERMINAL',          _COLORS.orange},
-	['v']  = {'VISUAL',            _COLORS.blue},
-	['V']  = {'VISUAL LINE',       _COLORS.blue},
+	rm = {'--MORE',            _COLORS.blue},
+	R  = {'REPLACE',           _COLORS.red},
+	Rv = {'VIRTUAL',           _COLORS.red},
+	s  = {'SELECT',            _COLORS.blue},
+	S  = {'SELECT',            _COLORS.blue},
+	t  = {'TERMINAL',          _COLORS.orange},
+	v  = {'VISUAL',            _COLORS.blue},
+	V  = {'VISUAL LINE',       _COLORS.blue},
 	['!']  = {'SHELL',             _COLORS.yellow},
 
 	-- libmodal
-	['TABS']    = _COLORS.tan,
-	['BUFFERS'] = _COLORS.teal,
-	['TABLES']  = _COLORS.orange_light,
+	TABS    = _COLORS.tan,
+	BUFFERS = _COLORS.teal,
+	TABLES  = _COLORS.orange_light,
 }
 
 require('galaxyline').section.left =
