@@ -1,9 +1,7 @@
 --[[/* IMPORTS */]]
 
-local fn = vim.fn
 local globals = require('libmodal/src/globals')
 local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
-local vim_api = vim.api
 
 --[[/* MODULE */]]
 
@@ -19,17 +17,17 @@ function api.mode_exit(exit_char)
 	end
 
 	-- Exit the prompt by sending an escape key.
-	vim_api.nvim_feedkeys(exit_char, 'nt', false)
+	vim.api.nvim_feedkeys(exit_char, 'nt', false)
 end
 
 --- Make vim ring the visual/audio bell, if it is enabled.
 function api.nvim_bell()
-	vim_api.nvim_command('normal '..string.char(27)) -- escape char
+	vim.api.nvim_command('normal '..string.char(27)) -- escape char
 end
 
 --- Gets one character of user input, as a number.
 function api.nvim_input()
-	return fn.getchar()
+	return vim.fn.getchar()
 end
 
 --------------------------
@@ -39,7 +37,7 @@ end
 ]]
 --------------------------
 function api.nvim_redraw()
-	vim_api.nvim_command 'mode'
+	vim.api.nvim_command 'mode'
 end
 
 ---------------------------------
@@ -65,9 +63,9 @@ function api.nvim_lecho(hlTables)
 		lecho_template[2] = tostring(hlTable.hl)
 		lecho_template[4] = tostring(hlTable.str)
 
-		vim_api.nvim_command(table.concat(lecho_template))
+		vim.api.nvim_command(table.concat(lecho_template))
 	end
-	vim_api.nvim_command 'echohl None'
+	vim.api.nvim_command 'echohl None'
 end
 
 --------------------------------------
@@ -84,7 +82,7 @@ function api.nvim_show_err(title, msg)
 		HighlightSegment.new('Title', tostring(title)..'\n'),
 		HighlightSegment.new('Error', tostring(msg)),
 	})
-	fn.getchar()
+	vim.fn.getchar()
 end
 
 return api

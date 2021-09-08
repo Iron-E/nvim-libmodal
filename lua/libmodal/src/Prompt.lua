@@ -4,14 +4,7 @@ local globals   = require('libmodal/src/globals')
 local utils     = require('libmodal/src/utils')
 local Vars      = require('libmodal/src/Vars')
 
-local api  = vim.api
-local fn = vim.fn
-
---[[
-	/*
-	 * MODULE
-	 */
---]]
+--[[/* MODULE */]]
 
 local Prompt = {TYPE = 'libmodal-prompt'}
 
@@ -51,7 +44,7 @@ function _metaPrompt:_executeInstruction(userInput)
 			if type(to_execute) == globals.TYPE_FUNC then
 				to_execute()
 			else
-				api.nvim_command(instruction[userInput])
+				vim.api.nvim_command(instruction[userInput])
 			end
 		elseif userInput == _HELP then -- The user did not define a 'help' command, so use the default.
 			self._help:show()
@@ -83,13 +76,13 @@ function _metaPrompt:_inputLoop()
 	local userInput = ''
 
 	-- echo the highlighting
-	api.nvim_command('echohl ' .. self.indicator.hl)
+	vim.api.nvim_command('echohl ' .. self.indicator.hl)
 
 	-- set the user input variable
 	if self._completions then userInput =
-		fn['libmodal#_inputWith'](self.indicator.str, self._completions)
+		vim.fn['libmodal#_inputWith'](self.indicator.str, self._completions)
 	else userInput =
-		fn.input(self.indicator)
+		vim.fn.input(self.indicator)
 	end
 
 	-- determine what to do with the input

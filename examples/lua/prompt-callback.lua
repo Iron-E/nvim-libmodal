@@ -1,6 +1,5 @@
 -- Imports
 local libmodal = require 'libmodal'
-local cmd = vim.api.nvim_command
 
 -- The list of commands. Providing this will allow for autocomplete.
 local commandList = {'new', 'close', 'last'}
@@ -9,11 +8,11 @@ local commandList = {'new', 'close', 'last'}
 function FooMode()
 	local userInput = vim.g.fooModeInput
 	if userInput == 'new' then
-		cmd 'tabnew'
+		vim.api.nvim_command 'tabnew'
 	elseif userInput == 'close' then
-		cmd 'tabclose'
+		vim.api.nvim_command 'tabclose'
 	elseif userInput == 'last' then
-		cmd 'tablast'
+		vim.api.nvim_command 'tablast'
 	end
 end
 

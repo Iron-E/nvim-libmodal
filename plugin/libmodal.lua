@@ -1,9 +1,7 @@
-local g = vim.g
+if vim.g.loaded_libmodal then return end
+vim.g.loaded_libmodal = true
 
-if g.loaded_libmodal then return end
-g.loaded_libmodal = true
-
-g.libmodalTimeouts = g.libmodalTimeouts or vim.go.timeout
+vim.g.libmodalTimeouts = vim.g.libmodalTimeouts or vim.go.timeout
 
 -- The default highlight groups (for colors) are specified below.
 -- Change these default colors by defining or linking the corresponding highlight group.

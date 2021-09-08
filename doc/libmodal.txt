@@ -515,17 +515,16 @@ PROMPTS                                                *libmodal-examples-prompt
 
 Using a callback `function`: >
 	local libmodal = require('libmodal')
-	local cmd = vim.api.nvim_command
 	local commandList = {'new', 'close', 'last'}
 
 	function fooMode()
-		local userInput = vim.api.nvim_get_var 'fooModeInput'
+		local userInput = vim.g.fooModeInput
 		if userInput == 'new' then
-			cmd 'tabnew'
+			vim.api.nvim_command 'tabnew'
 		elseif userInput == 'close' then
-			cmd 'tabclose'
+			vim.api.nvim_command 'tabclose'
 		elseif userInput == 'last' then
-			cmd 'tablast'
+			vim.api.nvim_command 'tablast'
 		end
 	end
 
@@ -642,7 +641,6 @@ then reset it upon exit. Example:
 <
 	Lua: ~
 >
-		local api = vim.api
 		local libmodal = require('libmodal')
 
 		function fooMode()

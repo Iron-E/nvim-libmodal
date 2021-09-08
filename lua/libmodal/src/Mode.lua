@@ -1,8 +1,4 @@
---[[
-	/*
-	 * IMPORTS
-	 */
---]]
+--[[/* IMPORTS */]]
 
 local classes    = require('libmodal/src/classes')
 local globals    = require('libmodal/src/globals')
@@ -10,24 +6,17 @@ local ParseTable = require('libmodal/src/collections/ParseTable')
 local utils      = require('libmodal/src/utils')
 local Vars       = require('libmodal/src/Vars')
 
-local api = vim.api
-local go = vim.go
-
---[[
-	/*
-	 * MODULE
-	 */
---]]
+--[[/* MODULE */]]
 
 local Mode = {TYPE  = 'libmodal-mode'}
 
 local _HELP = '?'
 local _TIMEOUT = {
 	CHAR = 'ø',
-	LEN  = go.timeoutlen,
-	SEND = function(self) api.nvim_feedkeys(self.CHAR, 'nt', false) end
+	LEN  = vim.go.timeoutlen,
+	SEND = function(self) vim.api.nvim_feedkeys(self.CHAR, 'nt', false) end
 }
-_TIMEOUT.NR = string.byte(_TIMEOUT.CHAR)
+_TIMEOUT.CHAR_NUMBER = string.byte(_TIMEOUT.CHAR)
 
 --[[
 	/*
@@ -60,7 +49,7 @@ classes = nil
 -----------------------------------------------------------
 function _metaMode._commandTableExecute(instruction)
 	if type(instruction) == globals.TYPE_FUNC then instruction()
-	else api.nvim_command(instruction) end
+	else vim.api.nvim_command(instruction) end
 end
 
 -----------------------------------------------
@@ -209,7 +198,7 @@ function _metaMode:_inputLoop()
 	local userInput = utils.api.nvim_input()
 
 	-- Return if there was a timeout event.
-	if userInput == _TIMEOUT.NR then
+	if userInput == _TIMEOUT.CHAR_NUMBER then
 		return true
 	end
 
