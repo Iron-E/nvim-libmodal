@@ -13,7 +13,7 @@ local libmodal_api = require('libmodal/src/utils/api')
 	 */
 --]]
 
-local Layer = {['TYPE'] = 'libmodal-layer'}
+local Layer = {TYPE = 'libmodal-layer'}
 
 local _BUFFER_CURRENT = 0
 local _ERR_NO_MAP     = 'E5555: API call: E31: No such mapping'
@@ -142,7 +142,7 @@ function _metaLayer:map(mode, lhs, rhs, options)
 
 	-- add the new mapping to the keymap
 	self._keymap[mode][lhs] = vim.tbl_extend('force',
-		options, {['rhs'] = rhs}
+		options, {rhs = rhs}
 	)
 end
 
@@ -239,7 +239,7 @@ end
 -----------------------------------------------------
 function Layer.new(keymap)
 	return setmetatable(
-		{['_keymap'] = keymap},
+		{_keymap = keymap},
 		_metaLayer
 	)
 end

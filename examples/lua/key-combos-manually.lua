@@ -1,6 +1,5 @@
 -- Imports
-local api      = vim.api
-local libmodal = require('libmodal')
+local libmodal = require 'libmodal'
 
 -- Keep track of the user's input history manually.
 local _inputHistory = {}
@@ -19,7 +18,7 @@ local function fooMode()
 	-- Append to the input history, the latest button press.
 	_inputHistory[#_inputHistory + 1] = string.char(
 		-- The input is a character number.
-		api.nvim_get_var('fooModeInput')
+		vim.g.fooModeInput
 	)
 
 	-- Custom logic to test for each character index to see if it matches the 'zfo' mapping.
@@ -27,7 +26,7 @@ local function fooMode()
 	if _inputHistory[1] == 'z' then
 		if _inputHistory[2] == 'f' then
 			if _inputHistory[3] == 'o' then
-				api.nvim_command("echom 'It works!'")
+				vim.api.nvim_command "echom 'It works!'"
 			else index = 3
 			end
 		else index = 2

@@ -1,57 +1,55 @@
---[[
-	/*
-	 * IMPORTS
-	 */
---]]
-local vim = vim
+--[[/* IMPORTS */]]
+
 local globals = require('libmodal/src/globals')
 
---[[
-	/*
-	 * MODULE
-	 */
---]]
+--[[/* Utilities */]]
 
-local Help = {['TYPE'] = 'libmodal-help'}
+--- Align `tbl` according to the `longestKeyLen`.
+--- @param tbl table what to align.
+--- @param longestKeyLen number how long the longest key is.
+--- @return table aligned
+local function tabAlign(tbl, longestKeyLen)
+	local toPrint = {}
+	for key, value in pairs(tbl) do
+		toPrint[#toPrint + 1] = key
+		local len = string.len(key)
+		local byte = string.byte(key)
+		-- account for ASCII chars that take up more space.
+		if byte <= 32 or byte == 127 then len = len + 1 end
 
---[[
-	/*
-	 * META `Help`
-	 */
---]]
+		for _ = len, longestKeyLen do
+			toPrint[#toPrint + 1] = ' '
+		end
+
+		toPrint[#toPrint + 1] = table.concat(
+			{' │ ', '\n'},
+			(type(value) == globals.TYPE_STR) and value or '<lua function>'
+		)
+	end
+	return toPrint
+end
+
+--[[/* MODULE */]]
+
+local Help = {TYPE = 'libmodal-help'}
+
+--[[/* META `Help` */]]
 
 local _metaHelp = require('libmodal/src/classes').new(Help.TYPE)
 
--------------------------
---[[ SUMMARY:
-	* Show the contents of this `Help`.
-]]
--------------------------
+--- Show the contents of this `Help`.
 function _metaHelp:show()
 	for _, helpText in ipairs(self) do
 		print(helpText)
 	end
-	vim.api.nvim_call_function('getchar', {})
+	vim.fn.getchar()
 end
 
---[[
-	/*
-	 * CLASS `Help`
-	 */
---]]
+--[[/* CLASS `Help` */]]
 
-
-----------------------------------------
---[[ SUMMARY:
-	* Create a default help table with `commandsOrMaps` and vim expressions.
-]]
---[[ PARAMS:
-	* `commandsOrMaps` => the table of commands or mappings to vim expressions.
-]]
---[[ RETURNS:
-	* A new `Help`.
-]]
-----------------------------------------
+--- Create a default help table with `commandsOrMaps` and vim expressions.
+--- @param commandsOrMaps table commands or mappings to vim expressions.
+--- @return table Help
 function Help.new(commandsOrMaps, title)
 	-- find the longest key in the table.
 	local longestKeyLen = 0
@@ -67,68 +65,21 @@ function Help.new(commandsOrMaps, title)
 		longestKeyLen = string.len(title)
 	end
 
-	-- define the separator for entries in the help table.
-	local SEPARATOR_TEMPLATE = {' │ ', '\n'}
-
-	----------------------
-	--[[ SUMMARY:
-		* Align `tbl` according to the `longestKey`.
-	]]
-	--[[ PARAMS:
-		* `tbl` => the table to align.
-	]]
-	--[[ RETURNS:
-		* The aligned `tbl`.
-	]]
-	----------------------
-	local function tabAlign(tbl)
-		local toPrint = {}
-		for key, value in pairs(tbl) do
-			toPrint[#toPrint + 1] = key
-			local len = string.len(key)
-			local byte = string.byte(key)
-			-- account for ASCII chars that take up more space.
-			if byte <= 32 or byte == 127 then len = len + 1 end
-
-			for _ = len, longestKeyLen do
-				toPrint[#toPrint + 1] = ' '
-			end
-
-			toPrint[#toPrint + 1] = table.concat(
-				SEPARATOR_TEMPLATE,
-				(type(value) == globals.TYPE_STR) and value or '<lua function>'
-			)
-		end
-		return toPrint
-	end
-
 	-- define the separator for the help table.
 	local helpSeparator = {}
-	for i = 1, string.len(title) do
-		helpSeparator[i] = '-'
-	end
+	for i = 1, string.len(title) do helpSeparator[i] = '-' end
 	helpSeparator = table.concat(helpSeparator)
 
 	-- Create a new `Help`.
 	return setmetatable(
 		{
 			[1] = ' ',
-			[2] = table.concat(tabAlign({
-				[title] = 'VIM EXPRESSION'
-			})),
-			[3] = table.concat(tabAlign({
-				[helpSeparator] = '--------------'
-			})),
-			[4] = table.concat(tabAlign(commandsOrMaps)),
+			[2] = table.concat(tabAlign({[title] = 'VIM EXPRESSION'}, longestKeyLen)),
+			[3] = table.concat(tabAlign({[helpSeparator] = '--------------'}, longestKeyLen)),
+			[4] = table.concat(tabAlign(commandsOrMaps, longestKeyLen)),
 		},
 		_metaHelp
 	)
 end
-
---[[
-	/*
-	 * PUBLICIZE `Help`.
-	 */
---]]
 
 return Help

@@ -5,7 +5,7 @@ local libmodal = require('libmodal')
 local fooModeRecurse = 0
 -- Register 'z' as the map for recursing further (by calling the FooMode function again).
 local fooModeCombos  = {
-	['z'] = 'lua FooMode()'
+	z = 'lua FooMode()'
 }
 
 -- define the FooMode() function which is called whenever the user presses 'z'

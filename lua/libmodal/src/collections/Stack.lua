@@ -4,7 +4,7 @@
 	 */
 --]]
 
-local Stack = {['TYPE'] = 'libmodal-stack'}
+local Stack = {TYPE = 'libmodal-stack'}
 
 --[[
 	/*

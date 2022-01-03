@@ -35,7 +35,7 @@ See: |libmodal-usage|, |lua|, |lua-require-example|.
 1. `libmodal`                                              *libmodal-lua-libmodal*
 
 This is the base of |libmodal|. It can be imported using: >
-	local libmodal = require('libmodal')
+	local libmodal = require 'libmodal'
 <if |libmodal| is in your 'runtimepath'.
 
 --------------------------------------------------------------------------------
@@ -190,12 +190,12 @@ FUNCTIONS                                    *libmodal-lua-ParseTable-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Create a mock set of user mappings.
 		local userTable = {
-			['zf'] = "echo 'Hello!'",
-			['zfo'] = "tabnew"
+			zf = "echo 'Hello!'",
+			zfo = "tabnew"
 		}
 
 		-- Create a new `ParseTable`
@@ -225,14 +225,14 @@ FUNCTIONS                                    *libmodal-lua-ParseTable-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Simulate user input.
 		local userInput = {122, 102} -- {'z', 'f'}
 
 		-- Create a dummy `ParseTable`.
 		local parseTable = libmodal.mode.ParseTable.new({
-			['zfo'] = 'echo "Hello!"'
+			zfo = 'echo "Hello!"'
 		})
 		-- Inspect it.
 		print(vim.inspect(parseTable))
@@ -257,7 +257,7 @@ FUNCTIONS                                    *libmodal-lua-ParseTable-functions*
 >
 		-- Create a dummy `ParseTable`.
 		local parseTable = libmodal.mode.ParseTable.new({
-			['zfo'] = 'echo "Hello!"'
+			zfo = 'echo "Hello!"'
 		})
 		-- Inspect it.
 		print(vim.inspect(parseTable))
@@ -288,8 +288,8 @@ FUNCTIONS                                    *libmodal-lua-ParseTable-functions*
 		local parseTable = libmodal.mode.ParseTable.new({})
 		-- Create some dummy keybindings.
 		local unparsedUserKeybinds = {
-			['zfo'] = 'echo "Hello!"',
-			['zfc'] = 'split'
+			zfo = 'echo "Hello!"',
+			zfc = 'split'
 		}
 
 		-- Add the dummy keybindings.
@@ -312,16 +312,14 @@ opening it and keeping updated.
 Whenever a `Popup` is created, it is immediately opened. Additionally, it is
 opened with the following options: >
 	local _winOpenOpts = {
-		['anchor']    = 'SW',
-		['col']       = api.nvim_get_option('columns') - 1,
-		['focusable'] = false,
-		['height']    = 1,
-		['relative']  = 'editor',
-		['row']       = api.nvim_get_option('lines')
-		                - api.nvim_get_option('cmdheight')
-		                - 1,
-		['style']     = 'minimal',
-		['width']     = 25,
+		anchor    = 'SW',
+		col       = vim.go.columns - 1,
+		focusable = false,
+		height    = 1,
+		relative  = 'editor',
+		row       = vim.go.lines - vim.go.cmdheight - 1,
+		style     = 'minimal',
+		width     = 25,
 	}
 <
 
@@ -340,16 +338,14 @@ VARIABLES                                         *libmodal-lua-Popup-variables*
 	Value: ~
 >
 	{
-		['anchor']    = 'SW',
-		['col']       = api.nvim_get_option('columns') - 1,
-		['focusable'] = false,
-		['height']    = 1,
-		['relative']  = 'editor',
-		['row']       = api.nvim_get_option('lines')
-		                - api.nvim_get_option('cmdheight')
-		                - 1,
-		['style']     = 'minimal',
-		['width']     = 1
+		anchor    = 'SW',
+		col       = vim.go.columns - 1,
+		focusable = false,
+		height    = 1,
+		relative  = 'editor',
+		row       = vim.go.lines - vim.go.cmdheight - 1,
+		style     = 'minimal',
+		width     = 1
 	}
 <
 
@@ -615,15 +611,11 @@ FUNCTIONS                                       *libmodal-lua-globals-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Get Lua's truth values.
 		local falseValue     = false
 		local trueValue      = true
-
-		-- Get Vim's `v:` truth values.
-		local v_falseValue   = vim.api.nvim_get_vvar('false')
-		local v_trueValue    = vim.api.nvim_get_vvar('true')
 
 		-- Get Vimscript's truth values.
 		local vim_falseValue = libmodal.globals.VIM_FALSE
@@ -655,15 +647,11 @@ FUNCTIONS                                       *libmodal-lua-globals-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Get Lua's truth values.
 		local falseValue     = false
 		local trueValue      = true
-
-		-- Get Vim's `v:` truth values.
-		local v_falseValue   = vim.api.nvim_get_vvar('false')
-		local v_trueValue    = vim.api.nvim_get_vvar('true')
 
 		-- Get Vimscript's truth values.
 		local vim_falseValue = libmodal.globals.VIM_FALSE
@@ -697,7 +685,7 @@ FUNCTIONS                                     *libmodal-lua-indicator-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 		local indicator = libmodal.utils.Indicator.mode('FOO')
 		libmodal.utils.api.nvim_lecho(indicator)
 <
@@ -716,7 +704,7 @@ FUNCTIONS                                     *libmodal-lua-indicator-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 		local indicator = libmodal.utils.Indicator.prompt('FOO')
 		print(indicator) -- you can't use `nvim_lecho` with this one.
 <
@@ -766,7 +754,7 @@ FUNCTIONS                              *libmodal-lua-HighlightSegment-Functions*
 
 	Example: ~
 >
-		local libmodal         = require('libmodal')
+		local libmodal         = require 'libmodal'
 		local api              = libmodal.utils.api
 		local HighlightSegment = libmodal.Indicator.HighlightSegment
 
@@ -801,11 +789,11 @@ FUNCTIONS                                           *libmodal-lua-Layer-function
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 		local layer = libmodal.Layer.new({
-			['n'] = {
-				['gg'] = {
-					['rhs'] = G
+			n = {
+				gg = {
+					rhs = G
 				}
 			}
 		})
@@ -835,24 +823,24 @@ FUNCTIONS                                           *libmodal-lua-Layer-function
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 		local layer = libmodal.Layer.new({
-			['n'] = {
-				['gg'] = {
-					['rhs'] = G
+			n = {
+				gg = {
+					rhs = G
 				}
 			}
 		})
 
 		-- this adds a binding for `G` to `gg` in normal mode.
-		layer:map('n', 'G', 'gg', {['noremap'] = true})
+		layer:map('n', 'G', 'gg', {noremap = true})
 
 		-- use `layer:exit()` or close the buffer to exit.
 		layer:enter()
 
 		-- you can also call `:map()` after entering.
 		-- this adds a binding for `o` to `gg` in visual mode.
-		layer:map('v', 'o', 'gg', {['noremap'] = true})
+		layer:map('v', 'o', 'gg', {noremap = true})
 <
 
 	See also: ~
@@ -871,17 +859,17 @@ FUNCTIONS                                           *libmodal-lua-Layer-function
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 		local layer = libmodal.Layer.new({
-			['n'] = {
-				['gg'] = {
-					['rhs'] = G
+			n = {
+				gg = {
+					rhs = G
 				}
 			}
 		})
 
 		-- This adds a binding for `G` to `gg` in normal mode.
-		layer:map('n', 'G', 'gg', {['noremap'] = true})
+		layer:map('n', 'G', 'gg', {noremap = true})
 
 		-- Unmap the initial `gg`.
 		layer:unmap('n', 'gg')
@@ -909,11 +897,11 @@ FUNCTIONS                                           *libmodal-lua-Layer-function
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 		local layer = libmodal.Layer.new({
-			['n'] = {
-				['gg'] = {
-					['rhs'] = G
+			n = {
+				gg = {
+					rhs = G
 				}
 			}
 		})
@@ -963,7 +951,7 @@ Additionally, one may alter the actual `function`s that are used by a `Mode`
 without forking |libmodal|. By using `setmetatable`, and `vim.inspect()`, one
 can grab code from the |nvim-libmodal| repository and change whatever they
 want to for their mode specifically. >
-	local libmodal         = require('libmodal')
+	local libmodal         = require 'libmodal'
 	local Mode             = libmodal.Mode
 	local HighlightSegment = libmodal.Indicator.HighlightSegment
 
@@ -1170,7 +1158,7 @@ FUNCTIONS                                         *libmodal-lua-utils-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Run `pcall` on an anonymous function.
 		local noErrors, pcall_err = pcall(function()
@@ -1213,7 +1201,7 @@ FUNCTIONS                                           *libmodal-lua-api-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- This function is called every time the user presses a key.
 		local function _instruction()
@@ -1235,7 +1223,7 @@ FUNCTIONS                                           *libmodal-lua-api-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		libmodal.utils.api.nvim_bell()
 <
@@ -1244,26 +1232,6 @@ FUNCTIONS                                           *libmodal-lua-api-functions*
 		'belloff'     For bell settings.
 		'errorbells'  For bell settings.
 		'visualbell'  For bell settings.
-
-`api`.nvim_exists({scope}, {var})                 *libmodal-lua-api.nvim_exists()*
-
-	Check whether or not some |variable| exists.
-
-	Parameters: ~
-		{scope}  The scope of the |variable| (i.e. `g:`, `l:`, etc.)
-		{var}    The |variable| to check for.
-
-	Example: ~
->
-		local libmodal = require('libmodal')
-
-		-- Set a mock variable to 3.
-		libmodal.utils.api.nvim_set_var('foo', 3)
-		print(libmodal.utils.api.nvim_exists('g', 'foo')) -- true
-
-		libmodal.utils.api.nvim_command('unlet g:foo')
-		print(libmodal.utils.api.nvim_exists('g', 'foo')) -- false
-<
 
 `api`.nvim_input()                                 *libmodal-lua-api.nvim_input()*
 
@@ -1276,7 +1244,7 @@ FUNCTIONS                                           *libmodal-lua-api-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Get one character of user input.
 		local char = string.char(libmodal.utils.api.nvim_input())
@@ -1297,7 +1265,7 @@ FUNCTIONS                                           *libmodal-lua-api-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Create an indicator.
 		local indicator = libmodal.utils.Indicator.mode('FOO')
@@ -1315,12 +1283,11 @@ FUNCTIONS                                           *libmodal-lua-api-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
-		local api = vim.api
+		local libmodal = require 'libmodal'
 
 		-- Echo hello and prompt for input before continuing.
-		api.nvim_command("echo 'Hello!'")
-		api.nvim_call_function('getchar', {})
+		vim.api.nvim_command "echo 'Hello!'"
+		vim.fn.getchar()
 
 		-- Clear the screen.
 		libmodal.utils.api.nvim_redraw()
@@ -1336,7 +1303,7 @@ FUNCTIONS                                           *libmodal-lua-api-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Show an error.
 		libmodal.utils.api.nvim_show_err(
@@ -1371,18 +1338,18 @@ FUNCTIONS                                          *libmodal-lua-Help-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Create a table of mock user commands.
 		local commands = {
-			['close'] = 'tabclose',
-			['new']   = 'tabnew'
+			close = 'tabclose',
+			new   = 'tabnew'
 		}
 
 		-- Create a table of mock user maps.
 		local maps = {
-			['zf']  = 'split',
-			['zfo'] = 'echo "Hello!"'
+			zf  = 'split',
+			zfo = 'echo "Hello!"'
 		}
 
 		local commandHelp = libmodal.utils.Help.new(commands, 'COMMANDS')
@@ -1395,18 +1362,18 @@ FUNCTIONS                                          *libmodal-lua-Help-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		-- Create a table of mock user commands.
 		local commands = {
-			['close'] = 'tabclose',
-			['new']   = 'tabnew'
+			close = 'tabclose',
+			new   = 'tabnew'
 		}
 
 		-- Create a table of mock user maps.
 		local maps = {
-			['zf']  = 'split',
-			['zfo'] = 'echo "Hello!"'
+			zf  = 'split',
+			zfo = 'echo "Hello!"'
 		}
 
 		local commandHelp = libmodal.utils.Help.new(commands, 'COMMANDS')
@@ -1434,7 +1401,7 @@ FUNCTIONS                                   *libmodal-lua-WindowState-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 		local windowState = libmodal.utils.WindowState.new()
 		print(vim.inspect(windowState))
 <
@@ -1449,18 +1416,17 @@ FUNCTIONS                                   *libmodal-lua-WindowState-functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
-		local api = vim.api
+		local libmodal = require 'libmodal'
 
 		-- Create a new `WindowState`.
 		local windowState = libmodal.utils.WindowState.new()
 
 		-- Set the 'winheight' to a new value.
-		api.nvim_set_option('winheight', 100)
+		vim.go.winheight = 100
 
 		-- Define a function to print the 'winheight' value.
 		local print_height = function()
-			api.nvim_command('echo &winheight')
+			vim.api.nvim_command 'echo &winheight'
 		end
 
 		-- Print the 'winheight' prior to `restore()`.
@@ -1492,7 +1458,7 @@ FUNCTIONS                                          *libmodal-lua-Vars.functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		local input = libmodal.Vars('input', 'FOO')
 		print(input:name()) -- 'fooModeInput'
@@ -1510,10 +1476,10 @@ FUNCTIONS                                          *libmodal-lua-Vars.functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		local input = libmodal.Vars('input', 'FOO')
-		vim.api.nvim_set_var(input:name(), 'test')
+		vim.g[input:name()] = 'test'
 		print(input:nvimGet())
 <
 
@@ -1527,7 +1493,7 @@ FUNCTIONS                                          *libmodal-lua-Vars.functions*
 
 	Example: ~
 >
-		local libmodal = require('libmodal')
+		local libmodal = require 'libmodal'
 
 		local input = libmodal.Vars('input', 'FOO')
 		input:nvimSet('test')

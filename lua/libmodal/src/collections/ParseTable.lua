@@ -15,8 +15,8 @@ local globals = require('libmodal/src/globals')
 local _REGEX_ALL = '.'
 
 local ParseTable = {
-	['CR']   = 13, -- The number corresponding to <CR> in vim.
-	['TYPE'] = 'libmodal-parse-table',
+	CR   = 13, -- The number corresponding to <CR> in vim.
+	TYPE = 'libmodal-parse-table',
 
 	--------------------------------------
 	--[[ SUMMARY:
@@ -30,7 +30,7 @@ local ParseTable = {
 		* The split `str`.
 	]]
 	--------------------------------------
-	['stringSplit'] = function(str, regex)
+	stringSplit = function(str, regex)
 		local split = {}
 		for char in string.gmatch(str, regex) do
 			split[#split + 1] = char

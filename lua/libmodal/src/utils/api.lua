@@ -1,21 +1,14 @@
---[[
-	/*
-	 * MODULE
-	 */
---]]
+--[[/* IMPORTS */]]
+
+local globals = require('libmodal/src/globals')
+local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
+
+--[[/* MODULE */]]
 
 local api = {}
-local globals = require('libmodal/src/globals')
-local vim_api = vim.api
 
----------------------------------
---[[ SUMMARY:
-	* Send a character to exit a mode.
-]]
---[[ PARAMS:
-	* `exit_char` => the character used to exit the mode, or ESCAPE if none was provided.
-]]
----------------------------------
+--- Send a character to exit a mode.
+--- @param exit_char string the character used to exit the mode, or ESCAPE if none was provided.
 function api.mode_exit(exit_char)
 	-- If there was no provided `exit_char`, or it is a character code.
 	if not exit_char or type(exit_char) == globals.TYPE_NUM then
@@ -24,57 +17,17 @@ function api.mode_exit(exit_char)
 	end
 
 	-- Exit the prompt by sending an escape key.
-	vim_api.nvim_feedkeys(exit_char, 'nt', false)
+	vim.api.nvim_feedkeys(exit_char, 'nt', false)
 end
 
-------------------------
---[[ SUMMARY:
-	* Make vim ring the visual/audio bell, if it is enabled.
-]]
-------------------------
+--- Make vim ring the visual/audio bell, if it is enabled.
 function api.nvim_bell()
-	vim_api.nvim_command('normal '..string.char(27)) -- escape char
+	vim.api.nvim_command('normal '..string.char(27)) -- escape char
 end
 
-------------------------------------
---[[ SUMMARY:
-	* Check whether or not some variable exists.
-]]
---[[ PARAMS:
-	* `scope` => The scope of the variable (i.e. `g`, `l`, etc.)
-	* `var` => the variable to check for.
-]]
-------------------------------------
-function api.nvim_exists(scope, var)
-	return vim_api.nvim_call_function('exists', {scope..':'..var}) == require('libmodal/src/globals').VIM_TRUE
-end
-
--------------------------
---[[ SUMMARY:
-	* Gets one character of user input, as a number.
-]]
---[[ REMARKS:
-	* This could also be:
-	```lua
-	local cmd = {
-		'"while 1"',
-			'"let c = getchar(0)"',
-			'"if empty(c)"',
-				'"sleep 20m"',
-			'"else"',
-				'"echo c"',
-				'"break"',
-			'"endif"',
-		'"endwhile"'
-	}
-
-	return tonumber(vim.api.nvim_call_function("execute",cmd))
-	```
-	However, I'm not sure if it would accidentally affect text.
-]]
--------------------------
+--- Gets one character of user input, as a number.
 function api.nvim_input()
-	return vim_api.nvim_call_function('getchar', {})
+	return vim.fn.getchar()
 end
 
 --------------------------
@@ -84,7 +37,7 @@ end
 ]]
 --------------------------
 function api.nvim_redraw()
-	vim_api.nvim_command('mode')
+	vim.api.nvim_command 'mode'
 end
 
 ---------------------------------
@@ -110,9 +63,9 @@ function api.nvim_lecho(hlTables)
 		lecho_template[2] = tostring(hlTable.hl)
 		lecho_template[4] = tostring(hlTable.str)
 
-		vim_api.nvim_command(table.concat(lecho_template))
+		vim.api.nvim_command(table.concat(lecho_template))
 	end
-	vim_api.nvim_command('echohl None')
+	vim.api.nvim_command 'echohl None'
 end
 
 --------------------------------------
@@ -125,18 +78,11 @@ end
 ]]
 --------------------------------------
 function api.nvim_show_err(title, msg)
-	local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
 	api.nvim_lecho({
 		HighlightSegment.new('Title', tostring(title)..'\n'),
 		HighlightSegment.new('Error', tostring(msg)),
 	})
-	vim_api.nvim_call_function('getchar', {})
+	vim.fn.getchar()
 end
-
---[[
-	/*
-	 * PUBLICIZE MODULE
-	 */
---]]
 
 return api

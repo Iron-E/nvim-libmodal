@@ -1,8 +1,4 @@
---[[
-	/*
-	 * IMPORTS
-	 */
---]]
+--[[/* IMPORTS */]]
 
 local api = vim.api
 
@@ -12,11 +8,9 @@ local api = vim.api
 	 */
 --]]
 
-local _TIMEOUT_GLOBAL_NAME = 'libmodalTimeouts'
-
 local Vars = {
-	[_TIMEOUT_GLOBAL_NAME] = api.nvim_get_var(_TIMEOUT_GLOBAL_NAME),
-	['TYPE'] = 'libmodal-vars'
+	libmodalTimeouts = vim.g.libmodalTimeouts,
+	TYPE = 'libmodal-vars'
 }
 
 --[[
@@ -48,7 +42,7 @@ end
 ]]
 ------------------------------------
 function _metaVars:nvimGet()
-	return api.nvim_get_var(self:name())
+	return vim.g[self:name()]
 end
 
 -----------------------------------------
@@ -61,7 +55,7 @@ end
 ]]
 -----------------------------------------
 function _metaVars:nvimSet(val)
-	api.nvim_set_var(self:name(), val)
+	vim.g[self:name()] = val
 end
 
 --[[

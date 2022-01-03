@@ -1,31 +1,16 @@
---[[
-	/*
-	 * IMPORTS
-	 */
---]]
-
-local vim = vim
-local api = vim.api
-
---[[
-	/*
-	 * MODULE
-	 */
---]]
+--[[/* MODULE */]]
 
 local Popup = require('libmodal/src/classes').new(
 	'libmodal-popup',
-	{['config'] = {
-		['anchor']    = 'SW',
-		['col']       = api.nvim_get_option('columns') - 1,
-		['focusable'] = false,
-		['height']    = 1,
-		['relative']  = 'editor',
-		['row']       = api.nvim_get_option('lines')
-		                - api.nvim_get_option('cmdheight')
-		                - 1,
-		['style']     = 'minimal',
-		['width']     = 1
+	{config = {
+		anchor    = 'SW',
+		col       = vim.go.columns - 1,
+		focusable = false,
+		height    = 1,
+		relative  = 'editor',
+		row       = vim.go.lines - vim.go.cmdheight - 1,
+		style     = 'minimal',
+		width     = 1
 	}}
 )
 
@@ -42,7 +27,7 @@ local Popup = require('libmodal/src/classes').new(
 ]]
 ----------------------------
 local function valid(window)
-	return window and api.nvim_win_is_valid(window)
+	return window and vim.api.nvim_win_is_valid(window)
 end
 
 --[[
@@ -64,7 +49,7 @@ local _metaPopup = require('libmodal/src/classes').new(Popup.TYPE)
 -------------------------------------
 function _metaPopup:close(keepBuffer)
 	if valid(self.window) then
-		api.nvim_win_close(self.window, false)
+		vim.api.nvim_win_close(self.window, false)
 	end
 
 	self.window = nil
@@ -85,11 +70,11 @@ function _metaPopup:open(config)
 	if not config then config = Popup.config end
 
 	if valid(self.window) then
-		config = vim.tbl_extend('keep', config, api.nvim_win_get_config(self.window))
+		config = vim.tbl_extend('keep', config, vim.api.nvim_win_get_config(self.window))
 		self:close(true)
 	end
 
-	self.window = api.nvim_open_win(self.buffer, false, config)
+	self.window = vim.api.nvim_open_win(self.buffer, false, config)
 end
 
 ---------------------------------------
@@ -116,22 +101,18 @@ function _metaPopup:refresh(inputBytes)
 		self._inputChars = chars
 	end
 
-	api.nvim_buf_set_lines(self.buffer, 0, 1, true, {
+	vim.api.nvim_buf_set_lines(self.buffer, 0, 1, true, {
 		table.concat(self._inputChars)
 	})
 
-	if not valid(self.window) or api.nvim_win_get_tabpage(self.window) ~= api.nvim_get_current_tabpage() then
+	if not valid(self.window) or vim.api.nvim_win_get_tabpage(self.window) ~= vim.api.nvim_get_current_tabpage() then
 		self:open()
 	end
 
-	api.nvim_win_set_width(self.window, #self._inputChars)
+	vim.api.nvim_win_set_width(self.window, #self._inputChars)
 end
 
---[[
-	/*
-	 * CLASS `Popup`
-	 */
---]]
+--[[/* CLASS `Popup` */]]
 
 --------------------
 --[[ SUMMARY:
@@ -142,12 +123,10 @@ end
 ]]
 --------------------
 function Popup.new(config)
-	local buf = api.nvim_create_buf(false, true)
-
 	local self = setmetatable(
 		{
-			['buffer'] = buf,
-			['_inputChars'] = {},
+			buffer = vim.api.nvim_create_buf(false, true),
+			_inputChars = {},
 		},
 		_metaPopup
 	)
@@ -157,10 +136,6 @@ function Popup.new(config)
 	return self
 end
 
---[[
-	/*
-	 * PUBLICIZE `Popup`
-	 */
---]]
+--[[/* PUBLICIZE `Popup` */]]
 
 return Popup
