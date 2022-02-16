@@ -72,28 +72,28 @@ function _metaPrompt:_inputLoop()
 	-- clear previous `echo`s.
 	utils.api.nvim_redraw()
 
-	-- define a placeholder for user input
-	local userInput = ''
+	-- determine what to do with the input
+	local function userInputCallback(userInput)
+		if userInput and string.len(userInput) > 0 then -- The user actually entered something.
+			self.input:nvimSet(userInput)
+			self:_executeInstruction(userInput)
+		else -- indicate we want to leave the prompt
+			return false
+		end
+
+		return true
+	end
 
 	-- echo the highlighting
 	vim.api.nvim_command('echohl ' .. self.indicator.hl)
 
 	-- set the user input variable
-	if self._completions then userInput =
-		vim.fn['libmodal#_inputWith'](self.indicator.str, self._completions)
-	else userInput =
-		vim.fn.input(self.indicator)
+	if self._completions then
+		vim.api.nvim_command('echo "' .. self.indicator.str .. '"')
+		return vim.ui.select(self._completions, {}, userInputCallback)
+	else
+		return vim.ui.input({prompt = self.indicator.str}, userInputCallback)
 	end
-
-	-- determine what to do with the input
-	if string.len(userInput) > 0 then -- The user actually entered something.
-		self.input:nvimSet(userInput)
-		self:_executeInstruction(userInput)
-	else -- indicate we want to leave the prompt
-		return false
-	end
-
-	return true
 end
 
 ----------------------------

@@ -1,22 +1,4 @@
 " SUMMARY:
-" * Get user input with some `completions`.
-" PARAMS:
-" * `indicator` => the prompt string.
-" * `completions` => the list of completions to provide.
-" RETURNS:
-" * Input from `input()`.
-function! libmodal#_inputWith(indicator, completions)
-	function! LibmodalCompletionsProvider(argLead, cmdLine, cursorPos) abort closure
-		return luaeval(
-		\	'require("libmodal/src/Prompt").createCompletionsProvider(_A[1])(_A[2], _A[3], _A[4])',
-		\	[a:completions, a:argLead, a:cmdLine, a:cursorPos]
-		\)
-	endfunction
-
-	return input(a:indicator, '', 'customlist,LibmodalCompletionsProvider')
-endfunction
-
-" SUMMARY:
 " * Runs the nvim-libmodal command prompt loop. The function takes an optional
 "   argument specifying how many times to run (runs until exiting by default).
 " PARAMS:
