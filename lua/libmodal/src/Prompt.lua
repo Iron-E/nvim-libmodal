@@ -51,7 +51,7 @@ function _metaPrompt:_executeInstruction(userInput)
 		else -- show an error.
 			utils.api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
 		end
-	elseif type(instruction) == globals.TYPE_STR then -- The instruction is a function. Works on Neovim 0.5+.
+	elseif type(instruction) == globals.TYPE_STR then -- The instruction is a function.
 		vim.fn[instruction]()
 	else -- attempt to call the instruction.
 		instruction()

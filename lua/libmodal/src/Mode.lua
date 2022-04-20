@@ -118,10 +118,8 @@ function _metaMode:enter()
 		self._popups:push(require('libmodal/src/collections/Popup').new())
 	end
 
-	if vim.g then -- requires neovim 0.5
-		self._previousModeName = vim.g.libmodalActiveModeName
-		vim.g.libmodalActiveModeName = self._name
-	end
+	self._previousModeName = vim.g.libmodalActiveModeName
+	vim.g.libmodalActiveModeName = self._name
 
 	--[[ MODE LOOP. ]]
 	local continueMode = true
@@ -215,7 +213,7 @@ function _metaMode:_inputLoop()
 
 		if instructionType == globals.TYPE_TBL then -- The second argument was a dict. Parse it.
 			self:_checkInputForMapping()
-		elseif instructionType == globals.TYPE_STR and vim.fn then -- It is the name of a VimL function. This only works in Neovim 0.5+.
+		elseif instructionType == globals.TYPE_STR then -- It is the name of a VimL function.
 			vim.fn[self._instruction]()
 		else -- the second argument was a function; execute it.
 			self._instruction()
@@ -238,12 +236,10 @@ function _metaMode:_tearDown()
 		self._popups:pop():close()
 	end
 
-	if vim.g then -- this step requires 0.5
-		if self._previousModeName and #vim.trim(self._previousModeName) < 1 then
-			vim.g.libmodalActiveModeName = nil
-		else
-			vim.g.libmodalActiveModeName = self._previousModeName
-		end
+	if self._previousModeName and #vim.trim(self._previousModeName) < 1 then
+		vim.g.libmodalActiveModeName = nil
+	else
+		vim.g.libmodalActiveModeName = self._previousModeName
 	end
 
 	self._winState:restore()
