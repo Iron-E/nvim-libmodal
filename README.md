@@ -12,7 +12,7 @@ Note that cross-compatability does not mean that `vim-libmodal` and `nvim-libmod
 
 # Requirements
 
-* Neovim 0.5+.
+* Neovim 0.7+.
 * `vim-libmodal` is _not_ installed.
 
 [libmodal]: https://github.com/Iron-E/vim-libmodal

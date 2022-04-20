@@ -12,8 +12,7 @@
 5. License .............. |libmodal-license|
 6. Bugs ................. |libmodal-bugs|
 7. Contributing ......... |libmodal-contributing|
-8. Changelog ............ |libmodal-changelog|
-9. Credits .............. |libmodal-credits|
+8. Credits .............. |libmodal-credits|
 
 ================================================================================
 1. About                                                          *libmodal-about*
@@ -99,8 +98,6 @@ VARIABLES                                               *libmodal-usage-variable
 
 	The name of the currently active |libmodal-mode|.
 
-	Note: only available on Neovim 0.5+
-
 	Type: ~
 		`string`
 
@@ -167,7 +164,6 @@ FUNCTIONS                                               *libmodal-usage-function
 			*Error	you cannot pass a funcref to Lua from Vimscript!
 			      	- If you want to use a |funcref()| for {instruction}, it
 			      	  must be the name of the function as a `string`.
-			      	- This only works on Neovim 0.5+. Example: >
 			      	" VIMSCRIPT
 			      	function! s:foo() abort
 			      		echo 'It works'
@@ -278,7 +274,6 @@ FUNCTIONS                                               *libmodal-usage-function
 			*Error	you cannot pass a funcref to Lua from Vimscript!
 			      	- If you want to use a |funcref()| for {instruction}, it
 			      	  must be the name of the function as a `string`.
-			      	- This only works on Neovim 0.5+. Example: >
 			      	" VIMSCRIPT
 			      	function! s:foo() abort
 			      		echo 'It works'
@@ -571,10 +566,6 @@ Name               Default       Description
 
 Note: `LibmodalStar`'s name — while not indicative of its use — is used for
       the sake of backwards compatability.
-	  - While |nvim-libmodal| might not be 100% backwards compatable with
-		|vim-libmodal| due to limitations of Neovim 0.4, an update will ship
-		when Neovim 0.5 launches that will introduce interoperaability between
-		the two.
 
 --------------------------------------------------------------------------------
 TIMEOUTS                                    *libmodal-timeouts* *g:libmodalTimeouts*
@@ -752,158 +743,7 @@ When submitting an issue, please describe the following:
 5. Attached media (screenshots, logs, etc.) (if applicable).
 
 ================================================================================
-8. Changelog                                                  *libmodal-changelog*
-
-0.8.0 ~
-
-	Additions: ~
-	- Ability to use |lua| `function`s as values in a |libmodal-mode|
-	  {instruction} `table` .
-	- Ability to use |lua| `function`s as values in a |libmodal-prompt|
-	  {instruction} `table` .
-	- Add |libmodal-mode| and |libmodal-prompt| kill functions
-	  (|libmodal-lua-api.mode_exit()|).
-
-0.7.0 ~
-
-	Additions: ~
-	- Ability to pass `function`s into |libmodal-mode| from Vimscript.
-	- Ability to pass `function`s into |libmodal-prompt| from Vimscript.
-	- Add examples for doing almost everything that this plugin can do, from
-	  Vimscript (although I still think Lua makes it easier).
-
-0.6.3 ~
-
-	Fixes: ~
-	- Fix being unable to paste into Vim's command line after importing
-	  the `libmodal.util.api` table.
-
-0.6.2 ~
-
-	Fixes: ~
-	- Remove unused variables
-
-0.6.1 ~
-
-	Fixes: ~
-	- Mode names with spaces or underscores are now represented correctly
-	  by |libmodal-lua-Vars.name()|.
-
-0.6.0 ~
-
-	Additions: ~
-	- New module: |libmodal-layer|s.
-		- Allows for use of built-in modes with overwriting of keymaps.
-		- New class `libmodal.Layer`.
-		- New function `libmodal.layer.enter()`.
-	- New examples for new additions.
-	- `libmodal.collections.ParseTable`:
-		- Added new `:parseGet()` method to replace the `:get()`
-		  implementation.
-	- Added new `libmodal.collections.ParseTable.parse()` method.
-		- You can override it to change how the `ParseTable` parses its keys.
-	- Added `ParseTable.stringSplit()`.
-
-	Breaking Changes: ~
-	- Moved `libmodal.Mode.Popup` to `libmodal.collections.Popup`.
-	- Changed `libmodal.collections.ParseTable.parseGet()` back to
-	  `libmodal.collections.ParseTable.get()`.
-	  - `:get()` requires that keys have been parsed according to
-	    `.parse()`.
-
-	Changes: ~
-	- Exposed more functionality of `libmodal.collections.Popup`.
-
-0.5.0 ~
-
-	Additions: ~
-	- New class `libmodal.collections.Stack`.
-	- New class `libmodal.Mode`.
-	- New class `libmodal.Mode.Popup`.
-	- New class `libmodal.Prompt`.
-	- New class `libmodal.Vars`.
-
-	Breaking Changes: ~
-	- Moved `libmodal.mode.ParseTable` to `libmodal.collections.ParseTable`.
-	- Removed `libmodal.utils.vars`.
-	- Moved `libmodal.utils.Indicator` to `libmodal.Indicator`.
-	- Moved `libmodal.utils.Indicator.Entry` to
-	  `libmodal.Indicator.HighlightSegment`.
-
-	Changes: ~
-	- Allow creation of |libmodal-mode| and |libmodal-prompt| table-objects.
-		- Call `libmodal.Mode.new()` or `libmodal.Prompt.new()` to create one.
-			- Call `{mode}:enter()` to enter the mode.
-		- More consistent mode recursion with `libmodal.collections.Stack`.
-		- Mode creators can now override specific functionality by copying
-		  portions of the source code, or changing the values that are
-		  referenced by the mode directly.
-			- This allows for finer control over how a mode behaves.
-			- It also allows for modes to inherit each other through
-			  `setmetatable()`.
-
-	- Removed program logic from `libmodal.mode.enter()`.
-		- Now internally calls `libmodal.Mode.new(…):enter()` instead.
-	- Removed program logic from `libmodal.prompt.enter()`.
-		- Now internally calls `libmodal.Prompt.new(…):enter()` instead.
-
-
-	Fixes: ~
-	- Fix unexpected behavior when repeating `libmodal.mode.enter()` calls
-	  with the from within themselves.
-	  - Mode popup windows may be closed prematurely by entering two different
-	    modes and then exiting them in reverse order, among other things. All
-	    previously known mysterious behavior is corrected.
-
-0.4.1 ~
-
-	Fixes: ~
-	- Fix reference to `libmodal/src/prompt` as `libmodal/src/path`.
-
-0.4.0 ~
-
-	Additions: ~
-	- Add partial support for |vim-libmodal|.
-
-	Fixes: ~
-	- Fix bad reference to `vars.windows`.
-	- Fix bug where help was always shown upon entering an invalid key-combo in
-	  `libmodal.mode.enter()`.
-
-0.3.1 ~
-
-	Fixes: ~
-	- Fix bug where everytime `api.nvim_lecho()` was called, its {hlTables}
-	  would infinitely grow with placeholder "None" entries.
-
-0.3.0 ~
-
-	Additions: ~
-	- Generate `?` mapping for |libmodal-mode|s.
-
-	Fixes: ~
-	- Fix |libmodal-timeouts| not being respected.
-
-0.2.1 ~
-
-	Fixes: ~
-	- Fix `help` command completion being shown during an {instruction}
-	  callback `function` when none should be shown.
-
-0.2.0 ~
-
-	Additions: ~
-	- |libmodal-prompt| implemetation from |vim-libmodal|.
-	- |libmodal-prompt|s now automatically generate `help` command if none is
-	  provided.
-
-0.1.0 ~
-
-	Additions: ~
-	- |libmodal-mode| implementation from |vim-libmodal|.
-
-================================================================================
-9. Credits                                                      *libmodal-credits*
+8. Credits                                                      *libmodal-credits*
 
 Credit                      Reason
 ---------------------       ----------------------------------
