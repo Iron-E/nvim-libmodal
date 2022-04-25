@@ -1,7 +1,5 @@
---[[/* IMPORTS */]]
-
-local globals = require('libmodal/src/globals')
-local HighlightSegment = require('libmodal/src/Indicator/HighlightSegment')
+local globals = require 'libmodal/src/globals'
+local Indicator = require 'libmodal/src/utils/Indicator'
 
 --[[/* MODULE */]]
 
@@ -25,63 +23,32 @@ function api.nvim_bell()
 	vim.api.nvim_command('normal '..string.char(27)) -- escape char
 end
 
---- Gets one character of user input, as a number.
-function api.nvim_input()
-	return vim.fn.getchar()
-end
-
---------------------------
---[[ SUMMARY:
-	* Run `mode` to refresh the screen.
-	* The function was not named `nvim_mode` because that would be really confusing given the name of this plugin.
-]]
---------------------------
+--- Run the `mode` command to refresh the screen.
 function api.nvim_redraw()
 	vim.api.nvim_command 'mode'
 end
 
----------------------------------
---[[ SUMMARY:
-	* Echo a table of {`hlgroup`, `str`} tables.
-	* Meant to be read as "nvim list echo".
-]]
---[[ PARAMS:
-	* `hlTables` => the tables to echo with highlights.
-]]
----------------------------------
-local lecho_template = {
-	[1] = "echohl ",
-	[2] = nil,
-	[3] = " | echon '",
-	[4] = nil,
-	[5] = "'"
-}
-function api.nvim_lecho(hlTables)
-	api.nvim_redraw()
-	for _, hlTable in ipairs(hlTables) do
-		-- `:echohl` the hlgroup and then `:echon` the string
-		lecho_template[2] = tostring(hlTable.hl)
-		lecho_template[4] = tostring(hlTable.str)
-
-		vim.api.nvim_command(table.concat(lecho_template))
+--- Echo a list of `Indicator`s with their associated highlighting.
+--- @param indicators libmodal.utils.Indicator|table<libmodal.utils.Indicator> the indicators to echo
+function api.nvim_lecho(indicators)
+	if indicators.hl then -- wrap the single indicator in a table to form a list of indicators
+		indicators = {indicators}
 	end
+
+	api.nvim_redraw()
+
+	for _, indicator in ipairs(indicators) do
+		vim.api.nvim_command('echohl ' .. indicator.hl .. " | echon '" .. indicator.str .. "'")
+	end
+
 	vim.api.nvim_command 'echohl None'
 end
 
---------------------------------------
---[[ SUMMARY:
-	* Show a `title` error.
-]]
---[[ PARAMS:
-	* `title` => the title of the error.
-	* `msg` => the message of the error.
-]]
---------------------------------------
+--- Show an error.
+--- @param title string a succint category of error
+--- @param msg string a descriptive reason for the error
 function api.nvim_show_err(title, msg)
-	api.nvim_lecho({
-		HighlightSegment.new('Title', tostring(title)..'\n'),
-		HighlightSegment.new('Error', tostring(msg)),
-	})
+	api.nvim_lecho {Indicator.new('Title', tostring(title)..'\n'), Indicator.new('Error', tostring(msg))}
 	vim.fn.getchar()
 end
 

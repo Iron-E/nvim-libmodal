@@ -1,5 +1,5 @@
-return {
-	ParseTable = require('libmodal/src/collections/ParseTable'),
-	Popup      = require('libmodal/src/collections/Popup'),
-	Stack      = require('libmodal/src/collections/Stack')
+return
+{
+	ParseTable = require 'libmodal/src/collections/ParseTable',
+	Stack      = require 'libmodal/src/collections/Stack'
 }

@@ -1,24 +1,42 @@
-local _VIM_FALSE = 0
-local _VIM_TRUE  = 1
+local VIM_FALSE = 0
+local VIM_TRUE  = 1
 
 return {
-	DEFAULT_ERROR_TITLE = 'vim-libmodal error',
+	--- The default error title for `nvim-libmodal` errors.
+	DEFAULT_ERROR_TITLE = 'nvim-libmodal error',
 
+	--- The key-code for the escape character.
 	ESC_NR = 27,
 
-	TYPE_FUNC = 'function',
-	TYPE_NUM  = 'number',
-	TYPE_STR = 'string',
-	TYPE_TBL = 'table',
+	--- The string which is returned by `type(function() end)` (or any function)
+	TYPE_FUNC = type(function() end),
 
-	VIM_FALSE = _VIM_FALSE,
-	VIM_TRUE  = _VIM_TRUE,
+	--- The string which is returned by `type(0)` (or any number)
+	TYPE_NUM  = type(0),
 
+	--- The string which is returned by `type ''` (or any string)
+	TYPE_STR = type '',
+
+	--- The string which is returned by `type {}` (or any table)
+	TYPE_TBL = type {},
+
+	--- The value of Vimscript's `v:false`
+	VIM_FALSE = VIM_FALSE,
+
+	--- The value of Vimscript's `v:true`
+	VIM_TRUE  = VIM_TRUE,
+
+	--- Assert some value is either `false` or `v:false`.
+	--- @param val boolean|number
+	--- @return boolean
 	is_false = function(val)
-		return val == false or val == _VIM_FALSE
+		return val == false or val == VIM_FALSE
 	end,
 
+	--- Assert some value is either `true` or `v:true`.
+	--- @param val boolean|number
+	--- @return boolean
 	is_true = function(val)
-		return val == true or val == _VIM_TRUE
+		return val == true or val == VIM_TRUE
 	end
 }

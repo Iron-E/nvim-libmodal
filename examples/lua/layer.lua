@@ -1,40 +1,28 @@
 -- Imports
-local libmodal = require('libmodal')
+local libmodal = require 'libmodal'
 
 -- create a new layer.
-local layer = libmodal.Layer.new({
-	n = { -- normal mode mappings
-		gg = { -- remap `gg`
+local layer = libmodal.layer.new(
+{
+	n =
+	{ -- normal mode mappings
+		gg = -- remap `gg`
+		{
 			rhs = 'G', -- map it to `G`
-			noremap = true, -- don't recursively map.
+			-- other options such as `noremap` and `silent` can be set to `true` here
 		},
-		G = { -- remap `G`
+		G = -- remap `G`
+		{
 			rhs = 'gg', -- map it to `gg`
-			noremap = true -- don't recursively map.
-		}
+			-- other options such as `noremap` and `silent` can be set to `true` here
+		},
 	}
 })
 
--- enter the `layer`.
+-- Add an additional mapping for `<Esc>` to exit the mode
+layer:map('n', '<Esc>', function() layer:exit() end, {})
+
 layer:enter()
 
--- add a global function for exiting the mode.
-function LibmodalLayerExampleExit()
-	layer:exit()
-end
-
--- Add an additional mapping for `z`.
-layer:map('n', 'z', 'gg', {noremap = true})
-
--- add an additional mapping for `q`.
-layer:map(
-	'n', 'q', ':lua LibmodalLayerExampleExit()<CR>',
-	{noremap = true, silent  = true}
-)
-
---[[ unmap `gg` and `G`. Notice they both return to their defaults,
-     rather than just not doing anything anymore. ]]
+--[[ unmap `gg`. Notice that now both `gg` and `G` return the cursor to the top. ]]
 layer:unmap('n', 'gg')
-layer:unmap('n', 'G')
-
--- If you wish to only change the mappings of a layer temporarily, you should use another layer. `map` and `unmap` permanently add and remove from the layer's keymap.

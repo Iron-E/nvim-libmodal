@@ -13,7 +13,4 @@ let s:layer = {
 \}
 
 " Capture the exit function
-let s:exitFunc = luaeval("require('libmodal').layer.enter(_A)", s:layer)
-
-" Call the exit function in 5 seconds.
-call timer_start(5000, s:exitFunc)
+let s:exitFunc = luaeval("require('libmodal').layer.enter(_A, '<Esc>')", s:layer)

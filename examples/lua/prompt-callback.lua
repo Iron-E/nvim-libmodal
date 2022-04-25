@@ -11,6 +11,7 @@ function FooMode()
 		vim.api.nvim_command 'tabnew'
 	elseif userInput == 'close' then
 		vim.api.nvim_command 'tabclose'
+		vim.g.fooModeExit = true
 	elseif userInput == 'last' then
 		vim.api.nvim_command 'tablast'
 	end

@@ -3,7 +3,7 @@
 "   argument specifying how many times to run (runs until exiting by default).
 " PARAMS:
 " * `a:1` => `modeName`
-" * `a:2` => `modeCallback` OR `modeCombos`
+" * `a:2` => `modeCallback` OR `modeKeymaps`
 " * `a:3` => `supressExit`
 function! libmodal#Enter(...) abort
 	call libmodal#_lua('mode', a:000)

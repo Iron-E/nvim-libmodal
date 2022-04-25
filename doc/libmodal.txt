@@ -112,8 +112,8 @@ VARIABLES                                               *libmodal-usage-variable
 FUNCTIONS                                               *libmodal-usage-functions*
 
                             *libmodal-mode* *libmodal#Enter()* *libmodal.mode.enter()*
-`libmodal.mode`.enter({name}, {instruction} [, {supressExit}])
-`libmodal`#Enter({name}, {instruction} [, {supressExit}])
+`libmodal.mode`.enter({name}, {instruction} [, {supress_exit}])
+`libmodal`#Enter({name}, {instruction} [, {supress_exit}])
 
 	Enter a new |vim-mode| using {instruction} to determine what actions will
 	be taken upon specific user inputs.
@@ -182,8 +182,8 @@ FUNCTIONS                                               *libmodal-usage-function
 			      - If `g:libmodalTimeouts` is enabled, then user input will be
 			        subjected to the |timeoutlen|.
 
-		{supressExit}  Whether or not to automatically exit the mode upon an
-                       <Esc> press.
+		{supress_exit}  Whether or not to automatically exit the mode upon an
+                        <Esc> press.
 
 			- If |v:false|/`false`, then <Esc> is automatically mapped to
               exiting.
@@ -198,7 +198,8 @@ FUNCTIONS                                               *libmodal-usage-function
 		|libmodal-examples-mode|  For examples of this function.
 
 
-`libmodal.layer`.enter({keymap})         *libmodal-layer* *libmodal.layer.enter()*
+                                           *libmodal-layer* *libmodal.layer.enter()*
+`libmodal.layer`.enter({keymap} [, {exit_char}])
 
 	While a |libmodal-mode| ignores behavior that has not been explicitly
 	defined, a |libmodal-layer| allows unrecognized |input| to be passed back
@@ -221,19 +222,23 @@ FUNCTIONS                                               *libmodal-usage-function
 				…
 			}
 <			Where {mode}, {lhs}, {rhs}, and {opts} are the same as in
-			|nvim_set_keymap()|
+			|vim.keymap.set()| (except you should not use multiple `<mode>` at
+			one time, despite |vim.keymap.set()| supporting it).
+
+		{exit_char}  The character used to exit the layer.
 
 
 	Return: ~
-		- The `function` used to undo changes made by the layer.
+		- The `function` used to undo changes made by the layer, or `nil` if
+		  {exit_char} is provided.
 
 	See also: ~
 		|libmodal-examples-layers|  For an example.
 		|nvim_set_keymap()|         For more information about {keymap}.
 
-                  *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
-`libmodal.prompt`.enter({name}, {instruction} [, {completions}, {supressExit}])
-`libmodal`#Prompt({name}, {instruction} [, {completions}, {supressExit}])
+                      *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
+`libmodal.prompt`.enter({name}, {instruction} [, {completions}])
+`libmodal`#Prompt({name}, {instruction} [, {completions}])
 
 	Besides accepting user input like keys in |Normal-mode|, |libmodal| is
 	also capable of prompting the user for |input| like |Cmdline-mode|. To
@@ -296,15 +301,8 @@ FUNCTIONS                                               *libmodal-usage-function
 			Note: If no `help` command is defined, one will be created
 			      automatically.
 
-		{supressExit}  Whether or not to automatically exit the mode upon an
-                       <Esc> press.
-
-			- If |v:false|/`false`, then <Esc> is automatically mapped to
-              exiting.
-			- If |v:true|/`true`, then <Esc> is ignored unless specified by
-			  the user. In such cases, the user should set the
-			  `g:`{name}`ModeExit` variable to `true` when exiting is
-			  desired. See |libmodal-examples-supress-exit|.
+			Note: The user may set the `g:`{name}`ModeExit` variable to
+			      `true` at any time to prematurely exit.
 
 
 	See also: ~
@@ -314,238 +312,9 @@ FUNCTIONS                                               *libmodal-usage-function
 ================================================================================
 3. Examples                                                    *libmodal-examples*
 
-Below are examples written in |Lua| to help show how specific features of
-|libmodal| may be implemented. In each example, the name of the mode is
-defined as "FOO". Additionally, each category of example has one example for
-both `function` and `table` {instruction}s.
+See the official examples at the link below:
 
-The source code can be either copied from here or downloaded from the
-repository's `examples/lua` folder. Assuming |libmodal| is installed, they can
-all be tested using the |luafile| |command|.
-
-See: |libmodal-usage|, |libmodal-use-case|, |lua-require-example|.
-
---------------------------------------------------------------------------------
-MODES                                                    *libmodal-examples-modes*
-
-Using a callback `function`: >
-	local libmodal = require('libmodal')
-	local fooModeInputHistory = {}
-
-	local function clearHistory(indexToCheck)
-		if #fooModeInputHistory >= indexToCheck then
-			fooModeInputHistory = {}
-		end
-	end
-
-	function fooMode()
-		fooModeInputHistory[#fooModeInputHistory + 1] = string.char(
-			vim.g.fooModeInput
-		)
-
-		local index = 1
-		if fooModeInputHistory[1] == 'z' then
-			if fooModeInputHistory[2] == 'f' then
-				if fooModeInputHistory[3] == 'o' then
-					vim.api.nvim_command "echom 'It works!'"
-				else index = 3 end
-			else index = 2 end
-		end
-
-		clearHistory(index)
-	end
-
-	libmodal.mode.enter('FOO', fooMode)
-<
-
-using a |key-mapping| `dict`: >
-	let s:barModeCombos = {
-	\	'zf': 'split',
-	\	'zfo': 'vsplit',
-	\	'zfc': 'tabnew'
-	\}
-
-	call libmodal#Enter('BAR', s:barModeCombos)
-<
-
-Using a |key-mapping| `table`: >
-	local libmodal = require('libmodal')
-	local fooModeCombos = {
-		zf = 'split',
-		zfo = 'vsplit',
-		zfc = 'tabnew'
-	}
-
-	libmodal.mode.enter('FOO', fooModeCombos)
-<
-
-Exit Supression ~
-                                                  *libmodal-examples-supress-exit*
-
-Using a callback `function`: >
-	local libmodal = require('libmodal')
-
-	function fooMode()
-		local userInput = string.char(
-			vim.g.fooModeInput
-		)
-
-		if userInput == '' then
-			vim.api.nvim_command "echom 'You cant leave using <Esc>.'"
-		elseif userInput == 'q' then
-			vim.g.fooModeExit = true
-		end
-	end
-
-	vim.g.fooModeExit = false
-	libmodal.mode.enter('FOO', fooMode, true)
-<
-
-Using a |key-mapping| `dict`: >
-	let s:barModeCombos = {
-	\	'': 'echom "You cant exit using escape."',
-	\	'q': 'let g:barModeExit = 1'
-	\}
-
-	let g:barModeExit = 0
-	call libmodal#Enter('BAR', s:barModeCombos, 1)
-<
-
-Using a |key-mapping| `table`: >
-	local libmodal = require('libmodal')
-	local fooModeCombos = {
-		[''] = 'echom "You cant exit using escape."',
-		q = 'let g:fooModeExit = 1'
-	}
-
-	vim.g.fooModeExit = false
-	libmodal.mode.enter('FOO', fooModeCombos, true)
-<
-
-Submodes ~
-                                                      *libmodal-examples-submodes*
-
-Using a callback `function`: >
-	local libmodal = require('libmodal')
-	local fooModeRecurse = 0
-
-	function fooMode()
-		local userInput = string.char(vim.g[
-			'foo'..tostring(fooModeRecurse)..'ModeInput'
-		])
-
-		if userInput == 'z' then
-			fooModeRecurse = fooModeRecurse + 1
-			enter()
-			fooModeRecurse = fooModeRecurse - 1
-		end
-	end
-
-	function enter()
-		libmodal.mode.enter('FOO' .. fooModeRecurse, fooMode)
-	end
-
-	enter()
-<
-
-Using a |key-mapping| `table`: >
-	let s:barModeRecurse = 0
-
-	let s:barModeCombos = {
-	\	'z': 'BarModeEnter',
-	\}
-
-	function! s:BarMode()
-		let s:barModeRecurse += 1
-		call libmodal#Enter('BAR' . s:barModeRecurse, s:barModeCombos)
-		let s:barModeRecurse -= 1
-	endfunction
-
-	command! BarModeEnter call s:BarMode()
-	execute 'BarModeEnter'
-<
-
-Using a |key-mapping| `table`: >
-	local libmodal = require('libmodal')
-	local fooModeRecurse = 0
-	local fooModeCombos = {
-		z = 'lua fooMode()'
-	}
-
-	function fooMode()
-		fooModeRecurse = fooModeRecurse + 1
-		libmodal.mode.enter('FOO' .. fooModeRecurse, fooModeCombos)
-		fooModeRecurse = fooModeRecurse - 1
-	end
-
-	fooMode()
-<
-
---------------------------------------------------------------------------------
-LAYERS                                                  *libmodal-examples-layers*
->
-	local libmodal = require('libmodal')
-
-	-- save the exit function
-	local exitFunc = libmodal.layer.enter({
-		n = { -- normal mode
-			gg = { -- remap `gg`
-				rhs = 'G', -- map it to `G`
-				noremap = true -- don't remap
-			},
-			G = { -- remap `G`
-				rhs = 'gg', -- map it to `gg`
-				noremap = true -- don't remap
-			}
-		}
-	})
-
-	-- exit the mode in five seconds
-	vim.loop.new_timer():start(5000, 0,
-		vim.schedule_wrap(exitFunc)
-	)
-<
---------------------------------------------------------------------------------
-PROMPTS                                                *libmodal-examples-prompts*
-
-Using a callback `function`: >
-	local libmodal = require('libmodal')
-	local commandList = {'new', 'close', 'last'}
-
-	function fooMode()
-		local userInput = vim.g.fooModeInput
-		if userInput == 'new' then
-			vim.api.nvim_command 'tabnew'
-		elseif userInput == 'close' then
-			vim.api.nvim_command 'tabclose'
-		elseif userInput == 'last' then
-			vim.api.nvim_command 'tablast'
-		end
-	end
-
-	libmodal.prompt.enter('FOO', fooMode, commandList)
-<
-
-Using a |command| `dict`: >
-	let s:commands = {
-	\	'new': 'tabnew',
-	\	'close': 'tabclose',
-	\	'last': 'tablast'
-	\}
-
-	call libmodal#Prompt('TAB', s:commands)
-<
-
-Using a |command| `table`: >
-	local libmodal = require('libmodal')
-	local commands = {
-		new   = 'tabnew',
-		close = 'tabclose',
-		last  = 'tablast'
-	}
-
-	libmodal.prompt.enter('BAR', commands)
-<
+https://github.com/Iron-E/nvim-libmodal/tree/master/examples
 
 ================================================================================
 4. Configuration                                          *libmodal-configuration*

@@ -1,32 +1,23 @@
---[[/* IMPORTS */]]
+local globals    = require 'libmodal/src/globals'
+local ParseTable = require 'libmodal/src/collections/ParseTable'
+local utils      = require 'libmodal/src/utils'
 
-local classes    = require('libmodal/src/classes')
-local globals    = require('libmodal/src/globals')
-local ParseTable = require('libmodal/src/collections/ParseTable')
-local utils      = require('libmodal/src/utils')
-local Vars       = require('libmodal/src/Vars')
+--- @class libmodal.Mode
+--- @field private exit libmodal.utils.Vars
+--- @field private flush_input_timer unknown
+--- @field private help libmodal.utils.Help|nil
+--- @field private indicator libmodal.utils.Indicator
+--- @field private input libmodal.utils.Vars
+--- @field private instruction function|table<string, function|string>
+--- @field private mappings libmodal.collections.ParseTable
+--- @field private name string
+--- @field private popups libmodal.collections.Stack
+--- @field private supress_exit boolean
+--- @field private timeouts_enabled boolean
+local Mode = utils.classes.new()
 
---[[/* MODULE */]]
-
-local Mode = {TYPE  = 'libmodal-mode'}
-
-local _HELP = '?'
-local _TIMEOUT = {
-	CHAR = 'ø',
-	LEN  = vim.go.timeoutlen,
-	SEND = function(self) vim.api.nvim_feedkeys(self.CHAR, 'nt', false) end
-}
-_TIMEOUT.CHAR_NUMBER = string.byte(_TIMEOUT.CHAR)
-
---[[
-	/*
-	 * META `_metaMode`
-	 */
---]]
-
-local _metaMode = classes.new(Mode.TYPE)
-
-local _metaInputBytes = classes.new(nil, {
+local InputBytes = utils.classes.new(
+{
 	clear = function(self)
 		for i, _ in ipairs(self) do
 			self[i] = nil
@@ -34,158 +25,108 @@ local _metaInputBytes = classes.new(nil, {
 	end
 })
 
-classes = nil
+local HELP = '?'
+local TIMEOUT =
+{
+	CHAR = 'ø',
+	LEN  = vim.go.timeoutlen,
+	SEND = function(self) vim.api.nvim_feedkeys(self.CHAR, 'nt', false) end
+}
+TIMEOUT.CHAR_NUMBER = string.byte(TIMEOUT.CHAR)
 
------------------------------------------------------------
---[[ SUMMARY:
-	* Execute some `selection` according to a set of determined logic.
-]]
---[[ REMARKS:
-	* Only provides logic for when `self._instruction` is a table of commands.
-]]
---[[ PARAMS:
-	* `selection` => The instruction that is desired to be executed.
-]]
------------------------------------------------------------
-function _metaMode._commandTableExecute(instruction)
-	if type(instruction) == globals.TYPE_FUNC then instruction()
-	else vim.api.nvim_command(instruction) end
+--- Execute the `instruction`.
+--- @param instruction function|string a Lua function or Vimscript command.
+function Mode.execute_instruction(instruction)
+	if type(instruction) == globals.TYPE_FUNC then
+		instruction()
+	else
+		vim.api.nvim_command(instruction)
+	end
 end
 
------------------------------------------------
---[[ SUMMARY:
-	* Parse `self.mappings` and see if there is any command to execute.
-]]
------------------------------------------------
-function _metaMode:_checkInputForMapping()
+--- Check the user's input against the `self.instruction` mappings to see if there is anything to execute.
+--- If there is nothing to execute, the user's input is rendered on the screen (as does Vim by default).
+function Mode:check_input_for_mapping()
 	-- Stop any running timers
-	self._flushInputTimer:stop()
+	self.flush_input_timer:stop()
 
 	-- Append the latest input to the locally stored input history.
-	local inputBytes = self.inputBytes
-
-	inputBytes[#inputBytes + 1] = self.input:nvimGet()
+	self.input_bytes[#self.input_bytes + 1] = self.input:get()
 
 	-- Get the command based on the users input.
-	local cmd = self.mappings:get(inputBytes)
+	local cmd = self.mappings:get(self.input_bytes)
 
 	-- Get the type of the command.
-	local commandType = type(cmd)
+	local command_type = type(cmd)
 
 	-- if there was no matching command
 	if not cmd then
-		if #inputBytes < 2 and inputBytes[1] == string.byte(_HELP) then
-			self._help:show()
+		if #self.input_bytes < 2 and self.input_bytes[1] == string.byte(HELP) then
+			self.help:show()
 		end
-		inputBytes:clear()
+		self.input_bytes:clear()
 	-- The command was a table, meaning that it MIGHT match.
-	elseif commandType == globals.TYPE_TBL
-		and globals.is_true(self._timeouts.enabled)
+	elseif command_type == globals.TYPE_TBL
+		and globals.is_true(self.timeouts_enabled)
 	then
 		-- start the timer
-		self._flushInputTimer:start(
-			_TIMEOUT.LEN, 0, vim.schedule_wrap(function()
+		self.flush_input_timer:start(
+			TIMEOUT.LEN, 0, vim.schedule_wrap(function()
 				-- Send input to interrupt a blocking `getchar`
-				_TIMEOUT:SEND()
+				TIMEOUT:SEND()
 				-- if there is a command, execute it.
 				if cmd[ParseTable.CR] then
-					self._commandTableExecute(cmd[ParseTable.CR])
+					self.execute_instruction(cmd[ParseTable.CR])
 				end
 				-- clear input
-				inputBytes:clear()
-				self._popups:peek():refresh(inputBytes)
+				self.input_bytes:clear()
+				self.popups:peek():refresh(self.input_bytes)
 			end)
 		)
 
 	-- The command was an actual vim command.
 	else
-		self._commandTableExecute(cmd)
-		inputBytes:clear()
+		self.execute_instruction(cmd)
+		self.input_bytes:clear()
 	end
 
-	self._popups:peek():refresh(inputBytes)
+	self.popups:peek():refresh(self.input_bytes)
 end
 
---------------------------
---[[ SUMMARY:
-	* Enter `self`'s mode.
-]]
---------------------------
-function _metaMode:enter()
+--- Enter this mode.
+function Mode:enter()
 	-- intialize variables that are needed for each recurse of a function
-	if type(self._instruction) == globals.TYPE_TBL then
+	if type(self.instruction) == globals.TYPE_TBL then
 		-- Initialize the input history variable.
-		self._popups:push(require('libmodal/src/collections/Popup').new())
+		self.popups:push(utils.Popup.new())
 	end
 
-	self._previousModeName = vim.g.libmodalActiveModeName
-	vim.g.libmodalActiveModeName = self._name
+	self.previous_mode_name = vim.g.libmodalActiveModeName
+	vim.g.libmodalActiveModeName = self.name
 
 	--[[ MODE LOOP. ]]
-	local continueMode = true
-	while continueMode do
+	local continue_mode = true
+	while continue_mode do
 		-- Try (using pcall) to use the mode.
-		local noErrors, modeResult = pcall(self._inputLoop, self)
+		local no_errors, mode_result = pcall(self.get_user_input, self)
 
 		-- If there were errors, handle them.
-		if not noErrors then
-			utils.show_error(modeResult)
-			continueMode = true
+		if not no_errors then
+			utils.show_error(mode_result)
+			continue_mode = false
 		else
-			continueMode = modeResult
+			continue_mode = mode_result
 		end
 	end
 
-	self:_tearDown()
+	self:tear_down()
 end
 
-----------------------------------
---[[ SUMMARY:
-	* Set the initial values used for parsing user input as combos.
-]]
-----------------------------------
-function _metaMode:_initMappings()
-	-- Create a timer to perform actions with.
-	self._flushInputTimer = vim.loop.new_timer()
-
-	-- Determine if a default `Help` should be created.
-	if not self._instruction[_HELP] then
-		self._help = utils.Help.new(self._instruction, 'KEY MAP')
-	end
-
-	self.inputBytes = setmetatable({}, _metaInputBytes)
-
-	-- Build the parse tree.
-	self.mappings = ParseTable.new(self._instruction)
-
-	-- Create a table for mode-specific data.
-	self._popups = require('libmodal/src/collections/Stack').new()
-
-	-- Create a variable for whether or not timeouts are enabled.
-	self._timeouts = Vars.new('timeouts', self._name)
-
-	-- Read the correct timeout variable.
-	if vim.g[self._timeouts:name()] ~= nil
-	then self._timeouts.enabled =
-		self._timeouts:nvimGet()
-	else self._timeouts.enabled =
-		Vars.libmodalTimeouts
-	end
-end
-
--------------------------------
---[[ SUMMARY:
-	* Loop an initialized `mode`.
-]]
---[[ RETURNS:
-	* `boolean` => whether or not the mode should continue
-]]
--------------------------------
-function _metaMode:_inputLoop()
+--- Get input from the user.
+--- @return boolean more_input
+function Mode:get_user_input()
 	-- If the mode is not handling exit events automatically and the global exit var is true.
-	if self.exit.supress
-	   and globals.is_true(self.exit:nvimGet())
-	then
+	if self.supress_exit and globals.is_true(self.exit:get()) then
 		return false
 	end
 
@@ -193,114 +134,103 @@ function _metaMode:_inputLoop()
 	utils.api.nvim_lecho(self.indicator)
 
 	-- Capture input.
-	local userInput = utils.api.nvim_input()
+	local user_input = vim.fn.getchar()
 
 	-- Return if there was a timeout event.
-	if userInput == _TIMEOUT.CHAR_NUMBER then
+	if user_input == TIMEOUT.CHAR_NUMBER then
 		return true
 	end
 
 	-- Set the global input variable to the new input.
-	self.input:nvimSet(userInput)
+	self.input:set(user_input)
 
-	if not self.exit.supress and userInput == globals.ESC_NR then -- The user wants to exit.
+	if not self.supress_exit and user_input == globals.ESC_NR then -- The user wants to exit.
 		return false -- As in, "I don't want to continue."
 	else -- The user wants to continue.
 
 		--[[ The instruction type is determined every cycle, because the user may be assuming a more direct control
 			over the instruction and it may change over the course of execution. ]]
-		local instructionType = type(self._instruction)
+		local instruction_type = type(self.instruction)
 
-		if instructionType == globals.TYPE_TBL then -- The second argument was a dict. Parse it.
-			self:_checkInputForMapping()
-		elseif instructionType == globals.TYPE_STR then -- It is the name of a VimL function.
-			vim.fn[self._instruction]()
-		else -- the second argument was a function; execute it.
-			self._instruction()
+		if instruction_type == globals.TYPE_TBL then -- The instruction was provided as a was a set of mappings.
+			self:check_input_for_mapping()
+		elseif instruction_type == globals.TYPE_STR then -- The instruction is the name of a Vimscript function.
+			vim.fn[self.instruction]()
+		else -- The instruction is a function.
+			self.instruction()
 		end
 	end
 
 	return true
 end
 
-------------------------------
---[[ SUMMARY:
-	* Remove variables used for a mode.
-]]
-------------------------------
-function _metaMode:_tearDown()
-	if type(self._instruction) == globals.TYPE_TBL then
-		self._flushInputTimer:stop()
-		self.inputBytes = nil
+--- Uninitialize variables from after exiting the mode.
+function Mode:tear_down()
+	if type(self.instruction) == globals.TYPE_TBL then
+		self.flush_input_timer:stop()
+		self.input_bytes = nil
 
-		self._popups:pop():close()
+		self.popups:pop():close()
 	end
 
-	if self._previousModeName and #vim.trim(self._previousModeName) < 1 then
+	if self.previous_mode_name and #vim.trim(self.previous_mode_name) < 1 then
 		vim.g.libmodalActiveModeName = nil
 	else
-		vim.g.libmodalActiveModeName = self._previousModeName
+		vim.g.libmodalActiveModeName = self.previous_mode_name
 	end
 
-	self._winState:restore()
 	utils.api.nvim_redraw()
 end
 
---[[
-	/*
-	 * CLASS `Mode`
-	 */
---]]
+return
+{
+	--- Create a new mode.
+	--- @param name string the name of the mode.
+	--- @param instruction function|string|table a Lua function, keymap dictionary, Vimscript command.
+	--- @return libmodal.Mode
+	new = function(name, instruction, supress_exit)
+		name = vim.trim(name)
 
------------------------------------------
---[[ SUMMARY:
-	* Enter a mode.
-]]
---[[ PARAMS:
-	* `name` => the mode name.
-	* `instruction` => the mode callback, or mode combo table.
-	* `...` => optional exit supresion flag.
-]]
------------------------------------------
-function Mode.new(name, instruction, ...)
-	name = vim.trim(name)
+		-- Inherit the metatable.
+		local self = setmetatable(
+			{
+				exit = utils.Vars.new('exit', name),
+				indicator = utils.Indicator.mode(name),
+				input = utils.Vars.new('input', name),
+				instruction = instruction,
+				name = name,
+			},
+			Mode
+		)
 
-	-- Inherit the metatable.
-	local self = setmetatable(
-		{
-			exit         = Vars.new('exit', name),
-			indicator    = require('libmodal/src/Indicator').mode(name),
-			input        = Vars.new('input', name),
-			_instruction = instruction,
-			_name        = name,
-			_winState    = utils.WindowState.new(),
-		},
-		_metaMode
-	)
+		-- Define the exit flag
+		self.supress_exit = supress_exit or false
 
-	-- Define the exit flag
-	self.exit.supress = (function(optionalValue)
-		if optionalValue then
-			return globals.is_true(optionalValue)
-		else
-			return false
+		-- If the user provided keymaps
+		if type(instruction) == globals.TYPE_TBL then
+			-- Create a timer to perform actions with.
+			self.flush_input_timer = vim.loop.new_timer()
+
+			-- Determine if a default `Help` should be created.
+			if not self.instruction[HELP] then
+				self.help = utils.Help.new(self.instruction, 'KEY MAP')
+			end
+
+			self.input_bytes = setmetatable({}, InputBytes)
+
+			-- Build the parse tree.
+			self.mappings = ParseTable.new(self.instruction)
+
+			-- Create a table for mode-specific data.
+			self.popups = require('libmodal/src/collections/Stack').new()
+
+			-- Create a variable for whether or not timeouts are enabled.
+			self.timeouts = utils.Vars.new('timeouts', self.name)
+
+			-- Read the correct timeout variable.
+			self.timeouts_enabled = self.timeouts:get() or vim.g.libmodalTimeouts
 		end
-	end)(unpack({...}))
 
-	-- Define other "session" variables.
-
-	-- Determine whether a callback was specified, or a combo table.
-	if type(instruction) == globals.TYPE_TBL then
-		self:_initMappings()
+		return self
 	end
-
-	return self
-end
-
---[[
-	/
-	 * PUBLICIZE MODULE
-	 */
---]]
-
-return Mode
+}

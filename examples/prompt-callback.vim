@@ -8,6 +8,7 @@ function! s:fooMode() abort
 		tabnew
 	elseif userInput == 'close'
 		tabclose
+		let g:fooModeExit = v:true
 	elseif userInput == 'last'
 		tablast
 	endif
