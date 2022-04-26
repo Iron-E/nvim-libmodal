@@ -105,8 +105,8 @@ VARIABLES                                               *libmodal-usage-variable
 		`nil`
 
 	See also: ~
-		|g:|     For more information about global variables.
-		|vim.g|  For info about accessing |g:| from lua.
+		|g:|    For more information about global variables.
+		|vim.g| For info about accessing |g:| from lua.
 
 --------------------------------------------------------------------------------
 FUNCTIONS                                               *libmodal-usage-functions*
@@ -128,7 +128,7 @@ FUNCTIONS                                               *libmodal-usage-function
 	To take input on a line-by-line basis, see |libmodal-prompt|.
 
 	Note: `libmodal.mode.enter()`/`libmodal#Enter()` may be called from inside
-	      itself. See |libmodal-examples-submodes| for an example.
+	      itself. See |libmodal-examples| for an example.
 
 	Parameters: ~
 		{name}         The name of the mode (e.g. |INSERT|).
@@ -190,16 +190,15 @@ FUNCTIONS                                               *libmodal-usage-function
 			- If |v:true|/`true`, then <Esc> is ignored unless specified by
 			  the user. In such cases, the user should set the
 			  `g:`{name}`ModeExit` variable to `true` when exiting is
-			  desired. See |libmodal-examples-supress-exit|.
+			  desired. See |libmodal-examples|.
 
 	See also: ~
-		|lua-eval|                For type conversions between Vimscript to
-		                        |Lua|.
-		|libmodal-examples-mode|  For examples of this function.
+		|lua-eval|          For type conversions between Vimscript to |Lua|.
+		|libmodal-examples| For examples of this function.
 
 
-                                           *libmodal-layer* *libmodal.layer.enter()*
-`libmodal.layer`.enter({keymap} [, {exit_char}])
+                                                   *libmodal-layer* *libmodal.layer*
+`libmodal.layer`.enter({keymap} [, {exit_char}])            *libmodal.layer.enter()*
 
 	While a |libmodal-mode| ignores behavior that has not been explicitly
 	defined, a |libmodal-layer| allows unrecognized |input| to be passed back
@@ -233,8 +232,76 @@ FUNCTIONS                                               *libmodal-usage-function
 		  {exit_char} is provided.
 
 	See also: ~
-		|libmodal-examples-layers|  For an example.
-		|nvim_set_keymap()|         For more information about {keymap}.
+		|libmodal-examples| For an example.
+		|vim.keymap.set()|  For more information about `opts`.
+
+`libmodal.layer`.new({keymap})                                *libmodal.layer.new()*
+
+	See |libmodal.layer.enter()| for more information. This function only
+	differs from |libmodal.layer.enter()| in that instead of entering the layer
+	immediately, it returns a |libmodal.Layer| object for you to manipulate.
+
+	Parameters: ~
+		{keymap}  The keymap for the layer. General template is this: >
+			{
+				[<mode>] = {
+					[<lhs>] = {
+						rhs = <rhs>,
+						<opts>
+					},
+					…
+				},
+				…
+			}
+<			Where {mode}, {lhs}, {rhs}, and {opts} are the same as in
+			|vim.keymap.set()| (except you should not use multiple `<mode>` at
+			one time, despite |vim.keymap.set()| supporting it).
+
+	Return: ~
+		- A |libmodal.Layer| object.
+
+	See also: ~
+		|libmodal-layer|    For more information about layers.
+		|libmodal-examples| For an example.
+		|vim.keymap.set()|  For more information about `opts`.
+
+                                                   *libmodal-Layer* *libmodal.Layer*
+`libmodal.Layer`:enter()                                    *libmodal.Layer:enter()*
+
+	Applies the {keymap} which was provided by |libmodal.layer.new|. These two
+	code snippets are equivalent: >
+	local libmodal = require 'libmodal'
+
+	-- enter a layer directly
+	libmodal.layer.enter({n = gg = {rhs = 'G'}})
+
+	-- enter a layer manually
+	local layer = libmodal.layer.new({n = gg = {rhs = 'G'}})
+	layer:enter()
+<
+	See also: ~
+		|libmodal.mode.enter| A shortcut to access this function.
+		|libmodal.mode.new|   How to create a |libmodal.Layer|
+
+`libmodal.Layer`:map({mode}, {lhs}, {rhs}, {opts})            *libmodal.Layer:map()*
+
+	{mode}, {lhs}, {rhs}, and {opts} are the same as in |vim.keymap.set()|
+	except that a {mode} table is not supported.
+
+	See also: ~
+		|libmodal-examples| For an example.
+		|vim.keymap.set()|  For information about the args.
+
+`libmodal.Layer`:unmap({mode}, {lhs})                       *libmodal.Layer:unmap()*
+
+	{mode} and {lhs} are the same as in |vim.keymap.del()| except that a {mode}
+	table is not supported.
+
+	Note: this function cannot be called until after |libmodal.Layer:enter()|
+
+	See also: ~
+		|libmodal-examples| For an example.
+		|vim.keymap.del()|  For information about the args.
 
                       *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
 `libmodal.prompt`.enter({name}, {instruction} [, {completions}])
@@ -306,8 +373,8 @@ FUNCTIONS                                               *libmodal-usage-function
 
 
 	See also: ~
-		|lua-eval|                  For type conversions between Vimscript to |Lua|.
-		|libmodal-examples-prompt|  For examples of this function.
+		|lua-eval|          For type conversions between Vimscript to |Lua|.
+		|libmodal-examples| For examples of this function.
 
 ================================================================================
 3. Examples                                                    *libmodal-examples*
