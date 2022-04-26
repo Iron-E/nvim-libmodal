@@ -23,30 +23,30 @@ for i, replacement in ipairs(REPLACEMENTS) do
 	REPLACEMENTS[i], _ = vim.pesc(replacement)
 end
 
---- Execute the instruction specified by the `user_input`.
+--- execute the instruction specified by the `user_input`.
 --- @param user_input string
 function Prompt:execute_instruction(user_input)
-	if type(self.instruction) == globals.TYPE_TBL then -- The self.instruction is a command table.
-		if self.instruction[user_input] then -- There is a defined command for the input.
+	if type(self.instruction) == globals.TYPE_TBL then -- the self.instruction is a command table.
+		if self.instruction[user_input] then -- there is a defined command for the input.
 			local to_execute = self.instruction[user_input]
 			if type(to_execute) == globals.TYPE_FUNC then
 				to_execute()
 			else
 				vim.api.nvim_command(to_execute)
 			end
-		elseif user_input == HELP then -- The user did not define a 'help' command, so use the default.
+		elseif user_input == HELP then -- the user did not define a 'help' command, so use the default.
 			self.help:show()
 		else -- show an error.
 			utils.api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
 		end
-	elseif type(self.instruction) == globals.TYPE_STR then -- The self.instruction is a function.
+	elseif type(self.instruction) == globals.TYPE_STR then -- the self.instruction is a function.
 		vim.fn[self.instruction]()
 	else -- attempt to call the self.instruction.
 		self.instruction()
 	end
 end
 
---- Get more input from the user.
+--- get more input from the user.
 --- @return boolean more_input
 function Prompt:get_user_input()
 	-- clear previous `echo`s.
@@ -86,7 +86,7 @@ function Prompt:get_user_input()
 	return continue_prompt == nil and true or continue_prompt
 end
 
---- Enter the prompt.
+--- enter the prompt.
 function Prompt:enter()
 	-- enter the mode using a loop.
 	local continue_mode = true
@@ -105,7 +105,7 @@ end
 
 return
 {
-	--- Enter a prompt.
+	--- enter a prompt.
 	--- @param name string the name of the prompt
 	--- @param instruction function|table<string, function|string> what to do with user input
 	--- @param user_completions table<string>|nil a list of possible inputs, provided by the user
@@ -126,7 +126,7 @@ return
 
 		-- get the completion list.
 		if type(instruction) == globals.TYPE_TBL then -- unload the keys of the mode command table.
-			-- Create one if the user specified a command table.
+			-- create one if the user specified a command table.
 			local completions   = {}
 			local contained_help = false
 
@@ -144,7 +144,7 @@ return
 
 			self.completions = completions
 		elseif user_completions then
-			-- Use the table that the user gave.
+			-- use the table that the user gave.
 			self.completions = user_completions
 		end
 

@@ -1,4 +1,4 @@
---- Remove and return the right-hand side of a `keymap`.
+--- remove and return the right-hand side of a `keymap`.
 --- @param keymap table the keymap to unpack
 --- @return string lhs, table options
 local function unpack_keymap_lhs(keymap)
@@ -8,7 +8,7 @@ local function unpack_keymap_lhs(keymap)
 	return lhs, keymap
 end
 
---- Remove and return the right-hand side of a `keymap`.
+--- remove and return the right-hand side of a `keymap`.
 --- @param keymap table the keymap to unpack
 --- @return function|string rhs, table options
 local function unpack_keymap_rhs(keymap)
@@ -21,9 +21,9 @@ end
 --- @class libmodal.Layer
 --- @field private existing_keymap table the keymaps to restore when exiting the mode; generated automatically
 --- @field private layer_keymap table the keymaps to apply when entering the mode; provided by user
-local Layer = require('libmodal/src/utils/classes').new()
+local Layer = require('libmodal/src/utils/classes').new(nil)
 
---- Apply the `Layer`'s keymaps buffer.
+--- apply the `Layer`'s keymaps buffer.
 function Layer:enter()
 	if self.existing_keymap then
 		error('This layer has already been entered. `:exit()` before entering again.')
@@ -59,7 +59,7 @@ function Layer:enter()
 	end
 end
 
---- Add a keymap to the mode.
+--- add a keymap to the mode.
 --- @param mode string the mode that this keymap for.
 --- @param lhs string the left hand side of the keymap.
 --- @param rhs function|string the right hand side of the keymap.
@@ -86,7 +86,7 @@ function Layer:map(mode, lhs, rhs, options)
 	self.layer_keymap[mode][lhs] = options
 end
 
---- Restore one keymapping to its original state.
+--- restore one keymapping to its original state.
 --- @param mode string the mode of the keymap.
 --- @param lhs string the keys which invoke the keymap.
 --- @see `vim.api.nvim_del_keymap`
@@ -111,7 +111,7 @@ function Layer:unmap(mode, lhs)
 	self.existing_keymap[mode][lhs] = nil
 end
 
---- Exit the layer, restoring all previous keymaps.
+--- exit the layer, restoring all previous keymaps.
 function Layer:exit()
 	if not self.existing_keymap then
 		error('This layer has not been entered yet.')

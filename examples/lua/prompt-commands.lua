@@ -1,7 +1,6 @@
--- Import
 local libmodal = require 'libmodal'
 
--- Define commands through a dictionary.
+-- define commands through a dictionary
 local commands =
 {
 	new   = 'tabnew',
@@ -10,5 +9,5 @@ local commands =
 	exit = 'let g:fooModeExit = v:true',
 }
 
--- Begin the prompt.
+-- begin the prompt
 libmodal.prompt.enter('FOO', commands)

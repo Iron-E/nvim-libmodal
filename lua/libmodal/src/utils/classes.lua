@@ -1,6 +1,6 @@
 return
 {
-	--- Define a metatable.
+	--- define a metatable.
 	--- @param template table the default value
 	new = function(template)
 		-- set self to `template`, or `{}` if nil.

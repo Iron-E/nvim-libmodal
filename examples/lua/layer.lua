@@ -1,7 +1,6 @@
--- Imports
 local libmodal = require 'libmodal'
 
--- create a new layer.
+-- create a new layer
 local layer = libmodal.layer.new(
 {
 	n =
@@ -19,7 +18,7 @@ local layer = libmodal.layer.new(
 	}
 })
 
--- Add an additional mapping for `<Esc>` to exit the mode
+-- add an additional mapping for `<Esc>` to exit the mode
 layer:map('n', '<Esc>', function() layer:exit() end, {})
 
 layer:enter()

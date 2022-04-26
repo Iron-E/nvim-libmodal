@@ -2,7 +2,7 @@
 --- @field private buffer number the number of the window which this popup is rendered on.
 --- @field private input_chars table<string> the characters input by the user.
 --- @field private window number the number of the window which this popup is rendered on.
-local Popup = require('libmodal/src/utils/classes').new()
+local Popup = require('libmodal/src/utils/classes').new(nil)
 
 --- @param window number
 --- @return boolean `true` if the window is non-`nil` and `nvim_win_is_valid`
@@ -27,7 +27,7 @@ function Popup:close(keep_buffer)
 	end
 end
 
---- Attempt to open this popup. If the popup was already open, close it and re-open it.
+--- attempt to open this popup. If the popup was already open, close it and re-open it.
 function Popup:open(config)
 	if not config then
 		config =
@@ -50,10 +50,10 @@ function Popup:open(config)
 	self.window = vim.api.nvim_open_win(self.buffer, false, config)
 end
 
---- Display `input_bytes` in `self.buffer`
+--- display `input_bytes` in `self.buffer`
 --- @param input_bytes table<number> a list of character codes to display
 function Popup:refresh(input_bytes)
-	-- The user simply typed one more character onto the last one.
+	-- the user simply typed one more character onto the last one.
 	if #input_bytes == #self.input_chars + 1 then
 		self.input_chars[#input_bytes] = string.char(input_bytes[#input_bytes])
 	elseif #input_bytes == 1 then -- the user's typing was reset by a parser.
@@ -67,7 +67,7 @@ function Popup:refresh(input_bytes)
 
 	vim.api.nvim_buf_set_lines(self.buffer, 0, 1, true, {table.concat(self.input_chars)})
 
-	-- Close and reopen the window if it was not already open.
+	-- close and reopen the window if it was not already open.
 	if not valid(self.window) or vim.api.nvim_win_get_tabpage(self.window) ~= vim.api.nvim_get_current_tabpage() then
 		self:open()
 	end

@@ -1,7 +1,7 @@
 --- @class libmodal.utils.Vars
 --- @field private mode_name string the highlight group to use when printing `str`
 --- @field private var_name string the highlight group to use when printing `str`
-local Vars = require('libmodal/src/utils/classes').new()
+local Vars = require('libmodal/src/utils/classes').new(nil)
 
 --- @return string name the global Neovim setting
 function Vars:name()
@@ -20,7 +20,7 @@ end
 
 return
 {
-	--- Create a new set of variables
+	--- create a new set of variables
 	--- @param var_name string the name of the key used to refer to this variable in `Vars`.
 	--- @param mode_name string the name of the mode
 	new = function(var_name, mode_name)

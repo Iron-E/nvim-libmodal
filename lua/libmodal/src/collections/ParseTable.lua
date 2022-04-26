@@ -1,11 +1,11 @@
---- The number corresponding to <CR> in vim.
+--- the number corresponding to <CR> in vim.
 local CR   = 13
 local globals = require 'libmodal/src/globals'
 
 --- @class libmodal.collections.ParseTable
-local ParseTable = require('libmodal/src/utils/classes').new()
+local ParseTable = require('libmodal/src/utils/classes').new(nil)
 
---- Reverse the order of elements in some `tbl`
+--- reverse the order of elements in some `tbl`
 --- @param tbl table the table to reverse
 --- @return table tbl_reversed
 local function table_reverse(tbl)
@@ -23,7 +23,7 @@ local function chars(str)
 	return vim.split(str, '')
 end
 
---- Retrieve the mapping of `lhs_reversed_bytes`
+--- retrieve the mapping of `lhs_reversed_bytes`
 --- @param parse_table libmodal.collections.ParseTable the table to fetch `lhs_reversed_bytes` from.
 --- @param lhs_reversed_bytes table<string> the characters of the left-hand side of the mapping reversed passed to `string.byte`
 --- @return false|function|string|table match a string/func when fully matched; a table when partially matched; false when no match.
@@ -31,7 +31,7 @@ local function get(parse_table, lhs_reversed_bytes)
 	--[[ Get the next character in the keymap string. ]]
 
 	local k = ''
-	if #lhs_reversed_bytes > 0 then -- There is more input to parse
+	if #lhs_reversed_bytes > 0 then -- there is more input to parse
 		k = table.remove(lhs_reversed_bytes) -- the table should already be `string.byte`'d
 	else -- the user input has run out, but there is more in the `parse_table`.
 		return parse_table
@@ -39,7 +39,7 @@ local function get(parse_table, lhs_reversed_bytes)
 
 	--[[ Parse the `k`. ]]
 
-	-- Make sure the dicitonary has a key for that value.
+	-- make sure the dicitonary has a key for that value.
 	if parse_table[k] then
 		local val = parse_table[k]
 		local val_type = type(val)
@@ -57,7 +57,7 @@ local function get(parse_table, lhs_reversed_bytes)
 	return nil
 end
 
---- Insert a `value` into `parse_table` at the position indicated by `lhs_reversed_bytes`
+--- insert a `value` into `parse_table` at the position indicated by `lhs_reversed_bytes`
 --- @param lhs_reversed_bytes table<string> the characters of the left-hand side of the mapping reversed passed to `string.byte`
 --- @param value function|string the right-hand-side of the mapping
 local function put(parse_table, lhs_reversed_bytes, value)
@@ -70,14 +70,14 @@ local function put(parse_table, lhs_reversed_bytes, value)
 		else -- if there is a previous command mapping in place
 			local value_type = type(parse_table[byte])
 			if value_type == globals.TYPE_STR or value_type == globals.TYPE_FUNC then -- if this is not a tree of inputs already
-				-- Make the mapping require hitting enter before executing
+				-- make the mapping require hitting enter before executing
 				parse_table[byte] = {[CR] = parse_table[byte]}
 			end
 		end
 
 		-- run put() again
 		put(parse_table[byte], lhs_reversed_bytes, value)
-	-- If parse_Table[k] is a pre-existing table, don't clobber the table— clobber the `CR` value.
+	-- if parse_Table[k] is a pre-existing table, don't clobber the table— clobber the `CR` value.
 	elseif type(parse_table[byte]) == globals.TYPE_TBL then
 		parse_table[byte][CR] = value
 	else
@@ -85,14 +85,14 @@ local function put(parse_table, lhs_reversed_bytes, value)
 	end
 end
 
---- Retrieve the mapping of `lhs_reversed_bytes`
+--- retrieve the mapping of `lhs_reversed_bytes`
 --- @param key_dict table a list of characters (most recent input first)
 --- @return false|function|string|table match a string/func when fully matched; a table when partially matched; false when no match.
 function ParseTable:get(key_dict)
 	return get(self, table_reverse(key_dict))
 end
 
---- Parse `key` and retrieve its value
+--- parse `key` and retrieve its value
 --- @param key string the left-hand-side of the mapping to retrieve
 --- @return false|function|string|table match a string/func when fully found; a table when partially found; false when not found.
 function ParseTable:parse_get(key)
@@ -106,7 +106,7 @@ function ParseTable:parse_get(key)
 	return get(self, parsed_table)
 end
 
---- Parse `key` and assign it to `value`.
+--- parse `key` and assign it to `value`.
 --- @param key string the left-hand-side of the mapping
 --- @param value function|string the right-hand-side of the mapping
 function ParseTable:parse_put(key, value)
@@ -125,16 +125,16 @@ return
 {
 	CR = CR,
 
-	--- Create a new `libmodal.collections.ParseTable` from a user-provided table.
+	--- create a new `libmodal.collections.ParseTable` from a user-provided table.
 	--- @param user_table table keymaps (e.g. `{zfo = 'tabnew'}`)
 	--- @return libmodal.collections.ParseTable
 	new = function(user_table)
 		local self = setmetatable({}, ParseTable)
 
-		-- Parse the passed in table.
+		-- parse the passed in table.
 		self:parse_put_all(user_table)
 
-		-- Return the new `ParseTable`.
+		-- return the new `ParseTable`.
 		return self
 	end,
 }

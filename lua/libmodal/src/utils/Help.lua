@@ -1,9 +1,9 @@
 local globals = require 'libmodal/src/globals'
 
 --- @class libmodal.utils.Help
-local Help = require('libmodal/src/utils/classes').new()
+local Help = require('libmodal/src/utils/classes').new(nil)
 
---- Align `tbl` according to the `longest_key_len`.
+--- align `tbl` according to the `longest_key_len`.
 --- @param tbl table what to align.
 --- @param longest_key_len number how long the longest key is.
 --- @return table aligned
@@ -27,7 +27,7 @@ local function align_columns(tbl, longest_key_len)
 	return to_print
 end
 
---- Show the contents of this `Help`.
+--- show the contents of this `Help`.
 function Help:show()
 	for _, help_text in ipairs(self) do
 		print(help_text)
@@ -39,7 +39,7 @@ end
 
 return
 {
-	--- Create a default help table with `commands_or_maps` and vim expressions.
+	--- create a default help table with `commands_or_maps` and vim expressions.
 	--- @param commands_or_maps table<string, function|string> commands or mappings to vim expressions.
 	--- @param title string
 	--- @return libmodal.utils.Help
@@ -60,7 +60,7 @@ return
 		end
 		help_separator = table.concat(help_separator)
 
-		-- Create a new `Help`.
+		-- create a new `Help`.
 		return setmetatable(
 			{
 				[1] = ' ',

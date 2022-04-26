@@ -3,7 +3,7 @@ return setmetatable(
 	{
 		layer =
 		{
-			--- Enter a new layer.
+			--- enter a new layer.
 			--- @param keymap table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
 			--- @param exit_char nil|string a character which can be used to exit the layer from normal mode.
 			--- @return function|nil exit a function to exit the layer, or `nil` if `exit_char` is passed
@@ -18,7 +18,7 @@ return setmetatable(
 				end
 			end,
 
-			--- Create a new layer.
+			--- create a new layer.
 			--- @param keymap table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
 			--- @return libmodal.Layer
 			new = function(keymap)
@@ -28,7 +28,7 @@ return setmetatable(
 
 		mode =
 		{
-			--- Enter a mode.
+			--- enter a mode.
 			--- @param name string the name of the mode.
 			--- @param instruction function|string|table a Lua function, keymap dictionary, Vimscript command.
 			enter = function(name, instruction, supress_exit)
@@ -38,7 +38,7 @@ return setmetatable(
 
 		prompt =
 		{
-			--- Enter a prompt.
+			--- enter a prompt.
 			--- @param name string the name of the prompt
 			--- @param instruction function|table<string, function|string> what to do with user input
 			--- @param user_completions table<string>|nil a list of possible inputs, provided by the user
