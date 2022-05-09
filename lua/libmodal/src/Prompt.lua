@@ -50,7 +50,7 @@ end
 --- @return boolean more_input
 function Prompt:get_user_input()
 	-- clear previous `echo`s.
-	utils.api.nvim_redraw()
+	utils.api.redraw()
 
 	local continue_prompt -- will set to true `true` if looping this prompt again
 

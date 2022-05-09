@@ -126,7 +126,7 @@ function Mode:get_user_input()
 	end
 
 	-- echo the indicator.
-	utils.api.nvim_lecho(self.indicator)
+	utils.api.hi_echo(self.indicator)
 
 	-- capture input.
 	local user_input = vim.fn.getchar()
@@ -174,7 +174,7 @@ function Mode:tear_down()
 		vim.g.libmodalActiveModeName = self.previous_mode_name
 	end
 
-	utils.api.nvim_redraw()
+	utils.api.redraw()
 end
 
 return
