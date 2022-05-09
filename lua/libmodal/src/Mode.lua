@@ -107,7 +107,7 @@ function Mode:enter()
 
 		-- if there were errors, handle them.
 		if not no_errors then
-			utils.show_error(mode_result)
+			utils.notify_error('Error during nvim-libmodal mode', mode_result)
 			continue_mode = false
 		else
 			continue_mode = mode_result

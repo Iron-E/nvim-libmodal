@@ -37,7 +37,7 @@ function Prompt:execute_instruction(user_input)
 		elseif user_input == HELP then -- the user did not define a 'help' command, so use the default.
 			self.help:show()
 		else -- show an error.
-			utils.api.nvim_show_err(globals.DEFAULT_ERROR_TITLE, 'Unknown command')
+			vim.notify('nvim-libmodal prompt: unkown command', vim.log.levels.ERROR, {title = 'nvim-libmodal'})
 		end
 	elseif type(self.instruction) == globals.TYPE_STR then -- the self.instruction is a function.
 		vim.fn[self.instruction]()
@@ -95,7 +95,7 @@ function Prompt:enter()
 
 		-- if there were errors.
 		if not no_errors then
-			utils.show_error(prompt_result)
+			utils.notify_error('Error during nvim-libmodal mode', prompt_result)
 			continue_mode = false
 		else
 			continue_mode = prompt_result

@@ -52,9 +52,10 @@ return setmetatable(
 			if key ~= 'Layer' then
 				return rawget(tbl, key)
 			else
-				require('libmodal/src/utils/api').nvim_show_err(
-					require('libmodal/src/globals').DEFAULT_ERROR_TITLE,
-					'`libmodal.Layer` is deprecated in favor of `libmodal.layer`. It will work FOR NOW, but uncapitalize that `L` please :)'
+				vim.notify_once(
+					'`libmodal.Layer` is deprecated in favor of `libmodal.layer`. It will work FOR NOW, but uncapitalize that `L` please :)',
+					vim.log.levels.WARN,
+					{title = 'nvim-libmodal'}
 				)
 				return require 'libmodal/src/Layer'
 			end

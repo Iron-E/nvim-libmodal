@@ -2,9 +2,6 @@ local VIM_FALSE = 0
 local VIM_TRUE  = 1
 
 return {
-	--- the default error title for `nvim-libmodal` errors.
-	DEFAULT_ERROR_TITLE = 'nvim-libmodal error',
-
 	--- the key-code for the escape character.
 	ESC_NR = 27,
 
