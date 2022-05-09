@@ -1,6 +1,6 @@
 local globals = require 'libmodal/src/globals'
-local Indicator = require 'libmodal/src/utils/Indicator'
 
+--- @class libmodal.utils.api
 local api = {}
 
 --- echo a list of `Indicator`s with their associated highlighting.

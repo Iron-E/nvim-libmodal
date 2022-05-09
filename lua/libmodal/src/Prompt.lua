@@ -1,5 +1,5 @@
 local globals = require 'libmodal/src/globals'
-local utils   = require 'libmodal/src/utils'
+local utils = require 'libmodal/src/utils'
 
 --- @class libmodal.Prompt
 --- @field private completions table<string>|nil
@@ -9,7 +9,7 @@ local utils   = require 'libmodal/src/utils'
 --- @field private input libmodal.utils.Vars
 --- @field private instruction function|table<string, function|string>
 --- @field private name string
-local Prompt = utils.classes.new()
+local Prompt = utils.classes.new(nil)
 
 local HELP = 'help'
 local REPLACEMENTS =

@@ -1,3 +1,4 @@
+--- @class libmodal.utils.classes
 return
 {
 	--- define a metatable.

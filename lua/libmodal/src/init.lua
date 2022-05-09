@@ -1,3 +1,10 @@
+--- @class libmodal
+--- @field private collections libmodal.collections
+--- @field private globals libmodal.globals
+--- @field private Layer libmodal.Layer
+--- @field private Mode libmodal.Mode
+--- @field private Prompt libmodal.Prompt
+--- @field private utils libmodal.utils
 return
 {
 	collections = require 'libmodal/src/collections',

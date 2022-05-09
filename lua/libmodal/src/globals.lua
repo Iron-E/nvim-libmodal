@@ -1,7 +1,16 @@
 local VIM_FALSE = 0
 local VIM_TRUE  = 1
 
-return {
+--- @class libmodal.globals
+--- @field private ESC_NR number
+--- @field private TYPE_FUNC string
+--- @field private TYPE_NUM string
+--- @field private TYPE_STR string
+--- @field private TYPE_TBL string
+--- @field private VIM_FALSE number
+--- @field private VIM_TRUE number
+return
+{
 	--- the key-code for the escape character.
 	ESC_NR = 27,
 

@@ -1,6 +1,13 @@
+--- @class libmodal.utils
+--- @field private completions libmodal.utils.api
+--- @field private classes libmodal.utils.classes
+--- @field private Indicator libmodal.utils.Indicator
+--- @field private Help libmodal.utils.Help
+--- @field private Popup libmodal.utils.Popup
+--- @field private Vars libmodal.utils.Vars
 return
 {
-	api   = require 'libmodal/src/utils/api',
+	api = require 'libmodal/src/utils/api',
 	classes = require 'libmodal/src/utils/classes',
 	Indicator = require 'libmodal/src/utils/Indicator',
 	Help = require 'libmodal/src/utils/Help',
