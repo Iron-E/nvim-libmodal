@@ -94,15 +94,8 @@ See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode,
 --------------------------------------------------------------------------------
 VARIABLES                                               *libmodal-usage-variables*
 
-`vim.g`.libmodalActiveModeName
-
+`vim.g`.libmodalActiveModeName		string	(default nil)
 	The name of the currently active |libmodal-mode|.
-
-	Type: ~
-		`string`
-
-	Default Value: ~
-		`nil`
 
 	See also: ~
 		|g:|    For more information about global variables.
@@ -122,114 +115,113 @@ FUNCTIONS                                               *libmodal-usage-function
 	passed through a |g:var| determined by the {name} of the mode. For
 	example, if {name} is "FOO" then the |g:var| is `g:fooModeInput`.
 	Additionally, this input is reported as a |char2nr| number, and as such
-	should be decoded with `string.char()` (|nr2char| in |Lua|) if working
-	with raw characters is desired.
+	should be decoded with `string.char()` (|nr2char| in |Lua|) if working with
+	raw characters is desired.
 
 	To take input on a line-by-line basis, see |libmodal-prompt|.
 
 	Note: `libmodal.mode.enter()`/`libmodal#Enter()` may be called from inside
-	      itself. See |libmodal-examples| for an example.
+	itself. See |libmodal-examples| for an example.
 
 	Parameters: ~
-		{name}         The name of the mode (e.g. |INSERT|).
 
-			- Case-sensitive. Caps are recommended.
+	{name}	The name of the mode (e.g. |INSERT|). Case-sensitive. Caps are
+		recommended.
 
-		{instruction}  What to do when accepting user input.
+	{instruction}
+		What to do when accepting user input.
 
-			- If {instruction} is a `dict`/`table`, then it is treated as a
-			  map of user key-chord to Vim |command|s. Example: >
-			      -- LUA
-			      local modeInstruction = {
-			          zf = 'split',
-			          zfo = 'vsplit',
-			          -- You can also use lua functions
-			          zfc = function() return 'tabnew' end
-			      }
+		If {instruction} is a `dict` / `table`, then it is
+		treated as a map of user key-chord to Vim |command|s.
 
-			    " VIMSCRIPT
-			    let s:modeInstruction = {
-			        'zf': 'split',
-			        'zfo': 'vsplit',
-			        'zfc': 'tabnew'
-			    }
+		Example Lua: >
+		    local modeInstruction = {
+		       zf = 'split',
+		       zfo = 'vsplit',
+		       -- You can also use lua functions
+		       zfc = function() return 'tabnew' end
+		    }
+<
+		Example Vimscript: >
+		    let s:modeInstruction = {
+		       'zf': 'split',
+		       'zfo': 'vsplit',
+		       'zfc': 'tabnew'
+		    }
+<
+		Note: If no `?` key is defined, one will be created automatically.
+
+		If {instruction} is a `function`, then it is called every time
+		that |getchar()| completes. The user input is received through
+		`g:{name}ModeInput` (see above).
+
+		*Error	you cannot pass a funcref to Lua from Vimscript!
+	      	If you want to use a |funcref()| for {instruction}, it must be the
+		name of the function as a `string`.
+
+		Vimscript: >
+		    function! s:foo() abort
+		        echo 'It works'
+		        call getchar()
+		    endfunction
+		    lua require('libmodal').mode.enter('FOO', 's:foo')
 <
 
-			Note: If no `?` key is defined, one will be created automatically.
+		Note: Some QoL features are available by default when specifying
+		a `dict`/`table` value for {instruction} that would otherwise have
+		to be programmed manually if a `function` is specified.
 
-			- If {instruction} is a `function`, then it is called every time
-			  that |getchar()| completes. The user input is received through
-			  `g:{name}ModeInput` (see above).
+		- A user's typed characters will show in the
+	          lower right corner when {instruction} is a table.
+	        - If `g:libmodalTimeouts` is enabled, then user input will be
+	          subjected to the |timeoutlen|.
 
-			*Error	you cannot pass a funcref to Lua from Vimscript!
-			      	- If you want to use a |funcref()| for {instruction}, it
-			      	  must be the name of the function as a `string`.
-			      	" VIMSCRIPT
-			      	function! s:foo() abort
-			      		echo 'It works'
-			      		call getchar()
-			      	endfunction
-			      	lua require('libmodal').mode.enter('FOO', 's:foo')
-<
+	{supress_exit}
+		Whether or not to automatically exit the mode upon an <Esc> press.
 
-			Note: Some QoL features are available by default when
-			      specifying a `dict`/`table` value for {instruction} that
-			      would otherwise have to be programmed manually if a
-			      `function` is specified.
-
-			      - A user's typed characters will show in the
-			        lower right corner when {instruction} is a table.
-			      - If `g:libmodalTimeouts` is enabled, then user input will be
-			        subjected to the |timeoutlen|.
-
-		{supress_exit}  Whether or not to automatically exit the mode upon an
-                        <Esc> press.
-
-			- If |v:false|/`false`, then <Esc> is automatically mapped to
-              exiting.
-			- If |v:true|/`true`, then <Esc> is ignored unless specified by
-			  the user. In such cases, the user should set the
-			  `g:`{name}`ModeExit` variable to `true` when exiting is
-			  desired. See |libmodal-examples|.
+		If |v:false|/`false`, then <Esc> is automatically mapped to exiting.
+		If |v:true|/`true`, then <Esc> is ignored unless specified by the
+		user.  In such cases, the user should set the `g:`{name}`ModeExit`
+		variable to `true` when exiting is desired.  See |libmodal-examples|.
 
 	See also: ~
-		|lua-eval|          For type conversions between Vimscript to |Lua|.
+		|lua-eval|  For type conversions between Vimscript to |Lua|.
 		|libmodal-examples| For examples of this function.
 
 
                                                    *libmodal-layer* *libmodal.layer*
-`libmodal.layer`.enter({keymap} [, {exit_char}])            *libmodal.layer.enter()*
+`libmodal.layer`.enter({keymap} [, {exit}])            *libmodal.layer.enter()*
 
 	While a |libmodal-mode| ignores behavior that has not been explicitly
 	defined, a |libmodal-layer| allows unrecognized |input| to be passed back
 	into Neovim for analysis.
 
 	So, if you have only defined a few keybindings, all of the remaining ones
-	from a user's configuration would still work— only new keymaps will be
+	from a user's configuration would still work — only new keymaps will be
 	overwritten.
 
 	Parameters: ~
-		{keymap}  The keymap for the layer. General template is this: >
-			{
-				[<mode>] = {
-					[<lhs>] = {
-						rhs = <rhs>,
-						<opts>
-					},
-					…
-				},
-				…
-			}
-<			Where {mode}, {lhs}, {rhs}, and {opts} are the same as in
-			|vim.keymap.set()| (except you should not use multiple `<mode>` at
-			one time, despite |vim.keymap.set()| supporting it).
 
-		{exit_char}  The character used to exit the layer.
+	{keymap}
+		The keymap for the layer. Is the table of the form: >
+		{
+		    [<mode>] = {
+			[<lhs>] = <rhs>,
+			-- or
+			[<lhs>] = { <rhs>, <opts> },
+			…
+		    },
+		    …
+		}
+<		Where {mode}, {lhs}, {rhs}, and {opts} are the same as in
+		|vim.keymap.set()| (except you should not use multiple `<mode>` at
+		one time, despite |vim.keymap.set()| supporting it).
 
+	{exit}	The one or several key sequences used to exit the layer.
 
 	Return: ~
-		- The `function` used to undo changes made by the layer, or `nil` if
-		  {exit_char} is provided.
+		The `function` on call of which the layer coresponding to Layer
+		object will be deactivated, or `nil` if {exit} is provided.
 
 	See also: ~
 		|libmodal-examples| For an example.
@@ -242,23 +234,24 @@ FUNCTIONS                                               *libmodal-usage-function
 	immediately, it returns a |libmodal.Layer| object for you to manipulate.
 
 	Parameters: ~
-		{keymap}  The keymap for the layer. General template is this: >
-			{
-				[<mode>] = {
-					[<lhs>] = {
-						rhs = <rhs>,
-						<opts>
-					},
-					…
-				},
-				…
-			}
-<			Where {mode}, {lhs}, {rhs}, and {opts} are the same as in
-			|vim.keymap.set()| (except you should not use multiple `<mode>` at
-			one time, despite |vim.keymap.set()| supporting it).
+
+	{keymap}
+		The keymap for the layer. General template is this: >
+		{
+		    [<mode>] = {
+		        [<lhs>] = <rhs>,
+		        -- or
+		        [<lhs>] = { <rhs>, <opts> },
+		        …
+		    },
+		    …
+		}
+<		Where {mode}, {lhs}, {rhs}, and {opts} are the same as in
+		|vim.keymap.set()| (except you should not use multiple `<mode>` at
+		one time, despite |vim.keymap.set()| supporting it).
 
 	Return: ~
-		- A |libmodal.Layer| object.
+		A |libmodal.Layer| object.
 
 	See also: ~
 		|libmodal-layer|    For more information about layers.
@@ -269,15 +262,16 @@ FUNCTIONS                                               *libmodal-usage-function
 `libmodal.Layer`:enter()                                    *libmodal.Layer:enter()*
 
 	Applies the {keymap} which was provided by |libmodal.layer.new|. These two
-	code snippets are equivalent: >
-	local libmodal = require 'libmodal'
+	code snippets are equivalent:
+>
+		local libmodal = require 'libmodal'
 
-	-- enter a layer directly
-	libmodal.layer.enter({n = gg = {rhs = 'G'}})
+		-- enter a layer directly
+		libmodal.layer.enter({ n = { gg = 'G' } })
 
-	-- enter a layer manually
-	local layer = libmodal.layer.new({n = gg = {rhs = 'G'}})
-	layer:enter()
+		-- enter a layer manually
+		local layer = libmodal.layer.new({ n = { gg = 'G' } })
+		layer:enter()
 <
 	See also: ~
 		|libmodal.mode.enter| A shortcut to access this function.
@@ -285,6 +279,8 @@ FUNCTIONS                                               *libmodal-usage-function
 
 `libmodal.Layer`:map({mode}, {lhs}, {rhs}, {opts})            *libmodal.Layer:map()*
 
+	Add a keymapping to an existing Layer object. Working even if Layer
+	object is already avtivated.
 	{mode}, {lhs}, {rhs}, and {opts} are the same as in |vim.keymap.set()|
 	except that a {mode} table is not supported.
 
@@ -294,10 +290,9 @@ FUNCTIONS                                               *libmodal-usage-function
 
 `libmodal.Layer`:unmap({mode}, {lhs})                       *libmodal.Layer:unmap()*
 
+	Delete keymapping from the Layer object.
 	{mode} and {lhs} are the same as in |vim.keymap.del()| except that a {mode}
 	table is not supported.
-
-	Note: this function cannot be called until after |libmodal.Layer:enter()|
 
 	See also: ~
 		|libmodal-examples| For an example.
@@ -307,69 +302,72 @@ FUNCTIONS                                               *libmodal-usage-function
 `libmodal.prompt`.enter({name}, {instruction} [, {completions}])
 `libmodal`#Prompt({name}, {instruction} [, {completions}])
 
-	Besides accepting user input like keys in |Normal-mode|, |libmodal| is
-	also capable of prompting the user for |input| like |Cmdline-mode|. To
-	define a |Cmdline-mode|-like prompt, use this function rather than
-	`libmodal.mode.enter()`/`libmodal#Enter()`.
+	Besides accepting user input like keys in |Normal-mode|, |libmodal| is also
+	capable of prompting the user for |input| like |Cmdline-mode|. To define
+	a |Cmdline-mode|-like prompt, use this function rather than
+	`libmodal.mode.enter()` / `libmodal#Enter()`.
 
 	User input is taken using |input()|. It is passed through a |g:var|
 	determined by the {name} of the mode. For example, if {name} is "FOO"
 	then the |g:var| is `g:fooModeInput`.
 
 	Parameters: ~
-		{name}         The name of the mode (e.g. |INSERT|).
 
-			- Case-sensitive. Caps are recommended.
+	{name}  The name of the mode (e.g. |INSERT|).
+		Case-sensitive. Caps are recommended.
 
-		{instruction}  What to do when accepting user input.
+	{instruction}
+		What to do when accepting user input.
 
-			- If {instruction} is a `dict`/`table`, then it is treated as a
-			  map of user inputs to Vim |command|s. Example: >
-			      -- LUA
-			      local modeInstruction = {
-			          new   = 'tabnew',
-			          close = 'tabclose',
-			          last  = 'tablast'
-			      }
+		If {instruction} is a `dict` / `table`, then it is treated as a
+		map of user inputs to Vim |command|s.
 
-			      " VIMSCRIPT
-			      let s:modeInstruction = {
-			          'new': 'tabnew',
-			          'close': 'tabclose',
-			          'last': 'tablast'
-			      }
+		Lua: >
+		local modeInstruction = {
+		    new   = 'tabnew',
+		    close = 'tabclose',
+		    last  = 'tablast'
+		}
 <
-			- If {instruction} is a `function`, then it is called
-			  every time that |input()| completes. The user input
-			  is received through `g:{name}ModeInput` (see above).
+		Vimscript: >
+		let s:modeInstruction = {
+		    'new': 'tabnew',
+		    'close': 'tabclose',
+		    'last': 'tablast'
+		}
+<
+		If {instruction} is a `function`, then it is called every time that
+		|input()| completes. The user input is received through
+		`g:{name}ModeInput` (see above).
 
-			*Error	you cannot pass a funcref to Lua from Vimscript!
-			      	- If you want to use a |funcref()| for {instruction}, it
-			      	  must be the name of the function as a `string`.
-			      	" VIMSCRIPT
-			      	function! s:foo() abort
-			      		echo 'It works'
-			      		call getchar()
-			      	endfunction
-			      	lua require('libmodal').prompt.enter('FOO', 's:foo')
+		*Error	you cannot pass a funcref to Lua from Vimscript!
+	      	If you want to use a |funcref()| for {instruction}, it
+	      	must be the name of the function as a `string`.
+
+	      	Vimscript: >
+	      	function! s:foo() abort
+	      	    echo 'It works'
+	      	    call getchar()
+	      	endfunction
+	      	lua require('libmodal').prompt.enter('FOO', 's:foo')
 <
 
-			Note: If you want to create commands with arguments, you will
-			      need to use a `function`.
+		Note: If you want to create commands with arguments, you will
+		need to use a `function`.
 
-		{completions}  An array-like `table` of commands that are offered by
-		               the prompt.
+	{completions}
+		An array-like `table` of commands that are offered by the prompt.
 
-			- Automatically generated when {instruction} is a `table`.
-			- Used to provide auto-completion when the user is typing.
-			- If unspecified, and {instruction} is not a `table`, then no
-			  completions will be provided.
+		- Automatically generated when {instruction} is a `table`.
+		- Used to provide auto-completion when the user is typing.
+		- If unspecified, and {instruction} is not a `table`, then no
+		  completions will be provided.
 
-			Note: If no `help` command is defined, one will be created
-			      automatically.
+		Note: If no `help` command is defined, one will be created
+		automatically.
 
-			Note: The user may set the `g:`{name}`ModeExit` variable to
-			      `true` at any time to prematurely exit.
+		Note: The user may set the `g:`{name}`ModeExit` variable to `true` at
+		any time to prematurely exit.
 
 
 	See also: ~
@@ -411,17 +409,18 @@ creators may also enable the use of Vim's built-in 'timeout' feature.
 
 To enable 'timeout's, one may set the following |variables|:
 
-	Lua: ~
->
+Lua: >
 	" Set libmodal modes to turn timeouts on.
 	vim.g.libmodalTimeouts = true
+
 	" Enable timeouts for specific mode.
 	vim.g[name..'ModeTimeouts'] = true
 <
-	Vimscript: ~
+Vimscript:
 >
 	" Set libmodal modes to turn timeouts on.
 	let g:libmodalTimeouts = v:true
+
 	" Enable timeouts for specific mode.
 	let g:{name}ModeTimeouts = v:true
 <
@@ -431,55 +430,62 @@ Similarly, to disable them, one may set them to `0`.
 
 When `g:libmodalTimeouts` or `g:{name}ModeTimeouts` is set to `1`, |libmodal|
 will automatically execute commands that have mappings that might also be
-longer mappings. For example:
-	If a mode specifies `zf` and `zfo` as mappings,
-	- Turning 'timeout's on will cause `zf` to be executed if the user waits
-	  for 'timeoutlen' without typing another character.
-	- If 'timeout' were to be off in this case, then the user would either
-	  have to hit <CR> to execute `zf` or hit `o` to execute `zfo`.
+longer mappings.
 
-NOTE: `g:libmodalTimeouts` defaults to the 'timeout' value.
+For example, if a mode specifies `zf` and `zfo` as mappings,
+- Turning 'timeout's on will cause `zf` to be executed if the user waits
+  for 'timeoutlen' without typing another character.
+- If 'timeout' were to be off in this case, then the user would either
+  have to hit <CR> to execute `zf` or hit `o` to execute `zfo`.
 
-NOTE: The `g:limbodalTimeouts` variable should NOT be defined by plugins.
-      - Allow users to decide whether or not they want timeouts to be
-        enabled globally themselves.
+Note: `g:libmodalTimeouts` defaults to the 'timeout' value.
 
-NOTE: Mode-specific timeout variables will override `g:libmodalTimeouts`.
+Note: The `g:limbodalTimeouts` variable should NOT be defined by plugins.
+Allow users to decide whether or not they want timeouts to be enabled globally
+themselves.
 
-When enabled, |libmodal-timeouts| will reference the mode user's 'timeoutlen'
-as specified in their |config|. This way, modes will feel consistent to users
-by default.
+Note: Mode-specific timeout variables will override `g:libmodalTimeouts`.
+
+When enabled, |libmodal-timeouts| will reference the mode user's 'timeoutlen' as
+specified in their |config|. This way, modes will feel consistent to users by
+default.
 
 However, mode creators may change 'timeoutlen' upon entrance of a mode, and
 then reset it upon exit. Example:
 
-	Vimscript: ~
+Vimscript:
 >
-		function! s:FooMode() abort
-			" Get the user's preferred timeout length.
-			let l:timeoutlen = &timeoutlen
-			" Set it to something else, like 1500ms
-			let &timeoutlen = 1500
-			" Enter a mode
-			call libmodal#Enter(…)
-			" Reset the timeout
-			let &timeoutlen = l:timeoutlen
-		endfunction
-<
-	Lua: ~
->
-		local libmodal = require('libmodal')
+	function! s:FooMode() abort
+	    " Get the user's preferred timeout length.
+	    let l:timeoutlen = &timeoutlen
 
-		function fooMode()
-			-- Get the user's preferred timeout length.
-			local prevTimeoutLen = vim.go.timeoutlen
-			-- Set it to something else, like 1500ms.
-			vim.go.timeoutlen = 1500
-			-- Enter a mode.
-			libmodal.mode.enter(…)
-			-- Restore the `timeoutlen`
-			vim.go.timeoutlen = prevTimeoutLen
-		end
+	    " Set it to something else, like 1500ms
+	    let &timeoutlen = 1500
+
+	    " Enter a mode
+	    call libmodal#Enter(…)
+
+	    " Reset the timeout
+	    let &timeoutlen = l:timeoutlen
+	endfunction
+<
+Lua:
+>
+	local libmodal = require('libmodal')
+
+	function fooMode()
+	    -- Get the user's preferred timeout length.
+	    local prevTimeoutLen = vim.go.timeoutlen
+
+	    -- Set it to something else, like 1500ms.
+	    vim.go.timeoutlen = 1500
+
+	    -- Enter a mode.
+	    libmodal.mode.enter(…)
+
+	    -- Restore the `timeoutlen`
+	    vim.go.timeoutlen = prevTimeoutLen
+	end
 <
 
 Mode creators who use `function` {instruction}s may define timeouts manually
@@ -491,15 +497,14 @@ using |timers|, which is how |libmodal| implements them internally.
 `nvim-libmodal` – Create new "modes" for Neovim.
 Copyright © 2020 Iron-E
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -507,10 +512,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ================================================================================
 6. Bugs                                                            *libmodal-bugs*
 
-- `libmodal#Enter()` does not work when {instruction} is a |funcref|.
-	- See |E5004|.
-- `libmodal#Prompt()` does not work when {instruction} is a |funcref|.
-	- See |E5004|.
+`libmodal#Enter()` and `libmodal#Prompt()` do not work when {instruction} is a
+|funcref|.  See |E5004|.
 
 ================================================================================
 7. Contributing                                            *libmodal-contributing*
@@ -524,43 +527,40 @@ CODE                                                  *libmodal-contributing-cod
 Bugfixes ~
 
 If you discover a bug and believe you know the solution to fixing it, then
-submit a bug report and state that you are working on a fix (and what that
-fix might be), and what general timeframe the fix may be completed in
-(months, weeks, days, etc.).
+submit a bug report and state that you are working on a fix (and what that fix
+might be), and what general timeframe the fix may be completed in (months,
+weeks, days, etc.).
 
-When the fix is complete, submit a PR that references the issue you
-submitted.
+When the fix is complete, submit a PR that references the issue you submitted.
 
 Features ~
 
-If there is a feature you would like to be a part of |libmodal|, the best
-thing you can do is submit a feature request, and then state that you are
-working on a pull request (PR) so others don't attempt to do the same work
-at the same time.
+If there is a feature you would like to be a part of |libmodal|, the best thing
+you can do is submit a feature request, and then state that you are working on a
+pull request (PR) so others don't attempt to do the same work at the same time.
 
-When you believe your feature is complete, write some examples for it in
-the `examples/lua` folder, and add them to |libmodal-examples| as
-appropriate.
+When you believe your feature is complete, write some examples for it in the
+`examples/lua` folder, and add them to |libmodal-examples| as appropriate.
 
-Assure that all existing |libmodal-examples| continue to work with your
-feature, unless a breaking change was discussed on the feature request.
-If you need help getting them to pass, you can ask for help on the PR.
+Assure that all existing |libmodal-examples| continue to work with your feature,
+unless a breaking change was discussed on the feature request.  If you need help
+getting them to pass, you can ask for help on the PR.
 
-Reference the issue you submitted on the PR so that the two show up
-together when looking back at the history.
+Reference the issue you submitted on the PR so that the two show up together
+when looking back at the history.
 
-Contributing documentation is not necessary but appreciated, since the
-person who knows the most about the feature being implemented is most
-likely the one implementing it.
+Contributing documentation is not necessary but appreciated, since the person
+who knows the most about the feature being implemented is most likely the one
+implementing it.
 
 --------------------------------------------------------------------------------
 DOCUMENTATION                                *libmodal-contributing-documentation*
 
-If there is a problem with the documentation, or you see an area where it
-could be improved, don't hesitate to submit an issue and a PR. At the very
-least it will exist in history if such an issue comes up again, and likely it
-will serve to help yourself and others with more clear and concise wording, or
-with more helpful and practical examples.
+If there is a problem with the documentation, or you see an area where it could
+be improved, don't hesitate to submit an issue and a PR. At the very least it
+will exist in history if such an issue comes up again, and likely it will serve
+to help yourself and others with more clear and concise wording, or with more
+helpful and practical examples.
 
 --------------------------------------------------------------------------------
 ISSUES                                              *libmodal-contributing-issues*
