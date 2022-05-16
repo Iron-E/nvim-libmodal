@@ -45,29 +45,10 @@ function Layer:enter()
 	-- add local aliases.
 	self.existing_keymaps_by_mode = {}
 
-	--[[ iterate over the new keymaps to both:
-	    1. Populate a list of keymaps which will be overwritten to `existing_keymap`
-		 2. Apply the layer's keymappings. ]]
 	for mode, new_keymaps in pairs(self.layer_keymaps_by_mode) do
-		-- if `mode` key has not yet been made for `existing_keymap`.
-		if not self.existing_keymaps_by_mode[mode] then
-			self.existing_keymaps_by_mode[mode] = {}
-		end
-
-		-- store the previously mapped keys
-		for _, existing_keymap in ipairs(vim.api.nvim_get_keymap(mode)) do
-			-- if the new keymaps would overwrite this one
-			if new_keymaps[existing_keymap.lhs] then
-				-- remove values so that it is in line with `nvim_set_keymap`.
-				local lhs, keymap = unpack_keymap_lhs(existing_keymap)
-				self.existing_keymaps_by_mode[mode][lhs] = keymap
-			end
-		end
-
-		-- add the new keymaps
-		for lhs, new_keymap in pairs(new_keymaps) do
-			local rhs, options = unpack_keymap_rhs(new_keymap)
-			vim.keymap.set(mode, lhs, rhs, options)
+		for lhs, options in pairs(new_keymaps) do
+			local rhs, unpacked = unpack_keymap_rhs(options)
+			self:map(mode, lhs, rhs, unpacked)
 		end
 	end
 end
