@@ -120,7 +120,7 @@ function Layer:unmap(buffer, mode, lhs)
 			end
 		end)
 
-		if not no_errors and err ~= 'E31: No such mapping' then
+		if not (no_errors or err:match 'E31: No such mapping') then
 			print(err)
 		end
 	end
