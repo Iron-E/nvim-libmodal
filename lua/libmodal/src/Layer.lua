@@ -35,7 +35,7 @@ function Layer:enter()
 	self.existing_keymap = {}
 
 	--[[ iterate over the new keymaps to both:
-	     1. Populate a list of keymaps which will be overwritten to `existing_keymap`
+	    1. Populate a list of keymaps which will be overwritten to `existing_keymap`
 		 2. Apply the layer's keymappings. ]]
 	for mode, new_keymaps in pairs(self.layer_keymap) do
 		-- if `mode` key has not yet been made for `existing_keymap`.
@@ -59,6 +59,20 @@ function Layer:enter()
 			vim.keymap.set(mode, lhs, rhs, options)
 		end
 	end
+end
+
+--- exit the layer, restoring all previous keymaps.
+function Layer:exit()
+	if not self.existing_keymap then
+		error('This layer has not been entered yet.')
+	end
+
+	for mode, keymaps in pairs(self.layer_keymap) do
+		for lhs, keymap in pairs(keymaps) do
+			self:unmap(keymap.buffer, mode, lhs)
+		end
+	end
+	self.existing_keymap = nil
 end
 
 --- add a keymap to the mode.
@@ -123,20 +137,6 @@ function Layer:unmap(buffer, mode, lhs)
 
 	-- remove this keymap from the list of ones to restore
 	self.existing_keymap[mode][lhs] = nil
-end
-
---- exit the layer, restoring all previous keymaps.
-function Layer:exit()
-	if not self.existing_keymap then
-		error('This layer has not been entered yet.')
-	end
-
-	for mode, keymaps in pairs(self.layer_keymap) do
-		for lhs, keymap in pairs(keymaps) do
-			self:unmap(keymap.buffer, mode, lhs)
-		end
-	end
-	self.existing_keymap = nil
 end
 
 return
