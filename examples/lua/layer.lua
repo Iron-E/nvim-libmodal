@@ -1,19 +1,15 @@
 local libmodal = require 'libmodal'
 
 -- create a new layer
-local layer = libmodal.layer.new(
-{
-	n =
-	{ -- normal mode mappings
-		gg = -- remap `gg`
-		{
-			rhs = 'G', -- map it to `G`
-			-- other options such as `noremap` and `silent` can be set to `true` here
+local layer = libmodal.layer.new({
+	n = { -- normal mode mappings
+		gg = { -- remap `gg`
+			'G', -- map it to `G`
+			-- The table with other options suitable for vim.keymap.set can be passed here.
 		},
-		G = -- remap `G`
-		{
-			rhs = 'gg', -- map it to `gg`
-			-- other options such as `noremap` and `silent` can be set to `true` here
+		G = { -- remap `G`
+			'gg', -- map it to `gg`
+			-- The table with other options suitable for vim.keymap.set can be passed here.
 		},
 	}
 })
