@@ -1,8 +1,8 @@
---- Normalizes a `buffer = true|false` argument into a number.
+--- Normalizes a `buffer = true|false|0` argument into a number.
 --- @param buffer boolean|number the argument to normalize
 --- @return nil|number
 local function normalize_buffer(buffer)
-	if buffer == true then
+	if buffer == true or buffer == 0 then
 		return vim.api.nvim_get_current_buf()
 	elseif buffer == false then
 		return nil
