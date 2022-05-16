@@ -1,5 +1,3 @@
-local Layer = require('libmodal/src/Layer')
-
 -- TODO: remove the __index here after a period of time to let people remove `libmodal.Layer` from their configurations
 return setmetatable(
 	{
@@ -10,7 +8,7 @@ return setmetatable(
 			--- @param exit_char nil|string a character which can be used to exit the layer from normal mode.
 			--- @return function|nil exit a function to exit the layer, or `nil` if `exit_char` is passed
 			enter = function(keymaps, exit_char)
-				local layer = Layer(keymaps)
+				local layer = require('libmodal/src/Layer')(keymaps)
 				layer:enter()
 
 				if exit_char then
@@ -24,7 +22,7 @@ return setmetatable(
 			--- @param keymaps table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
 			--- @return libmodal.Layer
 			new = function(keymaps)
-				return Layer(keymaps)
+				return require('libmodal/src/Layer')(keymaps)
 			end,
 		},
 
