@@ -95,13 +95,17 @@ end
 function Layer:map(mode, lhs, rhs, options)
 	options.buffer = normalize_buffer(options.buffer)
 	if self.existing_keymaps_by_mode then -- the layer has been activated
+		if not self.existing_keymaps_by_mode[mode] then -- this is the first time that a keymap with this mode is being set
+			self.existing_keymaps_by_mode[mode] = {}
+		end
+
 		if not self.existing_keymaps_by_mode[mode][lhs] then -- the keymap's state has not been saved.
 			for _, existing_keymap in ipairs(
 				options.buffer and
 				vim.api.nvim_buf_get_keymap(options.buffer, mode) or
 				vim.api.nvim_get_keymap(mode)
 			) do -- check if this keymap will overwrite something
-				if existing_keymap.lhs == lhs then -- add it to the undo list
+				if existing_keymap.lhs == lhs then -- mapping this will overwrite something; log the old mapping
 					existing_keymap.lhs = nil
 					self.existing_keymaps_by_mode[mode][lhs] = existing_keymap
 					break
@@ -115,7 +119,11 @@ function Layer:map(mode, lhs, rhs, options)
 
 	-- add the new mapping to the layer's keymap
 	options.rhs = rhs
-	self.layer_keymaps_by_mode[mode][lhs] = options
+	if self.layer_keymaps_by_mode[mode] then
+		self.layer_keymaps_by_mode[mode][lhs] = options
+	else
+		self.layer_keymaps_by_mode[mode] = {[lhs] = options}
+	end
 end
 
 --- restore one keymapping to its original state.
