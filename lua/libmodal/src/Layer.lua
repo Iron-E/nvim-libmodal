@@ -1,4 +1,15 @@
-local globals = require 'libmodal/src/globals'
+--- Normalizes a `buffer = true|false` argument into a number.
+--- @param buffer boolean|number the argument to normalize
+--- @return nil|number
+local function normalize_buffer(buffer)
+	if buffer == true then
+		return vim.api.nvim_get_current_buf()
+	elseif buffer == false then
+		return nil
+	end
+
+	return buffer
+end
 
 --- remove and return the right-hand side of a `keymap`.
 --- @param keymap table the keymap to unpack
@@ -22,25 +33,25 @@ end
 
 --- @class libmodal.Layer
 --- @field private existing_keymap table the keymaps to restore when exiting the mode; generated automatically
---- @field private layer_keymap table the keymaps to apply when entering the mode; provided by user
+--- @field private layer_keymaps_by_mode table the keymaps to apply when entering the mode; provided by user
 local Layer = require('libmodal/src/utils/classes').new(nil)
 
 --- apply the `Layer`'s keymaps buffer.
 function Layer:enter()
-	if self.existing_keymap then
+	if self.existing_keymaps_by_mode then
 		error('This layer has already been entered. `:exit()` before entering again.')
 	end
 
 	-- add local aliases.
-	self.existing_keymap = {}
+	self.existing_keymaps_by_mode = {}
 
 	--[[ iterate over the new keymaps to both:
 	    1. Populate a list of keymaps which will be overwritten to `existing_keymap`
 		 2. Apply the layer's keymappings. ]]
-	for mode, new_keymaps in pairs(self.layer_keymap) do
+	for mode, new_keymaps in pairs(self.layer_keymaps_by_mode) do
 		-- if `mode` key has not yet been made for `existing_keymap`.
-		if not self.existing_keymap[mode] then
-			self.existing_keymap[mode] = {}
+		if not self.existing_keymaps_by_mode[mode] then
+			self.existing_keymaps_by_mode[mode] = {}
 		end
 
 		-- store the previously mapped keys
@@ -49,7 +60,7 @@ function Layer:enter()
 			if new_keymaps[existing_keymap.lhs] then
 				-- remove values so that it is in line with `nvim_set_keymap`.
 				local lhs, keymap = unpack_keymap_lhs(existing_keymap)
-				self.existing_keymap[mode][lhs] = keymap
+				self.existing_keymaps_by_mode[mode][lhs] = keymap
 			end
 		end
 
@@ -63,16 +74,16 @@ end
 
 --- exit the layer, restoring all previous keymaps.
 function Layer:exit()
-	if not self.existing_keymap then
+	if not self.existing_keymaps_by_mode then
 		error('This layer has not been entered yet.')
 	end
 
-	for mode, keymaps in pairs(self.layer_keymap) do
+	for mode, keymaps in pairs(self.layer_keymaps_by_mode) do
 		for lhs, keymap in pairs(keymaps) do
 			self:unmap(keymap.buffer, mode, lhs)
 		end
 	end
-	self.existing_keymap = nil
+	self.existing_keymaps_by_mode = nil
 end
 
 --- add a keymap to the mode.
@@ -82,9 +93,9 @@ end
 --- @param options table options for the keymap.
 --- @see `vim.keymap.set`
 function Layer:map(mode, lhs, rhs, options)
-	options.buffer = type(options.buffer) == globals.TYPE_BOOL and 0 or options.buffer
-	if self.existing_keymap then -- the layer has been activated
-		if not self.existing_keymap[mode][lhs] then -- the keymap's state has not been saved.
+	options.buffer = normalize_buffer(options.buffer)
+	if self.existing_keymaps_by_mode then -- the layer has been activated
+		if not self.existing_keymaps_by_mode[mode][lhs] then -- the keymap's state has not been saved.
 			for _, existing_keymap in ipairs(
 				options.buffer and
 				vim.api.nvim_buf_get_keymap(options.buffer, mode) or
@@ -92,7 +103,7 @@ function Layer:map(mode, lhs, rhs, options)
 			) do -- check if this keymap will overwrite something
 				if existing_keymap.lhs == lhs then -- add it to the undo list
 					existing_keymap.lhs = nil
-					self.existing_keymap[mode][lhs] = existing_keymap
+					self.existing_keymaps_by_mode[mode][lhs] = existing_keymap
 					break
 				end
 			end
@@ -104,7 +115,7 @@ function Layer:map(mode, lhs, rhs, options)
 
 	-- add the new mapping to the layer's keymap
 	options.rhs = rhs
-	self.layer_keymap[mode][lhs] = options
+	self.layer_keymaps_by_mode[mode][lhs] = options
 end
 
 --- restore one keymapping to its original state.
@@ -113,12 +124,12 @@ end
 --- @param lhs string the keys which invoke the keymap.
 --- @see `vim.api.nvim_del_keymap`
 function Layer:unmap(buffer, mode, lhs)
-	if not self.existing_keymap then
+	if not self.existing_keymaps_by_mode then
 		error("Don't call this function before activating the layer; just remove from the keymap passed to `Layer.new` instead.")
 	end
 
-	if self.existing_keymap[mode][lhs] then -- there is an older keymap to go back to, so undo this layer_keymap
-		local rhs, options = unpack_keymap_rhs(self.existing_keymap[mode][lhs])
+	if self.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to, so undo this layer_keymaps_by_mode
+		local rhs, options = unpack_keymap_rhs(self.existing_keymaps_by_mode[mode][lhs])
 		vim.keymap.set(mode, lhs, rhs, options)
 	else
 		-- just make the keymap go back to default
@@ -136,14 +147,14 @@ function Layer:unmap(buffer, mode, lhs)
 	end
 
 	-- remove this keymap from the list of ones to restore
-	self.existing_keymap[mode][lhs] = nil
+	self.existing_keymaps_by_mode[mode][lhs] = nil
 end
 
 return
 {
-	--- @param keymap table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
+	--- @param keymaps_by_mode table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
 	--- @return libmodal.Layer
-	new = function(keymap)
-		return setmetatable({layer_keymap = keymap}, Layer)
+	new = function(keymaps_by_mode)
+		return setmetatable({layer_keymaps_by_mode = keymaps_by_mode}, Layer)
 	end
 }
