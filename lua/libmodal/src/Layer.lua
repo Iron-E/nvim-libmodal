@@ -1,3 +1,5 @@
+local globals = require 'libmodal/src/globals'
+
 --- remove and return the right-hand side of a `keymap`.
 --- @param keymap table the keymap to unpack
 --- @return string lhs, table options
@@ -66,9 +68,14 @@ end
 --- @param options table options for the keymap.
 --- @see `vim.keymap.set`
 function Layer:map(mode, lhs, rhs, options)
+	options.buffer = type(options.buffer) == globals.TYPE_BOOL and 0 or options.buffer
 	if self.existing_keymap then -- the layer has been activated
 		if not self.existing_keymap[mode][lhs] then -- the keymap's state has not been saved.
-			for _, existing_keymap in ipairs(vim.api.nvim_get_keymap(mode)) do -- check if it has a keymap
+			for _, existing_keymap in ipairs(
+				options.buffer and
+				vim.api.nvim_buf_get_keymap(options.buffer, mode) or
+				vim.api.nvim_get_keymap(mode)
+			) do -- check if this keymap will overwrite something
 				if existing_keymap.lhs == lhs then -- add it to the undo list
 					existing_keymap.lhs = nil
 					self.existing_keymap[mode][lhs] = existing_keymap
@@ -87,10 +94,11 @@ function Layer:map(mode, lhs, rhs, options)
 end
 
 --- restore one keymapping to its original state.
+--- @param buffer nil|number the buffer to unmap from (`nil` if it is not buffer-local)
 --- @param mode string the mode of the keymap.
 --- @param lhs string the keys which invoke the keymap.
 --- @see `vim.api.nvim_del_keymap`
-function Layer:unmap(mode, lhs)
+function Layer:unmap(buffer, mode, lhs)
 	if not self.existing_keymap then
 		error("Don't call this function before activating the layer; just remove from the keymap passed to `Layer.new` instead.")
 	end
@@ -100,7 +108,13 @@ function Layer:unmap(mode, lhs)
 		vim.keymap.set(mode, lhs, rhs, options)
 	else
 		-- just make the keymap go back to default
-		local no_errors, err = pcall(vim.api.nvim_del_keymap, mode, lhs)
+		local no_errors, err = pcall(function()
+			if buffer then
+				vim.api.nvim_buf_del_keymap(buffer, mode, lhs)
+			else
+				vim.api.nvim_del_keymap(mode, lhs)
+			end
+		end)
 
 		if not no_errors and err ~= 'E31: No such mapping' then
 			print(err)
@@ -118,8 +132,8 @@ function Layer:exit()
 	end
 
 	for mode, keymaps in pairs(self.layer_keymap) do
-		for lhs, _ in pairs(keymaps) do
-			self:unmap(mode, lhs)
+		for lhs, keymap in pairs(keymaps) do
+			self:unmap(keymap.buffer, mode, lhs)
 		end
 	end
 	self.existing_keymap = nil
