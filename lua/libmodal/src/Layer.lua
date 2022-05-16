@@ -13,16 +13,6 @@ end
 
 --- remove and return the right-hand side of a `keymap`.
 --- @param keymap table the keymap to unpack
---- @return string lhs, table options
-local function unpack_keymap_lhs(keymap)
-	local lhs = keymap.lhs
-	keymap.lhs = nil
-
-	return lhs, keymap
-end
-
---- remove and return the right-hand side of a `keymap`.
---- @param keymap table the keymap to unpack
 --- @return function|string rhs, table options
 local function unpack_keymap_rhs(keymap)
 	local rhs = keymap.rhs
