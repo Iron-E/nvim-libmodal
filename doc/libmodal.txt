@@ -163,7 +163,7 @@ FUNCTIONS                                               *libmodal-usage-function
 
 			*Error	you cannot pass a funcref to Lua from Vimscript!
 			      	- If you want to use a |funcref()| for {instruction}, it
-			      	  must be the name of the function as a `string`.
+			      	  must be the name of the function as a `string`. >
 			      	" VIMSCRIPT
 			      	function! s:foo() abort
 			      		echo 'It works'
@@ -280,8 +280,18 @@ FUNCTIONS                                               *libmodal-usage-function
 	layer:enter()
 <
 	See also: ~
-		|libmodal.mode.enter| A shortcut to access this function.
-		|libmodal.mode.new|   How to create a |libmodal.Layer|
+		|libmodal.layer.enter| A shortcut to access this function.
+		|libmodal.layer.new|   How to create a |libmodal.Layer|
+
+`libmodal.Layer`:is_active()                            *libmodal.Layer:is_active()*
+
+	Return: ~
+		- `true` if the |Layer:enter()| has been called, but not
+		  |Layer:exit()|. `false` otherwise.
+
+	See also: ~
+		|libmodal.Layer:enter()| A shortcut to access this function.
+		|libmodal.Layer.exit()|   How to create a |libmodal.Layer|
 
 `libmodal.Layer`:map({mode}, {lhs}, {rhs}, {opts})            *libmodal.Layer:map()*
 
