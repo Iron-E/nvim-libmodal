@@ -1,3 +1,5 @@
+local globals = require 'libmodal/src/globals'
+
 --- Normalizes a `buffer = true|false|0` argument into a number.
 --- @param buffer boolean|number the argument to normalize
 --- @return nil|number
@@ -9,6 +11,29 @@ local function normalize_buffer(buffer)
 	end
 
 	return buffer
+end
+
+--- Normalizes a keymap from `vim.api.nvim_get_keymap` so it can be passed to `vim.keymap.set`
+--- @param keymap table
+--- @return table normalized
+local function normalize_keymap(keymap)
+	-- `buffer == 0` just means "not a buffer mapping"
+	keymap.buffer = keymap.buffer > 0 and keymap.buffer or nil
+
+	-- Keys which are `v:true` or `v:false`
+	keymap.expr = globals.is_true(keymap.expr)
+	keymap.noremap = globals.is_true(keymap.noremap)
+	keymap.nowait = globals.is_true(keymap.nowait)
+	keymap.silent = globals.is_true(keymap.silent)
+
+	-- Keys which should not exist
+	keymap.lhs = nil
+	keymap.lnum = nil
+	keymap.script = nil
+	keymap.sid = nil
+	keymap.mode = nil
+
+	return keymap
 end
 
 --- remove and return the right-hand side of a `keymap`.
@@ -84,8 +109,7 @@ function Layer:map(mode, lhs, rhs, options)
 				vim.api.nvim_get_keymap(mode)
 			) do -- check if this keymap will overwrite something
 				if existing_keymap.lhs == lhs then -- mapping this will overwrite something; log the old mapping
-					existing_keymap.lhs = nil
-					self.existing_keymaps_by_mode[mode][lhs] = existing_keymap
+					self.existing_keymaps_by_mode[mode][lhs] = normalize_keymap(existing_keymap)
 					break
 				end
 			end
