@@ -53,7 +53,7 @@ local Layer = require('libmodal/src/utils/classes').new(nil)
 
 --- apply the `Layer`'s keymaps buffer.
 function Layer:enter()
-	if self.existing_keymaps_by_mode then
+	if self:is_active() then
 		vim.notify(
 			'nvim-libmodal layer: This layer has already been entered. `:exit()` before entering again.',
 			vim.log.levels.ERROR,
@@ -75,8 +75,12 @@ end
 
 --- exit the layer, restoring all previous keymaps.
 function Layer:exit()
-	if not self.existing_keymaps_by_mode then
-		vim.notify('nvim-libmodal layer: you cannot exit a layer without entering it first.', vim.log.levels.ERROR, {title = 'nvim-libmodal'})
+	if not self:is_active() then
+		vim.notify(
+			'nvim-libmodal layer: you cannot exit a layer without entering it first.',
+			vim.log.levels.ERROR,
+			{title = 'nvim-libmodal'}
+		)
 		return
 	end
 
@@ -87,6 +91,12 @@ function Layer:exit()
 	end
 
 	self.existing_keymaps_by_mode = nil
+end
+
+--- Check whether the layer has been `:enter`ed previously but not `:exit`ed.
+--- @return boolean
+function Layer:is_active()
+	return self.existing_keymaps_by_mode ~= nil
 end
 
 --- add a keymap to the mode.
