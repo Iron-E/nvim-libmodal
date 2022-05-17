@@ -110,31 +110,24 @@ end
 --- @param lhs string the keys which invoke the keymap.
 --- @see `vim.api.nvim_del_keymap`
 function Layer:unmap(buffer, mode, lhs)
-	if not self.existing_keymaps_by_mode then
-		vim.notify(
-			"Don't call this function before activating the layer; just remove from the keymap passed to `Layer.new` instead.",
-			vim.log.levels.ERROR,
-			{title = 'nvim-libmodal'}
-		)
-		return
-	end
+	if self.existing_keymaps_by_mode then
+		if self.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to, so undo this layer_keymaps_by_mode
+			local rhs, options = unpack_keymap_rhs(self.existing_keymaps_by_mode[mode][lhs])
+			vim.keymap.set(mode, lhs, rhs, options)
+		else
+			-- just make the keymap go back to default
+			local no_errors, err = pcall(function()
+				if buffer then
+					vim.api.nvim_buf_del_keymap(buffer, mode, lhs)
+				else
+					vim.api.nvim_del_keymap(mode, lhs)
+				end
+			end)
 
-	if self.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to, so undo this layer_keymaps_by_mode
-		local rhs, options = unpack_keymap_rhs(self.existing_keymaps_by_mode[mode][lhs])
-		vim.keymap.set(mode, lhs, rhs, options)
-	else
-		-- just make the keymap go back to default
-		local no_errors, err = pcall(function()
-			if buffer then
-				vim.api.nvim_buf_del_keymap(buffer, mode, lhs)
-			else
-				vim.api.nvim_del_keymap(mode, lhs)
+			if not (no_errors or err:match 'E31: No such mapping') then
+				vim.notify('nvim-libmodal encountered error while unmapping from layer: ' .. err, vim.log.levels.ERROR, {title = 'nvim-libmodal'})
+				return
 			end
-		end)
-
-		if not (no_errors or err:match 'E31: No such mapping') then
-			vim.notify('nvim-libmodal encountered error while unmapping from layer: ' .. err, vim.log.levels.ERROR, {title = 'nvim-libmodal'})
-			return
 		end
 	end
 
