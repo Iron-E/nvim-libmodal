@@ -159,11 +159,7 @@ function Layer:unmap(buffer, mode, lhs)
 			end)
 
 			if not (no_errors or err:match 'E31: No such mapping') then
-				vim.notify(
-					'nvim-libmodal encountered error while unmapping from layer: ' .. err,
-					vim.log.levels.ERROR,
-					{title = 'nvim-libmodal'}
-				)
+				require('libmodal/src/utils').notify_error('nvim-libmodal encountered an error while unmapping from layer', err)
 				return
 			end
 		end
