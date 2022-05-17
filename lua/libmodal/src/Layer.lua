@@ -36,6 +36,12 @@ local function normalize_keymap(keymap)
 	return keymap
 end
 
+--- @param key string
+--- @return string
+local function replace_termcodes(key)
+	return vim.api.nvim_replace_termcodes(key, true, true, true)
+end
+
 --- remove and return the right-hand side of a `keymap`.
 --- @param keymap table the keymap to unpack
 --- @return function|string rhs, table options
@@ -106,6 +112,7 @@ end
 --- @param options table options for the keymap.
 --- @see `vim.keymap.set`
 function Layer:map(mode, lhs, rhs, options)
+	lhs = replace_termcodes(lhs)
 	options.buffer = normalize_buffer(options.buffer)
 	if self.existing_keymaps_by_mode then -- the layer has been activated
 		if not self.existing_keymaps_by_mode[mode] then -- this is the first time that a keymap with this mode is being set
@@ -118,7 +125,7 @@ function Layer:map(mode, lhs, rhs, options)
 				vim.api.nvim_buf_get_keymap(options.buffer, mode) or
 				vim.api.nvim_get_keymap(mode)
 			) do -- check if this keymap will overwrite something
-				if existing_keymap.lhs == lhs then -- mapping this will overwrite something; log the old mapping
+				if replace_termcodes(existing_keymap.lhs) == lhs then -- mapping this will overwrite something; log the old mapping
 					self.existing_keymaps_by_mode[mode][lhs] = normalize_keymap(existing_keymap)
 					break
 				end
@@ -144,6 +151,7 @@ end
 --- @param lhs string the keys which invoke the keymap.
 --- @see `vim.api.nvim_del_keymap`
 function Layer:unmap(buffer, mode, lhs)
+	lhs = replace_termcodes(lhs)
 	if self.existing_keymaps_by_mode then
 		if self.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to, so undo this layer_keymaps_by_mode
 			local rhs, options = unpack_keymap_rhs(self.existing_keymaps_by_mode[mode][lhs])
