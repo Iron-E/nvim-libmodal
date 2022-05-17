@@ -14,10 +14,10 @@ return
 
 	--- `vim.notify` with a `msg` some `error` which has a `vim.v.throwpoint` and `vim.v.exception`.
 	--- @param msg string
-	--- @param error string
-	notify_error = function(msg, error)
+	--- @param err string
+	notify_error = function(msg, err)
 		vim.notify(
-			msg .. ': ' .. vim.v.throwpoint .. '\n' .. vim.v.exception .. '\n' .. error,
+			msg .. ': ' .. vim.v.throwpoint .. '\n' .. vim.v.exception .. '\n' .. err,
 			vim.log.levels.ERROR,
 			{title = 'nvim-libmodal'}
 		)
