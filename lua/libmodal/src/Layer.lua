@@ -110,7 +110,12 @@ end
 --- @see `vim.api.nvim_del_keymap`
 function Layer:unmap(buffer, mode, lhs)
 	if not self.existing_keymaps_by_mode then
-		error("Don't call this function before activating the layer; just remove from the keymap passed to `Layer.new` instead.")
+		vim.notify(
+			"Don't call this function before activating the layer; just remove from the keymap passed to `Layer.new` instead.",
+			vim.log.levels.ERROR,
+			{title = 'nvim-libmodal'}
+		)
+		return
 	end
 
 	if self.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to, so undo this layer_keymaps_by_mode
