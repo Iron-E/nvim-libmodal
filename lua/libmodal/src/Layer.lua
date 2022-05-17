@@ -17,8 +17,9 @@ end
 --- @param keymap table
 --- @return table normalized
 local function normalize_keymap(keymap)
-	-- `buffer == 0` just means "not a buffer mapping"
+	-- Keys which must be manually edited
 	keymap.buffer = keymap.buffer > 0 and keymap.buffer or nil
+	keymap.rhs = keymap.callback or keymap.rhs
 
 	-- Keys which are `v:true` or `v:false`
 	keymap.expr = globals.is_true(keymap.expr)
@@ -27,11 +28,12 @@ local function normalize_keymap(keymap)
 	keymap.silent = globals.is_true(keymap.silent)
 
 	-- Keys which should not exist
+	keymap.callback = nil
 	keymap.lhs = nil
 	keymap.lnum = nil
+	keymap.mode = nil
 	keymap.script = nil
 	keymap.sid = nil
-	keymap.mode = nil
 
 	return keymap
 end
@@ -46,7 +48,7 @@ end
 --- @param keymap table the keymap to unpack
 --- @return function|string rhs, table options
 local function unpack_keymap_rhs(keymap)
-	local rhs = keymap.rhs or ''
+	local rhs = keymap.rhs
 	keymap.rhs = nil
 
 	return rhs, keymap
