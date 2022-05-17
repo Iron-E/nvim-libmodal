@@ -15,7 +15,7 @@ end
 --- @param keymap table the keymap to unpack
 --- @return function|string rhs, table options
 local function unpack_keymap_rhs(keymap)
-	local rhs = keymap.rhs
+	local rhs = keymap.rhs or ''
 	keymap.rhs = nil
 
 	return rhs, keymap
