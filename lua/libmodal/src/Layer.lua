@@ -22,7 +22,7 @@ local function unpack_keymap_rhs(keymap)
 end
 
 --- @class libmodal.Layer
---- @field private existing_keymap table the keymaps to restore when exiting the mode; generated automatically
+--- @field private existing_keymaps_by_mode table the keymaps to restore when exiting the mode; generated automatically
 --- @field private layer_keymaps_by_mode table the keymaps to apply when entering the mode; provided by user
 local Layer = require('libmodal/src/utils/classes').new(nil)
 
@@ -60,6 +60,7 @@ function Layer:exit()
 			self:unmap(keymap.buffer, mode, lhs)
 		end
 	end
+
 	self.existing_keymaps_by_mode = nil
 end
 
