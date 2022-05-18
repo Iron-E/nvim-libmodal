@@ -1,5 +1,5 @@
 local globals = require 'libmodal/src/globals'
-local utils = require 'lilbmodal/src/utils'
+local utils = require 'libmodal/src/utils'
 
 --- Normalizes a `buffer = true|false|0` argument into a number.
 --- @param buffer boolean|number the argument to normalize
