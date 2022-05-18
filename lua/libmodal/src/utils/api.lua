@@ -37,4 +37,10 @@ function api.redraw()
 	vim.api.nvim_command 'mode'
 end
 
+--- @param termcodes string
+--- @return string replaced
+function api.replace_termcodes(termcodes)
+	return vim.api.nvim_replace_termcodes(termcodes, true, true, true)
+end
+
 return api
