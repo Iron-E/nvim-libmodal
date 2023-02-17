@@ -101,7 +101,7 @@ function Mode:enter()
 	vim.g.libmodalActiveModeName = self.name
 
 	--[[ MODE LOOP. ]]
-	local previous_mode = self.previous_mode_name or vim.api.nvim_get_mode()
+	local previous_mode = self.previous_mode_name or vim.api.nvim_get_mode().mode
 	vim.api.nvim_exec_autocmds('ModeChanged', {pattern = previous_mode .. ':' .. self.name})
 
 	local continue_mode = true
