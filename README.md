@@ -115,12 +115,9 @@ local MODE_HL_GROUP = 'LualineViMode'
  
 --[[/* FELINE CONFIG */]]
  
-vim.api.nvim_create_autocmd('User', {
-	callback = function()
+vim.api.nvim_create_autocmd('ModeChanged', {callback = function()
 		require('lualine').refresh {scope = 'window',  place = {'statusline'}}
-	end,
-	pattern = {'LibmodalModeEnterPre', 'LibmodalModeLeavePost'},
-})
+end})
  
 require('lualine').setup {sections = {lualine_a = {{
 	function() -- auto change color according the vim mode
