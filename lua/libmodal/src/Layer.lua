@@ -35,6 +35,7 @@ local function normalize_keymap(keymap)
 	keymap.mode = nil
 	keymap.script = nil
 	keymap.sid = nil
+	keymap.lhsraw = nil
 
 	return keymap
 end
