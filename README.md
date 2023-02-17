@@ -2,28 +2,30 @@
 
 This is a rewrite of [vim-libmodal](https://github.com/Iron-E/vim-libmodal) using Neovim's Lua API. This project aims to be cross-compatable with `vim-libmodal`— with a few notable exceptions (see the [FAQ](#FAQ)).
 
-## Requirements
+## Installation
+
+Either use `packadd` or any package manager. I recommend using [lazy.nvim](https://github.com/folke/lazy.nvim).
+
+### Requirements
 
 * Neovim 0.7+.
 * `vim-libmodal` is _not_ installed.
 
-## Installation
+### Examples
 
-You can use [packer.nvim](https://github.com/wbthomason/packer.nvim) (or any package manager) to install this plugin. The below example is for `packer.nvim`:
+#### lazy.nvim
 
 ```lua
-local install_path = vim.fn.stdpath('data')..'/site/pack/packer/opt/packer.nvim'
+{'Iron-E/nvim-libmodal', lazy = true},
+```
 
-if not vim.loop.fs_stat(vim.fn.glob(install_path)) then
-	os.execute('git clone https://github.com/wbthomason/packer.nvim '..install_path)
-end
+#### packer.nvim
 
-vim.api.nvim_command 'packadd packer.nvim'
+You can use [packer.nvim](https://github.com/wbthomason/packer.nvim) to install this plugin. The below example is for `packer.nvim`:
 
+```lua
 return require('packer').startup {function(use)
-	use {'wbthomason/packer.nvim', opt=true}
 	use 'Iron-E/nvim-libmodal'
-	-- use {'Username/mode-plugin', wants='nvim-libmodal'}
 end}
 ```
 
