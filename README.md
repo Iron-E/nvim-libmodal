@@ -49,7 +49,7 @@ You can add `libmodal` modes to your status line. Here are a few examples of how
 
 #### feline.nvim
 
-See my configuration for `feline.nvim` [here](https://gitlab.com/Iron_E/dotfiles/-/blob/master/.config/nvim/lua/plugin/feline.lua#L148-L164)
+See my configuration for `feline.nvim` [here](https://gitlab.com/Iron_E/dotfiles/-/blob/78e17b41cadd1660f8d3506ffce093437eb80aae/.config/nvim/lua/plugin/feline.lua#L134-160)
 
 #### galaxyline.nvim
 
