@@ -101,7 +101,8 @@ function Mode:enter()
 	vim.g.libmodalActiveModeName = self.name
 
 	--[[ MODE LOOP. ]]
-	vim.api.nvim_exec_autocmds('User', {pattern = 'LibmodalModeEnterPre'})
+	local previous_mode = self.previous_mode_name or vim.fn.mode(true)
+	vim.api.nvim_exec_autocmds('ModeChanged', {pattern = previous_mode .. ':' .. self.name})
 
 	local continue_mode = true
 	while continue_mode do
@@ -118,7 +119,7 @@ function Mode:enter()
 	end
 
 	self:tear_down()
-	vim.api.nvim_exec_autocmds('User', {pattern = 'LibmodalModeLeavePost'})
+	vim.api.nvim_exec_autocmds('ModeChanged', {pattern = self.name .. ':' .. previous_mode})
 end
 
 --- get input from the user.
