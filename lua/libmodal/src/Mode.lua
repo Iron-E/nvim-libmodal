@@ -5,10 +5,10 @@ local utils      = require 'libmodal/src/utils'
 --- @class libmodal.Mode
 --- @field private exit libmodal.utils.Vars
 --- @field private flush_input_timer unknown
---- @field private help libmodal.utils.Help|nil
+--- @field private help? libmodal.utils.Help
 --- @field private indicator libmodal.utils.Indicator
 --- @field private input libmodal.utils.Vars
---- @field private instruction function|table<string, function|string>
+--- @field private instruction fun()|{[string]: fun()|string}
 --- @field private mappings libmodal.collections.ParseTable
 --- @field private name string
 --- @field private popups libmodal.collections.Stack
@@ -35,7 +35,7 @@ local TIMEOUT =
 TIMEOUT.CHAR_NUMBER = string.byte(TIMEOUT.CHAR)
 
 --- execute the `instruction`.
---- @param instruction function|string a Lua function or Vimscript command.
+--- @param instruction fun()|string a Lua function or Vimscript command.
 function Mode.execute_instruction(instruction)
 	if type(instruction) == globals.TYPE_FUNC then
 		instruction()
@@ -106,10 +106,10 @@ function Mode:enter()
 	local continue_mode = true
 	while continue_mode do
 		-- try (using pcall) to use the mode.
-		local no_errors, mode_result = pcall(self.get_user_input, self)
+		local ok, mode_result = pcall(self.get_user_input, self)
 
 		-- if there were errors, handle them.
-		if not no_errors then
+		if not ok then
 			utils.notify_error('Error during nvim-libmodal mode', mode_result)
 			continue_mode = false
 		else
@@ -185,7 +185,7 @@ return
 {
 	--- create a new mode.
 	--- @param name string the name of the mode.
-	--- @param instruction function|string|table a Lua function, keymap dictionary, Vimscript command.
+	--- @param instruction fun()|string|table a Lua function, keymap dictionary, Vimscript command.
 	--- @return libmodal.Mode
 	new = function(name, instruction, supress_exit)
 		name = vim.trim(name)

@@ -18,15 +18,15 @@ local function table_reverse(tbl)
 end
 
 --- @param str string
---- @return table<string> chars of `str`
+--- @return string[] chars of `str`
 local function chars(str)
 	return vim.split(str, '')
 end
 
 --- retrieve the mapping of `lhs_reversed_bytes`
 --- @param parse_table libmodal.collections.ParseTable the table to fetch `lhs_reversed_bytes` from.
---- @param lhs_reversed_bytes table<string> the characters of the left-hand side of the mapping reversed passed to `string.byte`
---- @return false|function|string|table match a string/func when fully matched; a table when partially matched; false when no match.
+--- @param lhs_reversed_bytes string[] the characters of the left-hand side of the mapping reversed passed to `string.byte`
+--- @return false|fun()|nil|string|table match a string/func when fully matched; a table when partially matched; false when no match.
 local function get(parse_table, lhs_reversed_bytes)
 	--[[ Get the next character in the keymap string. ]]
 
@@ -54,12 +54,13 @@ local function get(parse_table, lhs_reversed_bytes)
 			return val
 		end
 	end
+
 	return nil
 end
 
 --- insert a `value` into `parse_table` at the position indicated by `lhs_reversed_bytes`
---- @param lhs_reversed_bytes table<string> the characters of the left-hand side of the mapping reversed passed to `string.byte`
---- @param value function|string the right-hand-side of the mapping
+--- @param lhs_reversed_bytes string[] the characters of the left-hand side of the mapping reversed passed to `string.byte`
+--- @param value fun()|string the right-hand-side of the mapping
 local function put(parse_table, lhs_reversed_bytes, value)
 	--[[ Get the next character in the table. ]]
 	local byte = string.byte(table.remove(lhs_reversed_bytes))
@@ -87,15 +88,16 @@ end
 
 --- retrieve the mapping of `lhs_reversed_bytes`
 --- @param key_dict table a list of characters (most recent input first)
---- @return false|function|string|table match a string/func when fully matched; a table when partially matched; false when no match.
+--- @return false|fun()|nil|string|table match a string/func when fully matched; a table when partially matched; false when no match.
 function ParseTable:get(key_dict)
 	return get(self, table_reverse(key_dict))
 end
 
 --- parse `key` and retrieve its value
 --- @param key string the left-hand-side of the mapping to retrieve
---- @return false|function|string|table match a string/func when fully found; a table when partially found; false when not found.
+--- @return false|fun()|nil|string|table match a string/func when fully found; a table when partially found; false when not found.
 function ParseTable:parse_get(key)
+	--- @type table<number|string>
 	local parsed_table = chars(string.reverse(key))
 
 	-- convert all of the strings to bytes.
@@ -108,13 +110,13 @@ end
 
 --- parse `key` and assign it to `value`.
 --- @param key string the left-hand-side of the mapping
---- @param value function|string the right-hand-side of the mapping
+--- @param value fun()|string the right-hand-side of the mapping
 function ParseTable:parse_put(key, value)
 	put(self, chars(string.reverse(key)), value)
 end
 
 --- `:parse_put` all `{key, value}` pairs in `keys_and_values`.
---- @param keys_and_values table<string, function|string>
+--- @param keys_and_values {[string]: fun()|string}
 function ParseTable:parse_put_all(keys_and_values)
 	for k, v in pairs(keys_and_values) do
 		self:parse_put(k, v)

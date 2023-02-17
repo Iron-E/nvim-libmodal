@@ -1,6 +1,6 @@
 --- @class libmodal.utils.Popup
 --- @field private buffer number the number of the window which this popup is rendered on.
---- @field private input_chars table<string> the characters input by the user.
+--- @field private input_chars string[] the characters input by the user.
 --- @field private window number the number of the window which this popup is rendered on.
 local Popup = require('libmodal/src/utils/classes').new(nil)
 
@@ -51,7 +51,7 @@ function Popup:open(config)
 end
 
 --- display `input_bytes` in `self.buffer`
---- @param input_bytes table<number> a list of character codes to display
+--- @param input_bytes number[] a list of character codes to display
 function Popup:refresh(input_bytes)
 	-- the user simply typed one more character onto the last one.
 	if #input_bytes == #self.input_chars + 1 then

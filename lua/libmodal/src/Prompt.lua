@@ -2,12 +2,12 @@ local globals = require 'libmodal/src/globals'
 local utils = require 'libmodal/src/utils'
 
 --- @class libmodal.Prompt
---- @field private completions table<string>|nil
+--- @field private completions? string[]
 --- @field private exit libmodal.utils.Vars
---- @field private help libmodal.utils.Help|nil
+--- @field private help? libmodal.utils.Help
 --- @field private indicator libmodal.utils.Indicator
 --- @field private input libmodal.utils.Vars
---- @field private instruction function|table<string, function|string>
+--- @field private instruction fun()|{[string]: fun()|string}
 --- @field private name string
 local Prompt = utils.classes.new(nil)
 
@@ -91,10 +91,10 @@ function Prompt:enter()
 	-- enter the mode using a loop.
 	local continue_mode = true
 	while continue_mode do
-		local no_errors, prompt_result = pcall(self.get_user_input, self)
+		local ok, prompt_result = pcall(self.get_user_input, self)
 
 		-- if there were errors.
-		if not no_errors then
+		if not ok then
 			utils.notify_error('Error during nvim-libmodal mode', prompt_result)
 			continue_mode = false
 		else
@@ -107,8 +107,8 @@ return
 {
 	--- enter a prompt.
 	--- @param name string the name of the prompt
-	--- @param instruction function|table<string, function|string> what to do with user input
-	--- @param user_completions table<string>|nil a list of possible inputs, provided by the user
+	--- @param instruction fun()|{[string]: fun()|string} what to do with user input
+	--- @param user_completions? string[] a list of possible inputs, provided by the user
 	--- @return libmodal.Prompt
 	new = function(name, instruction, user_completions)
 		name = vim.trim(name)
@@ -130,6 +130,7 @@ return
 			local completions   = {}
 			local contained_help = false
 
+			--- @diagnostic disable-next-line:param-type-mismatch we check `instruction` is `table`
 			for command, _ in pairs(instruction) do
 				completions[#completions + 1] = command
 				if command == HELP then

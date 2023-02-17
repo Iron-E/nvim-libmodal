@@ -11,6 +11,7 @@ local function normalize_buffer(buffer)
 		return nil
 	end
 
+	--- @diagnostic disable-next-line:return-type-mismatch `true` and `false are already checked
 	return buffer
 end
 
@@ -42,7 +43,7 @@ end
 
 --- remove and return the right-hand side of a `keymap`.
 --- @param keymap table the keymap to unpack
---- @return function|string rhs, table options
+--- @return fun()|string rhs, table options
 local function unpack_keymap_rhs(keymap)
 	local rhs = keymap.rhs
 	keymap.rhs = nil
@@ -106,9 +107,9 @@ end
 --- add a keymap to the mode.
 --- @param mode string the mode that this keymap for.
 --- @param lhs string the left hand side of the keymap.
---- @param rhs function|string the right hand side of the keymap.
+--- @param rhs fun()|string the right hand side of the keymap.
 --- @param options table options for the keymap.
---- @see `vim.keymap.set`
+--- @see vim.keymap.set
 function Layer:map(mode, lhs, rhs, options)
 	lhs = utils.api.replace_termcodes(lhs)
 	options.buffer = normalize_buffer(options.buffer)
@@ -143,10 +144,10 @@ function Layer:map(mode, lhs, rhs, options)
 end
 
 --- restore one keymapping to its original state.
---- @param buffer nil|number the buffer to unmap from (`nil` if it is not buffer-local)
+--- @param buffer? number the buffer to unmap from (`nil` if it is not buffer-local)
 --- @param mode string the mode of the keymap.
 --- @param lhs string the keys which invoke the keymap.
---- @see `vim.api.nvim_del_keymap`
+--- @see vim.api.nvim_del_keymap
 function Layer:unmap(buffer, mode, lhs)
 	lhs = utils.api.replace_termcodes(lhs)
 	if self.existing_keymaps_by_mode then
@@ -155,7 +156,7 @@ function Layer:unmap(buffer, mode, lhs)
 			-- WARN: nvim can fail to restore the original keybinding here unless schedule
 			vim.schedule(function() vim.keymap.set(mode, lhs, rhs, options) end)
 		else -- there was no older keymap; just delete the one set by this layer
-			local no_errors, err = pcall(function()
+			local ok, err = pcall(function()
 				if buffer then
 					vim.api.nvim_buf_del_keymap(buffer, mode, lhs)
 				else
@@ -163,7 +164,7 @@ function Layer:unmap(buffer, mode, lhs)
 				end
 			end)
 
-			if not (no_errors or err:match 'E31: No such mapping') then
+			if not ok and err:match 'E31: No such mapping' then
 				require('libmodal/src/utils').notify_error('nvim-libmodal encountered an error while unmapping from layer', err)
 				return
 			end

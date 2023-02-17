@@ -40,7 +40,7 @@ end
 return
 {
 	--- create a default help table with `commands_or_maps` and vim expressions.
-	--- @param commands_or_maps table<string, function|string> commands or mappings to vim expressions.
+	--- @param commands_or_maps {[string]: fun()|string} commands or mappings to vim expressions.
 	--- @param title string
 	--- @return libmodal.utils.Help
 	new = function(commands_or_maps, title)
@@ -53,19 +53,12 @@ return
 			end
 		end
 
-		-- define the separator for the help table.
-		local help_separator = {}
-		for i = 1, string.len(title) do
-			help_separator[i] = '-'
-		end
-		help_separator = table.concat(help_separator)
-
 		-- create a new `Help`.
 		return setmetatable(
 			{
 				[1] = ' ',
 				[2] = table.concat(align_columns({[title] = 'VIM EXPRESSION'}, longest_key_maps)),
-				[3] = table.concat(align_columns({[help_separator] = '--------------'}, longest_key_maps)),
+				[3] = table.concat(align_columns({[string.rep('-', string.len(title))] = '--------------'}, longest_key_maps)),
 				[4] = table.concat(align_columns(commands_or_maps, longest_key_maps)),
 			},
 			Help
