@@ -94,7 +94,7 @@ See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode,
 --------------------------------------------------------------------------------
 VARIABLES                                               *libmodal-usage-variables*
 
-`vim.g`.libmodalActiveModeName
+`vim.g`.libmodalActiveModeName                            *g:libmodalActiveModeName*
 
 	The name of the currently active |libmodal-mode|.
 
@@ -385,6 +385,19 @@ FUNCTIONS                                               *libmodal-usage-function
 	See also: ~
 		|lua-eval|          For type conversions between Vimscript to |Lua|.
 		|libmodal-examples| For examples of this function.
+
+--------------------------------------------------------------------------------
+EVENTS                                                     *libmodal-usage-events*
+
+|libmodal| provides several |User| |autocmd-events| which you can hook into in
+order to ensure that certain things happen before and after a |libmodal-mode|
+is entered or left.
+
+                                                            *LibmodalModeEnterPre*
+`LibmodalModeEnterPre`: before entering a |libmodal-mode|.
+
+                                                           *LibmodalModeLeavePost*
+`LibmodalModeLeavePost`: after exiting a |libmodal-mode|.
 
 ================================================================================
 3. Examples                                                    *libmodal-examples*

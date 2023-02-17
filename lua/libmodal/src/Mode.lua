@@ -81,6 +81,7 @@ function Mode:check_input_for_mapping()
 			end)
 		)
 	else -- the command was an actual vim command.
+		--- @diagnostic disable-next-line:param-type-mismatch already checked `cmd` != `table`
 		self.execute_instruction(cmd)
 		self.input_bytes:clear()
 	end
@@ -217,6 +218,7 @@ return
 			self.input_bytes = setmetatable({}, InputBytes)
 
 			-- build the parse tree.
+			--- @diagnostic disable-next-line:param-type-mismatch already checked `self.instruction` != `table`
 			self.mappings = ParseTable.new(self.instruction)
 
 			-- create a table for mode-specific data.
