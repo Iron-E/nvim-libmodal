@@ -389,15 +389,8 @@ FUNCTIONS                                               *libmodal-usage-function
 --------------------------------------------------------------------------------
 EVENTS                                                     *libmodal-usage-events*
 
-|libmodal| provides several |User| |autocmd-events| which you can hook into in
-order to ensure that certain things happen before and after a |libmodal-mode|
-is entered or left.
-
-                                                            *LibmodalModeEnterPre*
-`LibmodalModeEnterPre`: before entering a |libmodal-mode|.
-
-                                                           *LibmodalModeLeavePost*
-`LibmodalModeLeavePost`: after exiting a |libmodal-mode|.
+|libmodal| fires the |ModeChanged| |autocommand| |{event}| when entering and
+exiting |libmodal-mode|s.
 
 ================================================================================
 3. Examples                                                    *libmodal-examples*
