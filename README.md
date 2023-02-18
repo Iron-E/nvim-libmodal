@@ -57,6 +57,96 @@ See my configuration for `feline.nvim` [here](https://gitlab.com/Iron_E/dotfiles
 
 See my configuration for `galaxyline.nvim` [here](https://gitlab.com/Iron_E/dotfiles/-/blob/edf3e1c9779bbc81002832bb03ec875dc86cc16b/.config/nvim/lua/plugin/galaxyline.lua#L140-163).
 
+#### heirline.nvim
+
+<details>
+  <summary>An example config</summary>
+  <pre lang = "lua">
+-- Defined in https://github.com/Iron-E/nvim-highlite
+local BLACK        = '#202020'
+local BLUE         = '#7766ff'
+local CYAN         = '#33dbc3'
+local GRAY_DARK    = '#353535'
+local GRAY_LIGHT   = '#c0c0c0'
+local GREEN        = '#22ff22'
+local GREEN_LIGHT  = '#99ff99'
+local ICE          = '#95c5ff'
+local ORANGE       = '#ff8900'
+local ORANGE_LIGHT = '#f0af00'
+local PINK         = '#ffa6ff'
+local PINK_LIGHT   = '#ffb7b7'
+local PURPLE       = '#cf55f0'
+local PURPLE_LIGHT = '#af60af'
+local RED          = '#ee4a59'
+local RED_DARK     = '#a80000'
+local RED_LIGHT    = '#ff4090'
+local TAN          = '#f4c069'
+local TEAL         = '#60afff'
+local TURQOISE     = '#2bff99'
+local YELLOW       = '#f0df33'
+ 
+require('heirline').setup({statusline =
+{
+  {
+    hl = function(self)
+      vim.api.nvim_set_hl(0, self.group, {bold = true, fg = self.color})
+      return self.group
+    end,
+    init = function(self)
+      if vim.g.libmodalActiveModeName then
+        self.name = vim.g.libmodalActiveModeName
+        self.color = self.modes[self.name]
+      else
+        local current_mode = self.modes[vim.api.nvim_get_mode().mode]
+ 
+        self.name = current_mode[1]
+        self.color = current_mode[2]
+      end
+ 
+      if not self.once then
+        vim.api.nvim_create_autocmd('ModeChanged', {command = 'redrawstatus', pattern = '*:*o'})
+        self.once = true
+      end
+    end,
+    provider = function(self) return '▊ ' .. self.name .. ' ' end,
+    static =
+    { -- {{{
+      group = 'HeirlineViMode',
+      modes =
+      {
+        ['c']  = {'COMMAND-LINE', RED},
+        ['ce'] = {'NORMAL EX', RED_DARK},
+        ['cv'] = {'EX', RED_LIGHT},
+        ['i']  = {'INSERT', GREEN},
+        ['ic'] = {'INS-COMPLETE', GREEN_LIGHT},
+        ['n']  = {'NORMAL', PURPLE_LIGHT},
+        ['no'] = {'OPERATOR-PENDING', PURPLE},
+        ['r']  = {'HIT-ENTER', CYAN},
+        ['r?'] = {':CONFIRM', CYAN},
+        ['rm'] = {'--MORE', ICE},
+        ['R']  = {'REPLACE', PINK},
+        ['Rv'] = {'VIRTUAL', PINK_LIGHT},
+        ['s']  = {'SELECT', TURQOISE},
+        ['S']  = {'SELECT', TURQOISE},
+        ['␓']  = {'SELECT', TURQOISE},
+        ['t']  = {'TERMINAL', ORANGE},
+        ['v']  = {'VISUAL', BLUE},
+        ['V']  = {'VISUAL LINE', BLUE},
+        ['␖']  = {'VISUAL BLOCK', BLUE},
+        ['!']  = {'SHELL', YELLOW},
+ 
+        -- libmodal
+        ['BUFFERS'] = TEAL,
+        ['TABLES'] = ORANGE_LIGHT,
+        ['TABS'] = TAN,
+      }
+    }, -- }}}
+    update = 'ModeChanged',
+  },
+}})
+  </pre>
+</details>
+
 #### lualine.nvim
 
 <details>
