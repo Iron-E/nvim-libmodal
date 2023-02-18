@@ -21,11 +21,9 @@ Either use `packadd` or any package manager. I recommend using [lazy.nvim](https
 
 #### packer.nvim
 
-You can use [packer.nvim](https://github.com/wbthomason/packer.nvim) to install this plugin. The below example is for `packer.nvim`:
-
 ```lua
 return require('packer').startup {function(use)
-	use 'Iron-E/nvim-libmodal'
+  use 'Iron-E/nvim-libmodal'
 end}
 ```
 
@@ -150,8 +148,8 @@ require('heirline').setup({statusline =
 #### lualine.nvim
 
 <details>
-	<summary>An example config</summary>
-	<pre lang = "lua">
+  <summary>An example config</summary>
+  <pre lang = "lua">
 -- Defined in https://github.com/Iron-E/nvim-highlite
 local BLUE         = '#7766ff'
 local CYAN         = '#33dbc3'
@@ -174,31 +172,31 @@ local YELLOW       = '#f0df33'
  
 local MODES =
 { -- {{{
-	['c']  = {'COMMAND-LINE',     RED},
-	['ce'] = {'NORMAL EX',        RED_DARK},
-	['cv'] = {'EX',               RED_LIGHT},
-	['i']  = {'INSERT',           GREEN},
-	['ic'] = {'INS-COMPLETE',     GREEN_LIGHT},
-	['n']  = {'NORMAL',           PURPLE_LIGHT},
-	['no'] = {'OPERATOR-PENDING', PURPLE},
-	['r']  = {'HIT-ENTER',        CYAN},
-	['r?'] = {':CONFIRM',         CYAN},
-	['rm'] = {'--MORE',           ICE},
-	['R']  = {'REPLACE',          PINK},
-	['Rv'] = {'VIRTUAL',          PINK_LIGHT},
-	['s']  = {'SELECT',           TURQOISE},
-	['S']  = {'SELECT',           TURQOISE},
-	['␓'] = {'SELECT',            TURQOISE},
-	['t']  = {'TERMINAL',         ORANGE},
-	['v']  = {'VISUAL',           BLUE},
-	['V']  = {'VISUAL LINE',      BLUE},
-	['␖'] = {'VISUAL BLOCK',      BLUE},
-	['!']  = {'SHELL',            YELLOW},
+  ['c']  = {'COMMAND-LINE', RED},
+  ['ce'] = {'NORMAL EX', RED_DARK},
+  ['cv'] = {'EX', RED_LIGHT},
+  ['i']  = {'INSERT', GREEN},
+  ['ic'] = {'INS-COMPLETE', GREEN_LIGHT},
+  ['n']  = {'NORMAL', PURPLE_LIGHT},
+  ['no'] = {'OPERATOR-PENDING', PURPLE},
+  ['r']  = {'HIT-ENTER', CYAN},
+  ['r?'] = {':CONFIRM', CYAN},
+  ['rm'] = {'--MORE', ICE},
+  ['R']  = {'REPLACE', PINK},
+  ['Rv'] = {'VIRTUAL', PINK_LIGHT},
+  ['s']  = {'SELECT', TURQOISE},
+  ['S']  = {'SELECT', TURQOISE},
+  ['␓']  = {'SELECT', TURQOISE},
+  ['t']  = {'TERMINAL', ORANGE},
+  ['v']  = {'VISUAL', BLUE},
+  ['V']  = {'VISUAL LINE', BLUE},
+  ['␖']  = {'VISUAL BLOCK', BLUE},
+  ['!']  = {'SHELL', YELLOW},
  
-	-- libmodal
-	['BUFFERS'] = TEAL,
-	['TABLES']  = ORANGE_LIGHT,
-	['TABS']    = TAN,
+  -- libmodal
+  ['BUFFERS'] = TEAL,
+  ['TABLES'] = ORANGE_LIGHT,
+  ['TABS'] = TAN,
 } -- }}}
  
 local MODE_HL_GROUP = 'LualineViMode'
@@ -206,39 +204,39 @@ local MODE_HL_GROUP = 'LualineViMode'
 --[[/* FELINE CONFIG */]]
  
 vim.api.nvim_create_autocmd('ModeChanged', {callback = function()
-		require('lualine').refresh {scope = 'window',  place = {'statusline'}}
+  require('lualine').refresh {scope = 'window',  place = {'statusline'}}
 end})
  
 require('lualine').setup {sections = {lualine_a = {{
-	function() -- auto change color according the vim mode
-		local mode_color, mode_name
+  function() -- auto change color according the vim mode
+    local mode_color, mode_name
  
-		if vim.g.libmodalActiveModeName then
-			mode_name = vim.g.libmodalActiveModeName
-			mode_color = MODES[mode_name]
-		else
-			local current_mode = MODES[vim.api.nvim_get_mode().mode]
+    if vim.g.libmodalActiveModeName then
+      mode_name = vim.g.libmodalActiveModeName
+      mode_color = MODES[mode_name]
+    else
+      local current_mode = MODES[vim.api.nvim_get_mode().mode]
  
-			mode_name = current_mode[1]
-			mode_color = current_mode[2]
-		end
+      mode_name = current_mode[1]
+      mode_color = current_mode[2]
+    end
  
-		vim.api.nvim_set_hl(0, MODE_HL_GROUP, {fg = mode_color, bold = true})
+    vim.api.nvim_set_hl(0, MODE_HL_GROUP, {fg = mode_color, bold = true})
  
-		return mode_name..' '
-	end,
-	icon = {'▊', align = 'left'},
-	color = MODE_HL_GROUP,
-	padding = 0,
+    return mode_name..' '
+  end,
+  icon = {'▊', align = 'left'},
+  color = MODE_HL_GROUP,
+  padding = 0,
 }}}}
-	</pre>
+  </pre>
 </details>
 
 #### staline.nvim
 
 <details>
-	<summary>An example config</summary>
-	<pre lang = "lua">
+  <summary>An example config</summary>
+  <pre lang = "lua">
 --[[/* CONSTANTS */]]
  
 -- Defined in https://github.com/Iron-E/nvim-highlite
@@ -263,31 +261,31 @@ local YELLOW       = '#f0df33'
  
 local MODES =
 { -- {{{
-	['c']  = {'COMMAND-LINE', RED},
-	['ce'] = {'NORMAL EX', RED_DARK},
-	['cv'] = {'EX', RED_LIGHT},
-	['i']  = {'INSERT', GREEN},
-	['ic'] = {'INS-COMPLETE', GREEN_LIGHT},
-	['n']  = {'NORMAL', PURPLE_LIGHT},
-	['no'] = {'OPERATOR-PENDING', PURPLE},
-	['r']  = {'HIT-ENTER', CYAN},
-	['r?'] = {':CONFIRM', CYAN},
-	['rm'] = {'--MORE', ICE},
-	['R']  = {'REPLACE', PINK},
-	['Rv'] = {'VIRTUAL', PINK_LIGHT},
-	['s']  = {'SELECT', TURQOISE},
-	['S']  = {'SELECT', TURQOISE},
-	['␓'] = {'SELECT', TURQOISE},
-	['t']  = {'TERMINAL', ORANGE},
-	['v']  = {'VISUAL', BLUE},
-	['V']  = {'VISUAL LINE', BLUE},
-	['␖'] = {'VISUAL BLOCK', BLUE},
-	['!']  = {'SHELL', YELLOW},
+  ['c']  = {'COMMAND-LINE', RED},
+  ['ce'] = {'NORMAL EX', RED_DARK},
+  ['cv'] = {'EX', RED_LIGHT},
+  ['i']  = {'INSERT', GREEN},
+  ['ic'] = {'INS-COMPLETE', GREEN_LIGHT},
+  ['n']  = {'NORMAL', PURPLE_LIGHT},
+  ['no'] = {'OPERATOR-PENDING', PURPLE},
+  ['r']  = {'HIT-ENTER', CYAN},
+  ['r?'] = {':CONFIRM', CYAN},
+  ['rm'] = {'--MORE', ICE},
+  ['R']  = {'REPLACE', PINK},
+  ['Rv'] = {'VIRTUAL', PINK_LIGHT},
+  ['s']  = {'SELECT', TURQOISE},
+  ['S']  = {'SELECT', TURQOISE},
+  ['␓']  = {'SELECT', TURQOISE},
+  ['t']  = {'TERMINAL', ORANGE},
+  ['v']  = {'VISUAL', BLUE},
+  ['V']  = {'VISUAL LINE', BLUE},
+  ['␖']  = {'VISUAL BLOCK', BLUE},
+  ['!']  = {'SHELL', YELLOW},
  
-	-- libmodal
-	['BUFFERS'] = TEAL,
-	['TABLES']  = ORANGE_LIGHT,
-	['TABS']    = TAN,
+  -- libmodal
+  ['BUFFERS'] = TEAL,
+  ['TABLES'] = ORANGE_LIGHT,
+  ['TABS'] = TAN,
 } -- }}}
  
 local MODE_HL_GROUP = 'StalineViMode'
@@ -297,29 +295,29 @@ local MODE_HL_GROUP = 'StalineViMode'
 vim.api.nvim_set_hl(0, MODE_HL_GROUP, {})
 require('staline').setup(
 {
-	mode_colors = {},
-	mode_icons = {},
-	sections = {left =
-	{
-		function()
-			local mode_color, mode_name
+  mode_colors = {},
+  mode_icons = {},
+  sections = {left =
+  {
+    function()
+      local mode_color, mode_name
  
-			if vim.g.libmodalActiveModeName then
-				mode_name = vim.g.libmodalActiveModeName
-				mode_color = MODES[mode_name]
-			else
-				local current_mode = MODES[vim.api.nvim_get_mode().mode]
+      if vim.g.libmodalActiveModeName then
+        mode_name = vim.g.libmodalActiveModeName
+        mode_color = MODES[mode_name]
+      else
+        local current_mode = MODES[vim.api.nvim_get_mode().mode]
  
-				mode_name = current_mode[1]
-				mode_color = current_mode[2]
-			end
+        mode_name = current_mode[1]
+        mode_color = current_mode[2]
+      end
  
-			vim.api.nvim_set_hl(0, MODE_HL_GROUP, {bold = true, fg = mode_color})
-			return {MODE_HL_GROUP, mode_name}
-		end,
-	}},
+      vim.api.nvim_set_hl(0, MODE_HL_GROUP, {bold = true, fg = mode_color})
+      return {MODE_HL_GROUP, mode_name}
+    end,
+  }},
 })
-	</pre>
+  </pre>
 </details>
 
 ## FAQ
@@ -329,11 +327,11 @@ require('staline').setup(
 The following is a list of expressions that work in `nvim-libmodal` but not `vim-libmodal`:
 
 * `require 'libmodal'` in Lua.
-	* `vim-libmodal` does not support interacting with it through Lua, you must use the Vimscript interface.
+  * `vim-libmodal` does not support interacting with it through Lua, you must use the Vimscript interface.
 
 The following is a list of expressions that work in `vim-libmodal` but not `nvim-libmodal`:
 
 * `call libmodal#Enter('FOO', funcref('bar'), baz)` in Vimscript.
-	* Lua does not support passing `funcref`s from Vimscript. Try using the Lua interface instead.
+  * Lua does not support passing `funcref`s from Vimscript. Try using the Lua interface instead.
 * `call libmodal#Prompt('FOO', funcref('bar'), baz)` in Vimscript.
-	* Lua does not support passing `funcref`s from Vimscript. Try using the Lua interface instead.
+  * Lua does not support passing `funcref`s from Vimscript. Try using the Lua interface instead.
