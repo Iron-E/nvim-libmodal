@@ -126,11 +126,11 @@ require('heirline').setup({statusline =
         ['Rv'] = {'VIRTUAL', PINK_LIGHT},
         ['s']  = {'SELECT', TURQOISE},
         ['S']  = {'SELECT', TURQOISE},
-        ['␓']  = {'SELECT', TURQOISE},
+        [''] = {'SELECT', TURQOISE},
         ['t']  = {'TERMINAL', ORANGE},
         ['v']  = {'VISUAL', BLUE},
         ['V']  = {'VISUAL LINE', BLUE},
-        ['␖']  = {'VISUAL BLOCK', BLUE},
+        [''] = {'VISUAL BLOCK', BLUE},
         ['!']  = {'SHELL', YELLOW},
  
         -- libmodal
@@ -186,11 +186,11 @@ local MODES =
   ['Rv'] = {'VIRTUAL', PINK_LIGHT},
   ['s']  = {'SELECT', TURQOISE},
   ['S']  = {'SELECT', TURQOISE},
-  ['␓']  = {'SELECT', TURQOISE},
+  [''] = {'SELECT', TURQOISE},
   ['t']  = {'TERMINAL', ORANGE},
   ['v']  = {'VISUAL', BLUE},
   ['V']  = {'VISUAL LINE', BLUE},
-  ['␖']  = {'VISUAL BLOCK', BLUE},
+  [''] = {'VISUAL BLOCK', BLUE},
   ['!']  = {'SHELL', YELLOW},
  
   -- libmodal
@@ -275,11 +275,11 @@ local MODES =
   ['Rv'] = {'VIRTUAL', PINK_LIGHT},
   ['s']  = {'SELECT', TURQOISE},
   ['S']  = {'SELECT', TURQOISE},
-  ['␓']  = {'SELECT', TURQOISE},
+  [''] = {'SELECT', TURQOISE},
   ['t']  = {'TERMINAL', ORANGE},
   ['v']  = {'VISUAL', BLUE},
   ['V']  = {'VISUAL LINE', BLUE},
-  ['␖']  = {'VISUAL BLOCK', BLUE},
+  [''] = {'VISUAL BLOCK', BLUE},
   ['!']  = {'SHELL', YELLOW},
  
   -- libmodal
