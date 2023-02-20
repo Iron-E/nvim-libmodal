@@ -1,12 +1,10 @@
-local libmodal = require('libmodal')
+local libmodal = require 'libmodal'
 
 -- recurse counter
 local foo_mode_recurse = 0
+
 -- register 'z' as the map for recursing further (by calling the FooMode function again)
-local foo_mode_keymaps =
-{
-	z = 'lua FooMode()'
-}
+local foo_mode_keymaps = {z = 'lua FooMode()'}
 
 -- define the FooMode() function which is called whenever the user presses 'z'
 function FooMode()
