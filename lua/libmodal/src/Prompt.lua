@@ -1,4 +1,7 @@
+--- @type libmodal.globals
 local globals = require 'libmodal/src/globals'
+
+--- @type libmodal.utils
 local utils = require 'libmodal/src/utils'
 
 --- @class libmodal.Prompt
@@ -95,6 +98,7 @@ function Prompt:enter()
 
 		-- if there were errors.
 		if not ok then
+			--- @diagnostic disable-next-line:param-type-mismatch if `not ok` then `mode_result` is a string
 			utils.notify_error('Error during nvim-libmodal mode', prompt_result)
 			continue_mode = false
 		else
@@ -116,7 +120,7 @@ return
 		local self = setmetatable(
 			{
 				exit         = utils.Vars.new('exit', name),
-				indicator    = utils.Indicator.prompt(name),
+				indicator    = utils.Indicator.new('LibmodalStar', '* ' .. name .. ' > '),
 				input        = utils.Vars.new('input', name),
 				instruction = instruction,
 				name        = name
@@ -140,6 +144,7 @@ return
 
 			if not contained_help then -- assign it.
 				completions[#completions + 1] = HELP
+				--- @diagnostic disable-next-line:param-type-mismatch we checked that `instruction` is a table above
 				self.help = utils.Help.new(instruction, 'COMMAND')
 			end
 

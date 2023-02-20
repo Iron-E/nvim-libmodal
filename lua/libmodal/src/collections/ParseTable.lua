@@ -1,9 +1,12 @@
---- the number corresponding to <CR> in vim.
-local CR   = 13
+--- @type libmodal.globals
 local globals = require 'libmodal/src/globals'
 
+--- the number corresponding to <CR> in vim.
+local CR = string.byte(vim.api.nvim_replace_termcodes('<CR>', true, true, true))
+
 --- @class libmodal.collections.ParseTable
-local ParseTable = require('libmodal/src/utils/classes').new(nil)
+--- @field CR number the byte representation of `<CR>`
+local ParseTable = require('libmodal/src/utils/classes').new {CR = CR}
 
 --- reverse the order of elements in some `tbl`
 --- @param tbl table the table to reverse
@@ -93,6 +96,19 @@ function ParseTable:get(key_dict)
 	return get(self, table_reverse(key_dict))
 end
 
+--- create a new `libmodal.collections.ParseTable` from a user-provided table.
+--- @param user_table table keymaps (e.g. `{zfo = 'tabnew'}`)
+--- @return libmodal.collections.ParseTable
+function ParseTable.new(user_table)
+	local self = setmetatable({}, ParseTable)
+
+	-- parse the passed in table.
+	self:parse_put_all(user_table)
+
+	-- return the new `ParseTable`.
+	return self
+end
+
 --- parse `key` and retrieve its value
 --- @param key string the left-hand-side of the mapping to retrieve
 --- @return false|fun()|nil|string|table match a string/func when fully found; a table when partially found; false when not found.
@@ -123,20 +139,4 @@ function ParseTable:parse_put_all(keys_and_values)
 	end
 end
 
-return
-{
-	CR = CR,
-
-	--- create a new `libmodal.collections.ParseTable` from a user-provided table.
-	--- @param user_table table keymaps (e.g. `{zfo = 'tabnew'}`)
-	--- @return libmodal.collections.ParseTable
-	new = function(user_table)
-		local self = setmetatable({}, ParseTable)
-
-		-- parse the passed in table.
-		self:parse_put_all(user_table)
-
-		-- return the new `ParseTable`.
-		return self
-	end,
-}
+return ParseTable

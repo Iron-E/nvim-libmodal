@@ -1,6 +1,11 @@
-local globals    = require 'libmodal/src/globals'
+--- @type libmodal.globals
+local globals = require 'libmodal/src/globals'
+
+--- @type libmodal.collections.ParseTable
 local ParseTable = require 'libmodal/src/collections/ParseTable'
-local utils      = require 'libmodal/src/utils'
+
+--- @type libmodal.utils
+local utils = require 'libmodal/src/utils'
 
 --- @class libmodal.Mode
 --- @field private exit libmodal.utils.Vars
@@ -111,6 +116,7 @@ function Mode:enter()
 
 		-- if there were errors, handle them.
 		if not ok then
+			--- @diagnostic disable-next-line:param-type-mismatch if `not ok` then `mode_result` is a string
 			utils.notify_error('Error during nvim-libmodal mode', mode_result)
 			continue_mode = false
 		else
@@ -195,7 +201,7 @@ return
 		local self = setmetatable(
 			{
 				exit = utils.Vars.new('exit', name),
-				indicator = utils.Indicator.mode(name),
+				indicator = utils.Indicator.new('LibmodalPrompt', '-- ' .. name .. ' --'),
 				input = utils.Vars.new('input', name),
 				instruction = instruction,
 				name = name,
@@ -213,6 +219,7 @@ return
 
 			-- determine if a default `Help` should be created.
 			if not self.instruction[HELP] then
+				--- @diagnostic disable-next-line:param-type-mismatch we checked that `instruction` is a table above
 				self.help = utils.Help.new(self.instruction, 'KEY MAP')
 			end
 

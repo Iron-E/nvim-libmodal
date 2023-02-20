@@ -1,23 +1,8 @@
+--- @type libmodal.globals
 local globals = require 'libmodal/src/globals'
 
 --- @class libmodal.utils.api
 local api = {}
-
---- echo a list of `Indicator`s with their associated highlighting.
---- @param indicators libmodal.utils.Indicator|libmodal.utils.Indicator[] the indicators to echo
-function api.hi_echo(indicators)
-	if indicators.hl then -- wrap the single indicator in a table to form a list of indicators
-		indicators = {indicators}
-	end
-
-	api.redraw()
-
-	for _, indicator in ipairs(indicators) do
-		vim.api.nvim_command('echohl ' .. indicator.hl .. " | echon '" .. indicator.str .. "'")
-	end
-
-	vim.api.nvim_command 'echohl None'
-end
 
 --- send a character to exit a mode.
 --- @param exit_char? number|string the character used to exit the mode, or ESCAPE if none was provided.

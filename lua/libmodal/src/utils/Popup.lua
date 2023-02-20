@@ -27,6 +27,13 @@ function Popup:close(keep_buffer)
 	end
 end
 
+--- @return libmodal.utils.Popup
+function Popup.new(config)
+	local self = setmetatable({buffer = vim.api.nvim_create_buf(false, true), input_chars = {}}, Popup)
+	self:open(config)
+	return self
+end
+
 --- attempt to open this popup. If the popup was already open, close it and re-open it.
 function Popup:open(config)
 	if not config then
@@ -75,11 +82,4 @@ function Popup:refresh(input_bytes)
 	vim.api.nvim_win_set_width(self.window, #self.input_chars)
 end
 
-return
-{
-	new = function(config)
-		local self = setmetatable({buffer = vim.api.nvim_create_buf(false, true), input_chars = {}}, Popup)
-		self:open(config)
-		return self
-	end
-}
+return Popup

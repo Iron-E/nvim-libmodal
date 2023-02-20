@@ -1,6 +1,11 @@
 --- @class libmodal.collections.Stack
 local Stack = require('libmodal/src/utils/classes').new(nil)
 
+--- @return libmodal.collections.Stack
+function Stack.new()
+	return setmetatable({}, Stack)
+end
+
 --- @return unknown top the foremost value of the stack
 function Stack:peek()
 	return self[#self]
@@ -19,9 +24,4 @@ function Stack:push(value)
 	self[#self + 1] = value
 end
 
-return
-{
-	new = function()
-		return setmetatable({}, Stack)
-	end,
-}
+return Stack

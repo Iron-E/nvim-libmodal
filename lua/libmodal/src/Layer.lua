@@ -1,4 +1,7 @@
+--- @type libmodal.globals
 local globals = require 'libmodal/src/globals'
+
+--- @type libmodal.utils
 local utils = require 'libmodal/src/utils'
 
 --- Normalizes a `buffer = true|false|0` argument into a number.
@@ -143,6 +146,12 @@ function Layer:map(mode, lhs, rhs, options)
 	end
 end
 
+--- @param keymaps_by_mode table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
+--- @return libmodal.Layer
+function Layer.new(keymaps_by_mode)
+	return setmetatable({existing_keymaps_by_mode = {}, layer_keymaps_by_mode = keymaps_by_mode, active = false}, Layer)
+end
+
 --- restore one keymapping to its original state.
 --- @param buffer? number the buffer to unmap from (`nil` if it is not buffer-local)
 --- @param mode string the mode of the keymap.
@@ -175,11 +184,4 @@ function Layer:unmap(buffer, mode, lhs)
 	self.existing_keymaps_by_mode[mode][lhs] = nil
 end
 
-return
-{
-	--- @param keymaps_by_mode table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
-	--- @return libmodal.Layer
-	new = function(keymaps_by_mode)
-		return setmetatable({existing_keymaps_by_mode = {}, layer_keymaps_by_mode = keymaps_by_mode, active = false}, Layer)
-	end
-}
+return Layer
