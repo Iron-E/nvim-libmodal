@@ -71,14 +71,14 @@ function Layer:enter()
 		return
 	end
 
+	self.active = true
+
 	for mode, new_keymaps in pairs(self.layer_keymaps_by_mode) do
 		for lhs, options in pairs(new_keymaps) do
 			local rhs, unpacked = unpack_keymap_rhs(options)
 			self:map(mode, lhs, rhs, unpacked)
 		end
 	end
-
-	self.active = true
 end
 
 --- exit the layer, restoring all previous keymaps.
@@ -116,7 +116,8 @@ end
 function Layer:map(mode, lhs, rhs, options)
 	lhs = utils.api.replace_termcodes(lhs)
 	options.buffer = normalize_buffer(options.buffer)
-	if self.existing_keymaps_by_mode then -- the layer has been activated
+
+	if self.active then -- the layer has been activated
 		if not self.existing_keymaps_by_mode[mode] then -- this is the first time that a keymap with this mode is being set
 			self.existing_keymaps_by_mode[mode] = {}
 		end
@@ -159,7 +160,8 @@ end
 --- @see vim.api.nvim_del_keymap
 function Layer:unmap(buffer, mode, lhs)
 	lhs = utils.api.replace_termcodes(lhs)
-	if self.existing_keymaps_by_mode then
+
+	if self.active then
 		if self.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to; restore it
 			local rhs, options = unpack_keymap_rhs(self.existing_keymaps_by_mode[mode][lhs])
 			-- WARN: nvim can fail to restore the original keybinding here unless schedule
