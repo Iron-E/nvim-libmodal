@@ -24,4 +24,4 @@ layer:map('n', '<Esc>', function() layer:exit() end, {})
 layer:enter()
 
 --[[ unmap `gg`. Notice that now both `gg` and `G` return the cursor to the top. ]]
-layer:unmap('n', 'gg')
+layer:unmap(nil, 'n', 'gg')
