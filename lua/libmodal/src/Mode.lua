@@ -13,22 +13,15 @@ local utils = require 'libmodal/src/utils'
 --- @field private help? libmodal.utils.Help
 --- @field private indicator libmodal.utils.Indicator
 --- @field private input libmodal.utils.Vars
+--- @field private input_bytes? number[]
 --- @field private instruction fun()|{[string]: fun()|string}
 --- @field private mappings libmodal.collections.ParseTable
 --- @field private name string
 --- @field private popups libmodal.collections.Stack
+--- @field private show_name fun()
 --- @field private supress_exit boolean
 --- @field private timeouts_enabled boolean
 local Mode = utils.classes.new()
-
-local InputBytes = utils.classes.new(
-{
-	clear = function(self)
-		for i, _ in ipairs(self) do
-			self[i] = nil
-		end
-	end
-})
 
 local HELP = '?'
 local TIMEOUT =
@@ -70,7 +63,7 @@ function Mode:check_input_for_mapping()
 			self.help:show()
 		end
 
-		self.input_bytes:clear()
+		self.input_bytes = {}
 	elseif command_type == globals.TYPE_TBL and globals.is_true(self.timeouts_enabled) then -- the command was a table, meaning that it MIGHT match.
 		self.flush_input_timer:start( -- start the timer
 			TIMEOUT.LEN, 0, vim.schedule_wrap(function()
@@ -81,14 +74,14 @@ function Mode:check_input_for_mapping()
 					self.execute_instruction(cmd[ParseTable.CR])
 				end
 				-- clear input
-				self.input_bytes:clear()
+				self.input_bytes = {}
 				self.popups:peek():refresh(self.input_bytes)
 			end)
 		)
 	else -- the command was an actual vim command.
 		--- @diagnostic disable-next-line:param-type-mismatch already checked `cmd` != `table`
 		self.execute_instruction(cmd)
-		self.input_bytes:clear()
+		self.input_bytes = {}
 	end
 
 	self.popups:peek():refresh(self.input_bytes)
@@ -137,7 +130,7 @@ function Mode:get_user_input()
 	end
 
 	-- echo the indicator.
-	self:show_name()
+	self.show_name()
 
 	-- capture input.
 	local user_input = vim.fn.getchar()
@@ -188,64 +181,63 @@ function Mode:tear_down()
 	utils.api.redraw()
 end
 
-return
-{
-	--- create a new mode.
-	--- @param name string the name of the mode.
-	--- @param instruction fun()|string|table a Lua function, keymap dictionary, Vimscript command.
-	--- @return libmodal.Mode
-	new = function(name, instruction, supress_exit)
-		name = vim.trim(name)
+--- create a new mode.
+--- @param name string the name of the mode.
+--- @param instruction fun()|string|table a Lua function, keymap dictionary, Vimscript command.
+--- @return libmodal.Mode
+function Mode.new(name, instruction, supress_exit)
+	name = vim.trim(name)
 
-		-- inherit the metatable.
-		local self = setmetatable(
-			{
-				exit = utils.Vars.new('exit', name),
-				indicator = utils.Indicator.new('LibmodalPrompt', '-- ' .. name .. ' --'),
-				input = utils.Vars.new('input', name),
-				instruction = instruction,
-				name = name,
-			},
-			Mode
-		)
+	-- inherit the metatable.
+	local self = setmetatable(
+		{
+			exit = utils.Vars.new('exit', name),
+			indicator = utils.Indicator.new('LibmodalPrompt', '-- ' .. name .. ' --'),
+			input = utils.Vars.new('input', name),
+			instruction = instruction,
+			name = name,
+		},
+		Mode
+	)
 
-		self.show_name = (not vim.o.showmode) and utils.api.redraw or function()
-			utils.api.redraw()
+	self.show_name = (not vim.o.showmode) and utils.api.redraw or function()
+		utils.api.redraw()
 
-			vim.api.nvim_command('echohl ' .. self.indicator.hl .. " | echon '" .. self.indicator.str .. "'")
-			vim.api.nvim_command 'echohl None'
-		end
-
-		-- define the exit flag
-		self.supress_exit = supress_exit or false
-
-		-- if the user provided keymaps
-		if type(instruction) == globals.TYPE_TBL then
-			-- create a timer to perform actions with.
-			self.flush_input_timer = vim.loop.new_timer()
-
-			-- determine if a default `Help` should be created.
-			if not self.instruction[HELP] then
-				--- @diagnostic disable-next-line:param-type-mismatch we checked that `instruction` is a table above
-				self.help = utils.Help.new(self.instruction, 'KEY MAP')
-			end
-
-			self.input_bytes = setmetatable({}, InputBytes)
-
-			-- build the parse tree.
-			--- @diagnostic disable-next-line:param-type-mismatch already checked `self.instruction` != `table`
-			self.mappings = ParseTable.new(self.instruction)
-
-			-- create a table for mode-specific data.
-			self.popups = require('libmodal/src/collections/Stack').new()
-
-			-- create a variable for whether or not timeouts are enabled.
-			self.timeouts = utils.Vars.new('timeouts', self.name)
-
-			-- read the correct timeout variable.
-			self.timeouts_enabled = self.timeouts:get() or vim.g.libmodalTimeouts
-		end
-
-		return self
+		vim.api.nvim_command('echohl ' .. self.indicator.hl .. " | echon '" .. self.indicator.str .. "'")
+		vim.api.nvim_command 'echohl None'
 	end
-}
+
+	-- define the exit flag
+	self.supress_exit = supress_exit or false
+
+	-- if the user provided keymaps
+	if type(instruction) == globals.TYPE_TBL then
+		-- create a timer to perform actions with.
+		self.flush_input_timer = vim.loop.new_timer()
+
+		-- determine if a default `Help` should be created.
+		if not self.instruction[HELP] then
+			--- @diagnostic disable-next-line:param-type-mismatch we checked that `instruction` is a table above
+			self.help = utils.Help.new(self.instruction, 'KEY MAP')
+		end
+
+		self.input_bytes = {}
+
+		-- build the parse tree.
+		--- @diagnostic disable-next-line:param-type-mismatch already checked `self.instruction` != `table`
+		self.mappings = ParseTable.new(self.instruction)
+
+		-- create a table for mode-specific data.
+		self.popups = require('libmodal/src/collections/Stack').new()
+
+		-- create a variable for whether or not timeouts are enabled.
+		self.timeouts = utils.Vars.new('timeouts', self.name)
+
+		-- read the correct timeout variable.
+		self.timeouts_enabled = self.timeouts:get() or vim.g.libmodalTimeouts
+	end
+
+	return self
+end
+
+return Mode
