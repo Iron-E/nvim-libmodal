@@ -180,10 +180,13 @@ function Layer:unmap(buffer, mode, lhs)
 				return
 			end
 		end
-	end
 
-	-- remove this keymap from the list of ones to restore
-	self.existing_keymaps_by_mode[mode][lhs] = nil
+		-- remove this keymap from the list of ones to restore
+		self.existing_keymaps_by_mode[mode][lhs] = nil
+	else
+		-- remove this keymap from the list of ones to create
+		self.layer_keymaps_by_mode[mode][lhs] = nil
+	end
 end
 
 return Layer
