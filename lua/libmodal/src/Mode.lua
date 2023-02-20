@@ -137,7 +137,7 @@ function Mode:get_user_input()
 	end
 
 	-- echo the indicator.
-	utils.api.hi_echo(self.indicator)
+	self:show_name()
 
 	-- capture input.
 	local user_input = vim.fn.getchar()
@@ -208,6 +208,13 @@ return
 			},
 			Mode
 		)
+
+		self.show_name = (not vim.o.showmode) and utils.api.redraw or function()
+			utils.api.redraw()
+
+			vim.api.nvim_command('echohl ' .. self.indicator.hl .. " | echon '" .. self.indicator.str .. "'")
+			vim.api.nvim_command 'echohl None'
+		end
 
 		-- define the exit flag
 		self.supress_exit = supress_exit or false
