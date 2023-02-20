@@ -46,7 +46,7 @@ function Popup:open(config)
 			relative  = 'editor',
 			row       = vim.go.lines - vim.go.cmdheight - 1,
 			style     = 'minimal',
-			width     = 1
+			width     = 1,
 		}
 	end
 
@@ -55,6 +55,9 @@ function Popup:open(config)
 	end
 
 	self.window = vim.api.nvim_open_win(self.buffer, false, config)
+
+	-- HACK: the window always pops up with the wrong width, but this makes it work :shrug:
+	vim.api.nvim_win_set_width(self.window, config.width)
 end
 
 --- display `input_bytes` in `self.buffer`
