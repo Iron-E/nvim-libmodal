@@ -22,26 +22,20 @@ end
 --- @param keymap table
 --- @return table normalized
 local function normalize_keymap(keymap)
+	local to_return = {}
 	-- Keys which must be manually edited
-	keymap.buffer = keymap.buffer > 0 and keymap.buffer or nil
-	keymap.rhs = keymap.callback or keymap.rhs
+	to_return.buffer = keymap.buffer > 0 and keymap.buffer or nil
+	to_return.rhs = keymap.callback or keymap.rhs
 
 	-- Keys which are `v:true` or `v:false`
-	keymap.expr = globals.is_true(keymap.expr)
-	keymap.noremap = globals.is_true(keymap.noremap)
-	keymap.nowait = globals.is_true(keymap.nowait)
-	keymap.silent = globals.is_true(keymap.silent)
+	to_return.expr = globals.is_true(keymap.expr)
+	to_return.noremap = globals.is_true(keymap.noremap)
+	to_return.nowait = globals.is_true(keymap.nowait)
+	to_return.script = globals.is_true(keymap.script)
+	to_return.silent = globals.is_true(keymap.silent)
 
-	-- Keys which should not exist
-	keymap.callback = nil
-	keymap.lhs = nil
-	keymap.lnum = nil
-	keymap.mode = nil
-	keymap.script = nil
-	keymap.sid = nil
-	keymap.lhsraw = nil
-
-	return keymap
+	to_return.desc = keymap.desc
+	return to_return
 end
 
 --- remove and return the right-hand side of a `keymap`.
