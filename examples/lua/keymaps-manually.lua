@@ -15,10 +15,10 @@ end
 -- this is the function that will be called whenever the user presses a button
 local function foo_mode()
 	-- append to the input history, the latest button press
-	input_history[#input_history + 1] = string.char(
+	table.insert(input_history, string.char(
 		-- the input is a character number
 		vim.g.fooModeInput
-	)
+	))
 
 	-- custom logic to test for each character index to see if it matches the 'zfo' mapping
 	local index = 1

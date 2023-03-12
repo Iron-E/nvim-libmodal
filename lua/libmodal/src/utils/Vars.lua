@@ -1,7 +1,7 @@
 --- @class libmodal.utils.Vars
 --- @field private mode_name string the highlight group to use when printing `str`
 --- @field private var_name string the highlight group to use when printing `str`
-local Vars = require('libmodal/src/utils/classes').new(nil)
+local Vars = require('libmodal.src.utils.classes').new()
 
 --- @return unknown `vim.g[self:name()])`
 function Vars:get()
@@ -20,11 +20,15 @@ end
 function Vars.new(var_name, mode_name)
 	local self = setmetatable({}, Vars)
 
+	--- @param str_with_spaces string
+	--- @param first_letter_modifier fun(s: string): string
 	local function no_spaces(str_with_spaces, first_letter_modifier)
-		local split_str = vim.split(string.gsub(str_with_spaces, vim.pesc '_', vim.pesc ' '), ' ')
+		local split_str = vim.split(str_with_spaces:gsub(vim.pesc '_', vim.pesc ' '), ' ')
 
+		--- @param str string
+		--- @param func fun(s: string): string
 		local function camel_case(str, func)
-			return func(string.sub(str, 0, 1) or '') .. string.lower(string.sub(str, 2) or '')
+			return func(str:sub(0, 1) or '') .. (str:sub(2) or ''):lower()
 		end
 
 		split_str[1] = camel_case(split_str[1], first_letter_modifier)
@@ -42,9 +46,11 @@ function Vars.new(var_name, mode_name)
 	return self
 end
 
---- @param val unknown set `vim.g[self:name()])` equal to this value
+--- @generic T
+--- @param val T set `g:{self:name()})` equal to this value
+--- @return nil
 function Vars:set(val)
-	vim.g[self:name()] = val
+	vim.api.nvim_set_var(self:name(), val)
 end
 
 return Vars

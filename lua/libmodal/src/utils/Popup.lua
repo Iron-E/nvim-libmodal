@@ -2,7 +2,7 @@
 --- @field private buffer number the number of the window which this popup is rendered on.
 --- @field private input_chars string[] the characters input by the user.
 --- @field private window number the number of the window which this popup is rendered on.
-local Popup = require('libmodal/src/utils/classes').new(nil)
+local Popup = require('libmodal.src.utils.classes').new()
 
 --- @param window number
 --- @return boolean `true` if the window is non-`nil` and `nvim_win_is_valid`
@@ -13,6 +13,7 @@ end
 ---  Close `self.window`
 ---  The `self` is inert after calling this.
 --- @param keep_buffer boolean `self.buffer` is passed to `nvim_buf_delete` unless `keep_buffer` is `false`
+--- @return nil
 function Popup:close(keep_buffer)
 	if valid(self.window) then
 		vim.api.nvim_win_close(self.window, false)
@@ -35,6 +36,7 @@ function Popup.new(config)
 end
 
 --- attempt to open this popup. If the popup was already open, close it and re-open it.
+--- @return nil
 function Popup:open(config)
 	if not config then
 		config =
@@ -62,6 +64,7 @@ end
 
 --- display `input_bytes` in `self.buffer`
 --- @param input_bytes number[] a list of character codes to display
+--- @return nil
 function Popup:refresh(input_bytes)
 	-- the user simply typed one more character onto the last one.
 	if #input_bytes == #self.input_chars + 1 then
