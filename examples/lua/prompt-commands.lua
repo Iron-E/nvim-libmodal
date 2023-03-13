@@ -10,4 +10,5 @@ local commands =
 }
 
 -- begin the prompt
+vim.g.fooModeExit = false
 libmodal.prompt.enter('FOO', commands)

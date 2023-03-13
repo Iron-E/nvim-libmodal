@@ -14,5 +14,6 @@ function! s:fooMode() abort
 	endif
 endfunction
 
+let g:fooModeExit = v:false
 " You have to convert s:commandList from a Vimscript list to a lua table using luaeval().
 call luaeval("require('libmodal').prompt.enter('FOO', 's:fooMode', _A)", s:commandList)

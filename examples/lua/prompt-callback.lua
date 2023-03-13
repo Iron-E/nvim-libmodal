@@ -17,4 +17,5 @@ function FooMode()
 end
 
 -- enter the prompt
+vim.g.fooModeExit = false
 libmodal.prompt.enter('FOO', FooMode, commandList)
