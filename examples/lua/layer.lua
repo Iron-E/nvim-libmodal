@@ -21,7 +21,8 @@ local layer = libmodal.layer.new(
 -- add an additional mapping for `<Esc>` to exit the mode
 layer:map('n', '<Esc>', function() layer:exit() end, {})
 
-layer:enter()
+-- Type `<Leader>ll` in normal mode to enter the layer
+vim.keymap.set('n', '<Leader>ll', function() layer:enter() end, {})
 
 --[[ unmap `gg`. Notice that now both `gg` and `G` return the cursor to the top. ]]
 layer:unmap(nil, 'n', 'gg')
