@@ -1,6 +1,6 @@
 --- @class libmodal.utils.Help
 --- @field private [integer] string[]
-local Help = require('libmodal.src.utils.classes').new()
+local Help = require('libmodal.utils.classes').new()
 
 --- align `tbl` according to the `longest_key_len`.
 --- @param longest_key_len number how long the longest key is.

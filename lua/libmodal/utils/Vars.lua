@@ -1,7 +1,7 @@
 --- @class libmodal.utils.Vars
 --- @field private mode_name string the highlight group to use when printing `str`
 --- @field private var_name string the highlight group to use when printing `str`
-local Vars = require('libmodal.src.utils.classes').new()
+local Vars = require('libmodal.utils.classes').new()
 
 --- @return unknown `vim.g[self:name()])`
 function Vars:get()

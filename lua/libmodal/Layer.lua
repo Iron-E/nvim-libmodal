@@ -1,5 +1,5 @@
-local globals = require 'libmodal.src.globals'
-local utils = require 'libmodal.src.utils' --- @type libmodal.utils
+local globals = require 'libmodal.globals'
+local utils = require 'libmodal.utils' --- @type libmodal.utils
 
 --- Normalizes a `buffer = true|false|0` argument into a number.
 --- @param buffer boolean|number the argument to normalize
@@ -67,7 +67,7 @@ local function unmap_existing(layer, buffer, mode, lhs)
 		end)
 
 		if not ok and err:match 'E31: No such mapping' then
-			require('libmodal.src.utils').notify_error('nvim-libmodal encountered an error while unmapping from layer', err)
+			require('libmodal.utils').notify_error('nvim-libmodal encountered an error while unmapping from layer', err)
 			return
 		end
 	end
@@ -80,7 +80,7 @@ end
 --- @field private active boolean whether the layer is currently applied
 --- @field private existing_keymaps_by_mode table the keymaps to restore when exiting the mode; generated automatically
 --- @field private layer_keymaps_by_mode table the keymaps to apply when entering the mode; provided by user
-local Layer = require('libmodal.src.utils.classes').new()
+local Layer = require('libmodal.utils.classes').new()
 
 --- apply the `Layer`'s keymaps buffer.
 --- @return nil

@@ -1,4 +1,4 @@
-local utils = require 'libmodal.src.utils' --- @type libmodal.utils
+local utils = require 'libmodal.utils' --- @type libmodal.utils
 
 --- @class libmodal.Prompt
 --- @field private completions? string[]

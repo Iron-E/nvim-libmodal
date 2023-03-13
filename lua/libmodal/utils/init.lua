@@ -6,11 +6,11 @@
 --- @field Vars libmodal.utils.Vars
 local utils =
 {
-	api = require 'libmodal.src.utils.api',
-	classes = require 'libmodal.src.utils.classes',
-	Help = require 'libmodal.src.utils.Help',
-	Popup = require 'libmodal.src.utils.Popup',
-	Vars  = require 'libmodal.src.utils.Vars',
+	api = require 'libmodal.utils.api',
+	classes = require 'libmodal.utils.classes',
+	Help = require 'libmodal.utils.Help',
+	Popup = require 'libmodal.utils.Popup',
+	Vars  = require 'libmodal.utils.Vars',
 }
 
 --- `vim.notify` with a `msg` some `error` which has a `vim.v.throwpoint` and `vim.v.exception`.

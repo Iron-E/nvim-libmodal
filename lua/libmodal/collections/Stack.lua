@@ -1,6 +1,6 @@
 --- @class libmodal.collections.Stack<T>
 --- @field private [number] T
-local Stack = require('libmodal.src.utils.classes').new()
+local Stack = require('libmodal.utils.classes').new()
 
 --- @generic T
 --- @return libmodal.collections.Stack<T>

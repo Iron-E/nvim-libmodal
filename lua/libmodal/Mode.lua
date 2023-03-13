@@ -1,6 +1,6 @@
-local globals = require 'libmodal.src.globals'
-local ParseTable = require 'libmodal.src.collections.ParseTable'
-local utils = require 'libmodal.src.utils' --- @type libmodal.utils
+local globals = require 'libmodal.globals'
+local ParseTable = require 'libmodal.collections.ParseTable'
+local utils = require 'libmodal.utils' --- @type libmodal.utils
 
 --- @class libmodal.Mode
 --- @field private exit libmodal.utils.Vars
@@ -223,7 +223,7 @@ function Mode.new(name, instruction, supress_exit)
 		self.mappings = ParseTable.new(instruction)
 
 		-- create a table for mode-specific data.
-		self.src.popups = require('libmodal.collections.Stack').new()
+		self.popups = require('libmodal.collections.Stack').new()
 
 		-- create a variable for whether or not timeouts are enabled.
 		self.timeouts = utils.Vars.new('timeouts', self.name)

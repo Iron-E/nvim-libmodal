@@ -2,7 +2,7 @@
 --- @field private buffer_number integer the number of the window which this popup is rendered on.
 --- @field private input_chars string[] the characters input by the user.
 --- @field private window_number integer the number of the window which this popup is rendered on.
-local Popup = require('libmodal.src.utils.classes').new()
+local Popup = require('libmodal.utils.classes').new()
 
 --- @param window number
 --- @return boolean `true` if the window is non-`nil` and `nvim_win_is_valid`

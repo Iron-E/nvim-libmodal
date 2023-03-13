@@ -1,4 +1,4 @@
-local utils = require('libmodal.src.utils') --- @type libmodal.utils
+local utils = require('libmodal.utils') --- @type libmodal.utils
 
 --- the number corresponding to `<CR>` in vim.
 local CR = utils.api.replace_termcodes('<CR>'):byte()
