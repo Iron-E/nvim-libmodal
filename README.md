@@ -16,7 +16,10 @@ Either use `packadd` or any package manager. I recommend using [lazy.nvim](https
 #### lazy.nvim
 
 ```lua
-{'Iron-E/nvim-libmodal', lazy = true},
+{'Iron-E/nvim-libmodal',
+  lazy = true, -- don't load until necessary
+  version = '^3.0', -- OPTIONAL: unsubscribe from breaking changes
+},
 ```
 
 #### packer.nvim
