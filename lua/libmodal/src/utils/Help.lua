@@ -2,30 +2,28 @@
 local Help = require('libmodal.src.utils.classes').new()
 
 --- align `tbl` according to the `longest_key_len`.
---- @param tbl {[string]: string|fun()} what to align.
 --- @param longest_key_len number how long the longest key is.
---- @return string aligned
-local function align_columns(tbl, longest_key_len)
-	local to_print = {}
+--- @param rows {hl: nil|string, columns: {[string]: string|fun()}}[]
+--- @return string[][] aligned
+local function align_columns(longest_key_len, rows)
+	local aligned = {} --- @type string[][]
 
-	for key, value in pairs(tbl) do
-		table.insert(to_print, key)
-		local len = key:len()
-		local byte = key:byte()
+	for _, row in ipairs(rows) do
+		for key, value in pairs(row.columns) do
+			table.insert(aligned, {'\n' .. key, row.hl or 'String'})
+			table.insert(aligned, {(' '):rep(longest_key_len - vim.api.nvim_strwidth(key)), 'Whitespace'})
+			table.insert(aligned, {' │ ', 'Delimiter'})
 
-		-- account for ASCII chars that take up more space.
-		if byte <= 32 or byte == 127 then
-			len = len + 1
+			local v, hl = value, row.hl
+			if type(value) == 'function' then
+				v, hl = vim.inspect(v), 'Function'
+			end
+
+			table.insert(aligned, {value, hl or 'String'})
 		end
-
-		for _ = len, longest_key_len do
-			table.insert(to_print, ' ')
-		end
-
-		table.insert(to_print, ' │ ' .. (type(value) == 'string' and value or vim.inspect(value)) .. '\n')
 	end
 
-	return table.concat(to_print)
+	return aligned
 end
 
 --- create a default help table with `commands_or_maps` and vim expressions.
@@ -33,24 +31,29 @@ end
 --- @param title string
 --- @return libmodal.utils.Help
 function Help.new(commands_or_maps, title)
-	--- the longest key in the table
-	local longest_key = title:len()
+	local COLUMN_NAME = 'VIM EXPRESSION'
 
-	for key, _ in pairs(commands_or_maps) do
-		local key_len = key:len()
+	--- the longest key in the table
+	local longest_key, longest_value = vim.api.nvim_strwidth(title), COLUMN_NAME:len()
+	for key, value in pairs(commands_or_maps) do
+		local key_len = vim.api.nvim_strwidth(key)
+		local value_len = vim.api.nvim_strwidth(value)
+
 		if key_len > longest_key then
 			longest_key = key_len
 		end
+
+		if value_len > longest_value then
+			longest_value = value_len
+		end
 	end
 
-	-- create a new `Help`.
 	return setmetatable(
-		{
-			[1] = ' ',
-			[2] = align_columns({[title] = 'VIM EXPRESSION'}, longest_key),
-			[3] = align_columns({[('-'):rep(title:len())] = '--------------'}, longest_key),
-			[4] = align_columns(commands_or_maps, longest_key),
-		},
+		align_columns(longest_key, {
+			{columns = {[title] = COLUMN_NAME}, hl = 'Title'},
+			{columns = {[('-'):rep(longest_key)] = ('-'):rep(longest_value)}, hl = 'Delimiter'},
+			{columns = commands_or_maps},
+		}),
 		Help
 	)
 end
