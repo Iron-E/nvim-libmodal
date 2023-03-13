@@ -63,3 +63,5 @@ luac.out
 *.hex
 
 **/test.lua
+
+**/lua/.luarc.json
