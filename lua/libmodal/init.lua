@@ -1,5 +1,5 @@
--- TODO: remove the __index here after a period of time to let people remove `libmodal.Layer` from their configurations
-return setmetatable(
+--- @class libmodal
+local libmodal = setmetatable(
 	{
 		layer =
 		{
@@ -67,3 +67,5 @@ return setmetatable(
 		end,
 	}
 )
+
+return libmodal

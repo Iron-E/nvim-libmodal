@@ -1,7 +1,9 @@
---- @class libmodal.collections.Stack
+--- @class libmodal.collections.Stack<T>
+--- @field private [number] T
 local Stack = require('libmodal.src.utils.classes').new()
 
---- @return libmodal.collections.Stack
+--- @generic T
+--- @return libmodal.collections.Stack<T>
 function Stack.new()
 	return setmetatable({}, Stack)
 end

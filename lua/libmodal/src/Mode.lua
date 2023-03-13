@@ -1,5 +1,5 @@
-local globals = require 'libmodal.src.globals' --- @type libmodal.globals
-local ParseTable = require 'libmodal.src.collections.ParseTable' --- @type libmodal.collections.ParseTable
+local globals = require 'libmodal.src.globals'
+local ParseTable = require 'libmodal.src.collections.ParseTable'
 local utils = require 'libmodal.src.utils' --- @type libmodal.utils
 
 --- @class libmodal.Mode
@@ -214,18 +214,16 @@ function Mode.new(name, instruction, supress_exit)
 
 		-- determine if a default `Help` should be created.
 		if not self.instruction[HELP_CHAR] then
-			--- @diagnostic disable-next-line:param-type-mismatch we checked that `instruction` is a table above
-			self.help = utils.Help.new(self.instruction, 'KEY MAP')
+			self.help = utils.Help.new(instruction, 'KEY MAP')
 		end
 
 		self.input_bytes = {}
 
 		-- build the parse tree.
-		--- @diagnostic disable-next-line:param-type-mismatch already checked `self.instruction` != `table`
-		self.mappings = ParseTable.new(self.instruction)
+		self.mappings = ParseTable.new(instruction)
 
 		-- create a table for mode-specific data.
-		self.popups = require('libmodal.src.collections.Stack').new()
+		self.src.popups = require('libmodal.collections.Stack').new()
 
 		-- create a variable for whether or not timeouts are enabled.
 		self.timeouts = utils.Vars.new('timeouts', self.name)

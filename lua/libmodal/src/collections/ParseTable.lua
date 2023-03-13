@@ -4,7 +4,7 @@ local utils = require('libmodal.src.utils') --- @type libmodal.utils
 local CR = utils.api.replace_termcodes('<CR>'):byte()
 
 --- @class libmodal.collections.ParseTable
---- @field CR number the byte representation of `<CR>`
+--- @field CR integer the byte representation of `<CR>`
 local ParseTable = utils.classes.new {CR = CR}
 
 --- reverse the order of elements in some `list`.

@@ -1,7 +1,7 @@
 --- @class libmodal.utils.Popup
---- @field private buffer number the number of the window which this popup is rendered on.
+--- @field private buffer_number integer the number of the window which this popup is rendered on.
 --- @field private input_chars string[] the characters input by the user.
---- @field private window number the number of the window which this popup is rendered on.
+--- @field private window_number integer the number of the window which this popup is rendered on.
 local Popup = require('libmodal.src.utils.classes').new()
 
 --- @param window number
@@ -15,22 +15,22 @@ end
 --- @param keep_buffer boolean `self.buffer` is passed to `nvim_buf_delete` unless `keep_buffer` is `false`
 --- @return nil
 function Popup:close(keep_buffer)
-	if valid(self.window) then
-		vim.api.nvim_win_close(self.window, false)
+	if valid(self.window_number) then
+		vim.api.nvim_win_close(self.window_number, false)
 	end
 
-	self.window = nil
+	self.window_number = nil
 
 	if not keep_buffer then
-		vim.api.nvim_buf_delete(self.buffer, {force = true})
-		self.buffer = nil
+		vim.api.nvim_buf_delete(self.buffer_number, {force = true})
+		self.buffer_number = nil
 		self.input_chars = nil
 	end
 end
 
 --- @return libmodal.utils.Popup
 function Popup.new(config)
-	local self = setmetatable({buffer = vim.api.nvim_create_buf(false, true), input_chars = {}}, Popup)
+	local self = setmetatable({buffer_number = vim.api.nvim_create_buf(false, true), input_chars = {}}, Popup)
 	self:open(config)
 	return self
 end
@@ -52,14 +52,14 @@ function Popup:open(config)
 		}
 	end
 
-	if valid(self.window) then
+	if valid(self.window_number) then
 		self:close(true)
 	end
 
-	self.window = vim.api.nvim_open_win(self.buffer, false, config)
+	self.window_number = vim.api.nvim_open_win(self.buffer_number, false, config)
 
 	-- HACK: the window always pops up with the wrong width, but this makes it work :shrug:
-	vim.api.nvim_win_set_width(self.window, config.width)
+	vim.api.nvim_win_set_width(self.window_number, config.width)
 end
 
 --- display `input_bytes` in `self.buffer`
@@ -78,14 +78,14 @@ function Popup:refresh(input_bytes)
 		end
 	end
 
-	vim.api.nvim_buf_set_lines(self.buffer, 0, 1, true, {table.concat(self.input_chars)})
+	vim.api.nvim_buf_set_lines(self.buffer_number, 0, 1, true, {table.concat(self.input_chars)})
 
 	-- close and reopen the window if it was not already open.
-	if not valid(self.window) or vim.api.nvim_win_get_tabpage(self.window) ~= vim.api.nvim_get_current_tabpage() then
+	if not valid(self.window_number) or vim.api.nvim_win_get_tabpage(self.window_number) ~= vim.api.nvim_get_current_tabpage() then
 		self:open()
 	end
 
-	vim.api.nvim_win_set_width(self.window, #self.input_chars)
+	vim.api.nvim_win_set_width(self.window_number, #self.input_chars)
 end
 
 return Popup

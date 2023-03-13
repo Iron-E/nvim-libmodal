@@ -1,4 +1,4 @@
-local globals = require 'libmodal.src.globals' --- @type libmodal.globals
+local globals = require 'libmodal.src.globals'
 
 --- @class libmodal.utils.api
 local api = {}
