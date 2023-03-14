@@ -48,6 +48,37 @@ local function unpack_keymap_rhs(keymap)
 	return rhs, keymap
 end
 
+--- remove maping from layer's active mappings, will not remove mapping from layer's defined mappings
+--- @param layer any layer to remove mapping from
+--- @param buffer? number the buffer to unmap from (`nil` if it is not buffer-local)
+--- @param mode string the mode of the keymap.
+--- @param lhs string the keys which invoke the keymap.
+--- @return nil
+--- @see vim.api.nvim_del_keymap
+local function unmap_existing(layer, buffer, mode, lhs)
+	if layer.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to; restore it
+		local rhs, options = unpack_keymap_rhs(layer.existing_keymaps_by_mode[mode][lhs])
+		-- WARN: nvim can fail to restore the original keybinding here unless schedule
+		vim.schedule(function() vim.keymap.set(mode, lhs, rhs, options) end)
+	else -- there was no older keymap; just delete the one set by this layer
+		local ok, err = pcall(function()
+			if buffer then
+				vim.api.nvim_buf_del_keymap(buffer, mode, lhs)
+			else
+				vim.api.nvim_del_keymap(mode, lhs)
+			end
+		end)
+
+		if not ok and err:match 'E31: No such mapping' then
+			require('libmodal.src.utils').notify_error('nvim-libmodal encountered an error while unmapping from layer', err)
+			return
+		end
+	end
+
+	-- remove this keymap from the list of ones to restore
+	layer.existing_keymaps_by_mode[mode][lhs] = nil
+end
+
 --- @class libmodal.Layer
 --- @field private active boolean whether the layer is currently applied
 --- @field private existing_keymaps_by_mode table the keymaps to restore when exiting the mode; generated automatically
@@ -90,7 +121,7 @@ function Layer:exit()
 
 	for mode, keymaps in pairs(self.layer_keymaps_by_mode) do
 		for lhs, keymap in pairs(keymaps) do
-			self:unmap(keymap.buffer, mode, lhs)
+			unmap_existing(self, keymap.buffer, mode, lhs)
 		end
 	end
 
@@ -160,27 +191,7 @@ function Layer:unmap(buffer, mode, lhs)
 	lhs = utils.api.replace_termcodes(lhs)
 
 	if self.active then
-		if self.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to; restore it
-			local rhs, options = unpack_keymap_rhs(self.existing_keymaps_by_mode[mode][lhs])
-			-- WARN: nvim can fail to restore the original keybinding here unless schedule
-			vim.schedule(function() vim.keymap.set(mode, lhs, rhs, options) end)
-		else -- there was no older keymap; just delete the one set by this layer
-			local ok, err = pcall(function()
-				if buffer then
-					vim.api.nvim_buf_del_keymap(buffer, mode, lhs)
-				else
-					vim.api.nvim_del_keymap(mode, lhs)
-				end
-			end)
-
-			if not ok and err:match 'E31: No such mapping' then
-				require('libmodal.src.utils').notify_error('nvim-libmodal encountered an error while unmapping from layer', err)
-				return
-			end
-		end
-
-		-- remove this keymap from the list of ones to restore
-		self.existing_keymaps_by_mode[mode][lhs] = nil
+		unmap_existing(self, buffer, mode, lhs)
 	end
 
 	-- remove this keymap from the list of ones managed by the layer
