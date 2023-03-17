@@ -45,14 +45,14 @@ local function unpack_keymap_rhs(keymap)
 	return rhs, keymap
 end
 
---- remove maping from layer's active mappings, will not remove mapping from layer's defined mappings
+--- Restore a mapping from the `existing_keymaps_by_mode`, or delete a mapping if no pre-existing mapping.
 --- @param layer any layer to remove mapping from
 --- @param buffer? number the buffer to unmap from (`nil` if it is not buffer-local)
 --- @param mode string the mode of the keymap.
 --- @param lhs string the keys which invoke the keymap.
---- @return nil
+--- @return boolean ok `true` iff there were no errors restoring the keymap
 --- @see vim.api.nvim_del_keymap
-local function unmap_existing(layer, buffer, mode, lhs)
+local function restore_map(layer, buffer, mode, lhs)
 	if layer.existing_keymaps_by_mode[mode][lhs] then -- there is an older keymap to go back to; restore it
 		local rhs, options = unpack_keymap_rhs(layer.existing_keymaps_by_mode[mode][lhs])
 		-- WARN: nvim can fail to restore the original keybinding here unless schedule
@@ -66,14 +66,16 @@ local function unmap_existing(layer, buffer, mode, lhs)
 			end
 		end)
 
-		if not ok and err:match 'E31: No such mapping' then
-			require('libmodal.utils').notify_error('nvim-libmodal encountered an error while unmapping from layer', err)
-			return
+		if not ok and err and err:match 'E31: No such mapping' then
+			utils.notify_error('nvim-libmodal encountered an error while unmapping from layer', err)
+			return false
 		end
 	end
 
 	-- remove this keymap from the list of ones to restore
 	layer.existing_keymaps_by_mode[mode][lhs] = nil
+
+	return true
 end
 
 --- @class libmodal.Layer
@@ -118,7 +120,7 @@ function Layer:exit()
 
 	for mode, keymaps in pairs(self.layer_keymaps_by_mode) do
 		for lhs, keymap in pairs(keymaps) do
-			unmap_existing(self, keymap.buffer, mode, lhs)
+			restore_map(self, keymap.buffer, mode, lhs)
 		end
 	end
 
@@ -178,7 +180,8 @@ function Layer.new(keymaps_by_mode)
 	return setmetatable({existing_keymaps_by_mode = {}, layer_keymaps_by_mode = keymaps_by_mode, active = false}, Layer)
 end
 
---- restore one keymapping to its original state.
+--- restore the `lhs` to its state before activating the layer
+--- WARN: prevent the `Layer` from setting it again the next time it is activated.
 --- @param buffer? number the buffer to unmap from (`nil` if it is not buffer-local)
 --- @param mode string the mode of the keymap.
 --- @param lhs string the keys which invoke the keymap.
@@ -187,8 +190,8 @@ end
 function Layer:unmap(buffer, mode, lhs)
 	lhs = utils.api.replace_termcodes(lhs)
 
-	if self.active then
-		unmap_existing(self, buffer, mode, lhs)
+	if self.active and not restore_map(self, buffer, mode, lhs) then
+		return
 	end
 
 	-- remove this keymap from the list of ones managed by the layer
