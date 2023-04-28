@@ -1,3 +1,6 @@
+--- The horizontal separator of the help output
+local HORIZONTAL_DELIMITER = '─'
+
 --- @class libmodal.utils.Help
 --- @field private [integer] string[]
 local Help = require('libmodal.utils.classes').new()
@@ -10,14 +13,24 @@ local function align_columns(longest_key_len, rows)
 	local aligned = {} --- @type string[][]
 
 	for _, row in ipairs(rows) do
-		for key, value in pairs(row.columns) do
+		local sorted_columns = vim.tbl_keys(row.columns)
+		table.sort(sorted_columns)
+
+		for _, key in pairs(sorted_columns) do
+			local value = row.columns[key]
+
 			table.insert(aligned, {'\n' .. key, row.hl or 'String'})
 			table.insert(aligned, {(' '):rep(longest_key_len - vim.api.nvim_strwidth(key)), 'Whitespace'})
-			table.insert(aligned, {' │ ', 'Delimiter'})
 
-			local v, hl = value, row.hl
+			if row.hl == 'Delimiter' then
+				table.insert(aligned, {HORIZONTAL_DELIMITER .. '┼' .. HORIZONTAL_DELIMITER, 'Delimiter'})
+			else
+				table.insert(aligned, {' │ ', 'Delimiter'})
+			end
+
+			local hl = row.hl
 			if type(value) == 'function' then
-				v, hl = vim.inspect(v), 'Function'
+				value, hl = tostring(value), 'Function'
 			end
 
 			table.insert(aligned, {value, hl or 'String'})
@@ -38,7 +51,7 @@ function Help.new(commands_or_maps, title)
 	local longest_key, longest_value = vim.api.nvim_strwidth(title), COLUMN_NAME:len()
 	for key, value in pairs(commands_or_maps) do
 		local key_len = vim.api.nvim_strwidth(key)
-		local value_len = vim.api.nvim_strwidth(value)
+		local value_len = vim.api.nvim_strwidth(tostring(value))
 
 		if key_len > longest_key then
 			longest_key = key_len
@@ -52,7 +65,10 @@ function Help.new(commands_or_maps, title)
 	return setmetatable(
 		align_columns(longest_key, {
 			{columns = {[title] = COLUMN_NAME}, hl = 'Title'},
-			{columns = {[('-'):rep(longest_key)] = ('-'):rep(longest_value)}, hl = 'Delimiter'},
+			{
+				columns = {[(HORIZONTAL_DELIMITER):rep(longest_key)] = (HORIZONTAL_DELIMITER):rep(longest_value)},
+				hl = 'Delimiter',
+			},
 			{columns = commands_or_maps},
 		}),
 		Help
@@ -62,6 +78,7 @@ end
 --- show the contents of this `Help`.
 --- @return nil
 function Help:show()
+	vim.print(self)
 	vim.api.nvim_echo(self, false, {})
 	vim.fn.getchar()
 end
