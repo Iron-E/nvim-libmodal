@@ -78,7 +78,6 @@ end
 --- show the contents of this `Help`.
 --- @return nil
 function Help:show()
-	vim.print(self)
 	vim.api.nvim_echo(self, false, {})
 	vim.fn.getchar()
 end
