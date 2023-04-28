@@ -33,7 +33,7 @@ local function align_columns(longest_key_len, rows)
 				value, hl = tostring(value), 'Function'
 			end
 
-			table.insert(aligned, {value, hl or 'String'})
+			table.insert(aligned, {value, hl or 'Statement'})
 		end
 	end
 
