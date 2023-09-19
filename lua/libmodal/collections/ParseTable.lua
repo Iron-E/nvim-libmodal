@@ -39,6 +39,22 @@ local function get(parse_table, lhs_reversed_bytes)
 		return parse_table
 	end
 
+	local out = k
+
+	if type(k) == "string" then
+		for index = 1, #k do
+			local character = k:byte(index)
+
+			if index == 1 then
+				out = character
+			else
+				table.insert(lhs_reversed_bytes, 1, character)
+			end
+		end
+	end
+
+	k = out
+
 	--[[ Parse the `k`. ]]
 
 	-- make sure the dicitonary has a key for that value.
