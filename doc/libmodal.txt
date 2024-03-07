@@ -161,6 +161,9 @@ FUNCTIONS                                               *libmodal-usage-function
 			  that |getchar()| completes. The user input is received through
 			  `g:{name}ModeInput` (see above).
 
+			- |v:count| and |v:count1| are provided through `g:{name}ModeCount`
+			  and `g:{name}ModeCount1` respectively.
+
 			*Error	you cannot pass a funcref to Lua from Vimscript!
 			      	- If you want to use a |funcref()| for {instruction}, it
 			      	  must be the name of the function as a `string`. >

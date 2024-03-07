@@ -7,6 +7,9 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field private global_exit libmodal.utils.Vars
 --- @field private global_input libmodal.utils.Vars
 --- @field private help? libmodal.utils.Help
+--- @field private input libmodal.utils.Vars
+--- @field private count libmodal.utils.Vars
+--- @field private count1 libmodal.utils.Vars
 --- @field private input_bytes? number[]
 --- @field private instruction fun()|{[string]: fun()|string}
 --- @field private local_exit boolean
@@ -27,6 +30,12 @@ local TIMEOUT =
 }
 TIMEOUT.CHAR_NUMBER = TIMEOUT.CHAR:byte()
 
+--- Byte for 0
+local ZERO = string.byte(0)
+
+--- Byte for 9
+local NINE = string.byte(9)
+
 --- execute the `instruction`.
 --- @private
 --- @param instruction fun(libmodal.Mode)|string a Lua function or Vimscript command.
@@ -38,6 +47,8 @@ function Mode:execute_instruction(instruction)
 		vim.api.nvim_command(instruction)
 	end
 
+	self.count:set(0)
+	self.count1:set(1)
 	self:redraw_virtual_cursor()
 end
 
@@ -103,6 +114,9 @@ function Mode:enter()
 		-- initialize the input history variable.
 		self.popups:push(utils.Popup.new())
 	end
+
+	self.count:set(0)
+	self.count1:set(1)
 
 	self.local_exit = false
 
@@ -172,6 +186,13 @@ function Mode:get_user_input()
 
 	-- set the global input variable to the new input.
 	self.global_input:set(user_input)
+
+	if ZERO <= user_input and user_input <= NINE then
+		local oldCount = self.count:get()
+		local newCount = tonumber(oldCount .. string.char(user_input))
+		self.count:set(newCount)
+		self.count1:set(math.max(1, newCount))
+	end
 
 	if not self.supress_exit and user_input == globals.ESC_NR then -- the user wants to exit.
 		return false -- as in, "I don't want to continue."
@@ -256,6 +277,8 @@ function Mode.new(name, instruction, supress_exit)
 	-- inherit the metatable.
 	local self = setmetatable(
 		{
+			count = utils.Vars.new('count', name),
+			count1 = utils.Vars.new('count1', name),
 			global_exit = utils.Vars.new('exit', name),
 			global_input = utils.Vars.new('input', name),
 			instruction = instruction,
