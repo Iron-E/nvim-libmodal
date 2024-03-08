@@ -32,8 +32,9 @@ local libmodal = setmetatable(
 			--- @param name string the name of the mode.
 			--- @param instruction fun()|string|table a Lua function, keymap dictionary, Vimscript command.
 			enter = function(name, instruction, supress_exit)
-				require('libmodal.Mode').new(name, instruction, supress_exit):enter()
-			end
+				local mode = require('libmodal.Mode').new(name, instruction, supress_exit)
+				mode:enter()
+			end,
 		},
 
 		prompt =

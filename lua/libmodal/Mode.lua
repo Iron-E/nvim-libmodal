@@ -3,12 +3,13 @@ local ParseTable = require 'libmodal.collections.ParseTable'
 local utils = require 'libmodal.utils' --- @type libmodal.utils
 
 --- @class libmodal.Mode
---- @field private exit libmodal.utils.Vars
 --- @field private flush_input_timer unknown
+--- @field private global_exit libmodal.utils.Vars
+--- @field private global_input libmodal.utils.Vars
 --- @field private help? libmodal.utils.Help
---- @field private input libmodal.utils.Vars
 --- @field private input_bytes? number[]
 --- @field private instruction fun()|{[string]: fun()|string}
+--- @field private local_exit boolean
 --- @field private mappings libmodal.collections.ParseTable
 --- @field private name string
 --- @field private ns number the namespace where cursor highlights are drawn on
@@ -27,11 +28,12 @@ local TIMEOUT =
 TIMEOUT.CHAR_NUMBER = TIMEOUT.CHAR:byte()
 
 --- execute the `instruction`.
---- @param instruction fun()|string a Lua function or Vimscript command.
+--- @private
+--- @param instruction fun(libmodal.Mode)|string a Lua function or Vimscript command.
 --- @return nil
 function Mode:execute_instruction(instruction)
 	if type(instruction) == 'function' then
-		instruction()
+		instruction(self)
 	else
 		vim.api.nvim_command(instruction)
 	end
@@ -41,13 +43,14 @@ end
 
 --- check the user's input against the `self.instruction` mappings to see if there is anything to execute.
 --- if there is nothing to execute, the user's input is rendered on the screen (as does Vim by default).
+--- @private
 --- @return nil
 function Mode:check_input_for_mapping()
 	-- stop any running timers
 	self.flush_input_timer:stop()
 
 	-- append the latest input to the locally stored input history.
-	self.input_bytes[#self.input_bytes + 1] = self.input:get()
+	self.input_bytes[#self.input_bytes + 1] = self.global_input:get()
 
 	-- get the command based on the users input.
 	local cmd = self.mappings:get(self.input_bytes)
@@ -87,6 +90,7 @@ function Mode:check_input_for_mapping()
 end
 
 --- clears the virtual cursor from the screen
+--- @private
 function Mode:clear_virt_cursor()
 	vim.api.nvim_buf_clear_namespace(0, self.ns, 0, -1);
 end
@@ -99,6 +103,8 @@ function Mode:enter()
 		-- initialize the input history variable.
 		self.popups:push(utils.Popup.new())
 	end
+
+	self.local_exit = false
 
 	--- HACK: https://github.com/neovim/neovim/issues/20793
 	vim.api.nvim_command 'highlight Cursor blend=100'
@@ -131,11 +137,23 @@ function Mode:enter()
 	vim.api.nvim_exec_autocmds('ModeChanged', {pattern = self.name .. ':' .. previous_mode})
 end
 
+--- exit this instance of the mode.
+--- @return nil
+function Mode:exit()
+	self.local_exit = true
+end
+
+--- @private
+--- @return boolean `true` if the mode's exit was flagged
+function Mode:exit_flagged()
+	return self.local_exit or globals.is_true(self.global_exit:get())
+end
+
 --- get input from the user.
+--- @private
 --- @return boolean more_input
 function Mode:get_user_input()
-	-- if the mode is not handling exit events automatically and the global exit var is true.
-	if self.supress_exit and globals.is_true(self.exit:get()) then
+	if self:exit_flagged() then
 		return false
 	end
 
@@ -151,7 +169,7 @@ function Mode:get_user_input()
 	end
 
 	-- set the global input variable to the new input.
-	self.input:set(user_input)
+	self.global_input:set(user_input)
 
 	if not self.supress_exit and user_input == globals.ESC_NR then -- the user wants to exit.
 		return false -- as in, "I don't want to continue."
@@ -174,6 +192,7 @@ function Mode:get_user_input()
 end
 
 --- uninitialize variables from after exiting the mode.
+--- @private
 --- @return nil
 function Mode:tear_down()
 	if type(self.instruction) == 'table' then
@@ -198,12 +217,14 @@ function Mode:tear_down()
 end
 
 --- clears and then renders the virtual cursor
+--- @private
 function Mode:redraw_virtual_cursor()
 	self:clear_virt_cursor()
 	self:render_virt_cursor()
 end
 
 --- render the virtual cursor using extmarks
+--- @private
 function Mode:render_virt_cursor()
 	local line_nr, col_nr = unpack(vim.api.nvim_win_get_cursor(0))
 	line_nr = line_nr - 1 -- win_get_cursor returns +1 for our purpose
@@ -211,8 +232,10 @@ function Mode:render_virt_cursor()
 end
 
 --- create a new mode.
+--- @private
 --- @param name string the name of the mode.
---- @param instruction fun()|string|table a Lua function, keymap dictionary, Vimscript command.
+--- @param instruction fun(libmodal.Mode)|string|table a Lua function, keymap dictionary, Vimscript command.
+--- @param supress_exit? boolean
 --- @return libmodal.Mode
 function Mode.new(name, instruction, supress_exit)
 	name = vim.trim(name)
@@ -220,9 +243,10 @@ function Mode.new(name, instruction, supress_exit)
 	-- inherit the metatable.
 	local self = setmetatable(
 		{
-			exit = utils.Vars.new('exit', name),
-			input = utils.Vars.new('input', name),
+			global_exit = utils.Vars.new('exit', name),
+			global_input = utils.Vars.new('input', name),
 			instruction = instruction,
+			local_exit = false,
 			name = name,
 			ns = vim.api.nvim_create_namespace('libmodal' .. name),
 		},
