@@ -145,7 +145,7 @@ FUNCTIONS                                               *libmodal-usage-function
 			          zf = 'split',
 			          zfo = 'vsplit',
 			          -- You can also use lua functions
-			          zfc = function() return 'tabnew' end
+			          zfc = function() vim.api.nvim_command 'tabnew' end
 			      }
 < >vim
 			    let s:modeInstruction = {
