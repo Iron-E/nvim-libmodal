@@ -9,10 +9,14 @@ end
 -- register keymaps for splitting windows and then closing windows
 local fooModeKeymaps =
 {
+	h = 'norm h',
+	j = 'norm j',
+	k = 'norm k',
+	l = 'norm l',
 	zf = 'split',
-	zfo = 'vsplit',
 	zfc = 'q',
-	zff = split_twice
+	zff = split_twice,
+	zfo = 'vsplit',
 }
 
 -- enter the mode using the keymaps

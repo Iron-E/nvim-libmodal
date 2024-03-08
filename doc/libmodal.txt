@@ -85,7 +85,7 @@ The following is a reference for high-level functions meant to be used by mode
 creators. For those who wish to see a low-level specification of |libmodal|,
 see |libmodal-lua|.
 
-Note: Examples for all topics covered here can be found in the "examples"
+NOTE: Examples for all topics covered here can be found in the "examples"
       folder at the root of the repository.
 
 See: |api|, |lua-api|, https://github.com/Iron-E/nvim-tabmode,
@@ -127,7 +127,9 @@ FUNCTIONS                                               *libmodal-usage-function
 
 	To take input on a line-by-line basis, see |libmodal-prompt|.
 
-	Note: `libmodal.mode.enter()`/`libmodal#Enter()` may be called from inside
+	NOTE: mode transitions trigger |ModeChanged| events.
+
+	NOTE: `libmodal.mode.enter()`/`libmodal#Enter()` may be called from inside
 	      itself. See |libmodal-examples| for an example.
 
 	Parameters: ~
@@ -138,16 +140,14 @@ FUNCTIONS                                               *libmodal-usage-function
 		{instruction}  What to do when accepting user input.
 
 			- If {instruction} is a `dict`/`table`, then it is treated as a
-			  map of user key-chord to Vim |command|s. Example: >
-			      -- LUA
+			  map of user key-chord to Vim |command|s. Example: >lua
 			      local modeInstruction = {
 			          zf = 'split',
 			          zfo = 'vsplit',
 			          -- You can also use lua functions
 			          zfc = function() return 'tabnew' end
 			      }
-
-			    " VIMSCRIPT
+< >vim
 			    let s:modeInstruction = {
 			        'zf': 'split',
 			        'zfo': 'vsplit',
@@ -155,7 +155,7 @@ FUNCTIONS                                               *libmodal-usage-function
 			    }
 <
 
-			Note: If no `?` key is defined, one will be created automatically.
+			NOTE: If no `?` key is defined, one will be created automatically.
 
 			- If {instruction} is a `function`, then it is called every time
 			  that |getchar()| completes. The user input is received through
@@ -172,7 +172,7 @@ FUNCTIONS                                               *libmodal-usage-function
 			      	lua require('libmodal').mode.enter('FOO', 's:foo')
 <
 
-			Note: Some QoL features are available by default when
+			NOTE: Some QoL features are available by default when
 			      specifying a `dict`/`table` value for {instruction} that
 			      would otherwise have to be programmed manually if a
 			      `function` is specified.
@@ -188,15 +188,35 @@ FUNCTIONS                                               *libmodal-usage-function
 			- If |v:false|/`false`, then <Esc> is automatically mapped to
               exiting.
 			- If |v:true|/`true`, then <Esc> is ignored unless specified by
-			  the user. In such cases, the user should set the
-			  `g:`{name}`ModeExit` variable to `true` when exiting is
-			  desired. See |libmodal-examples|.
+			  the user. In such cases, when exiting is desired the user should
+			  either:
+			  - set the `g:`{name}`ModeExit` variable to `true`, or
+			  - use |libmodal.Mode:exit()|
+			  See |libmodal-examples|.
 
 	See also: ~
 		|lua-eval|          For type conversions between Vimscript to |Lua|.
 		|libmodal-examples| For examples of this function.
 
+                                                          *libmodal.Mode:exit()*
+`libmodal.Mode`:exit()
 
+	When the {instruction} parameter to |libmodal.mode.enter()| is a
+	|lua-table|, one can use |lua-function|s as mappings. When this is done, the
+	`self` parameter becomes available, and from this the `:exit()` function can
+	be called.
+
+	WARNING: this call will *not* interrupt |getchar()| (see |libmodal-mode|).
+	         call `exit` only inside a `function` mapping as shown below.
+
+	Example: ~
+>lua
+		libmodal.mode.enter('Foo', {
+			q = function(self)
+				self:exit()
+			end,
+		})
+<
                                                    *libmodal-layer* *libmodal.layer*
 `libmodal.layer`.enter({keymap} [, {exit_char}])            *libmodal.layer.enter()*
 
@@ -307,7 +327,7 @@ FUNCTIONS                                               *libmodal-usage-function
 	{mode} and {lhs} are the same as in |vim.keymap.del()| except that a {mode}
 	table is not supported.
 
-	Note: this function cannot be called until after |libmodal.Layer:enter()|
+	NOTE: this function cannot be called until after |libmodal.Layer:enter()|
 
 	See also: ~
 		|libmodal-examples| For an example.
@@ -364,7 +384,7 @@ FUNCTIONS                                               *libmodal-usage-function
 			      	lua require('libmodal').prompt.enter('FOO', 's:foo')
 <
 
-			Note: If you want to create commands with arguments, you will
+			NOTE: If you want to create commands with arguments, you will
 			      need to use a `function`.
 
 		{completions}  An array-like `table` of commands that are offered by
@@ -375,10 +395,10 @@ FUNCTIONS                                               *libmodal-usage-function
 			- If unspecified, and {instruction} is not a `table`, then no
 			  completions will be provided.
 
-			Note: If no `help` command is defined, one will be created
+			NOTE: If no `help` command is defined, one will be created
 			      automatically.
 
-			Note: The user may set the `g:`{name}`ModeExit` variable to
+			NOTE: The user may set the `g:`{name}`ModeExit` variable to
 			      `true` at any time to prematurely exit.
 
 
@@ -416,7 +436,7 @@ Name               Default       Description
 `LibmodalPrompt`     `ModeMsg`       Color for the mode text.
 `LibmodalStar`       `StatusLine`    Color for the prompt text.
 
-Note: `LibmodalStar`'s name — while not indicative of its use — is used for
+NOTE: `LibmodalStar`'s name — while not indicative of its use — is used for
       the sake of backwards compatability.
 
 --------------------------------------------------------------------------------
