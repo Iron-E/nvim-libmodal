@@ -11,6 +11,7 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field private instruction fun()|{[string]: fun()|string}
 --- @field private mappings libmodal.collections.ParseTable
 --- @field private name string
+--- @field private ns number the namespace where cursor highlights are drawn on
 --- @field private popups libmodal.collections.Stack
 --- @field private show_name fun()
 --- @field private supress_exit boolean
@@ -29,12 +30,14 @@ TIMEOUT.CHAR_NUMBER = TIMEOUT.CHAR:byte()
 --- execute the `instruction`.
 --- @param instruction fun()|string a Lua function or Vimscript command.
 --- @return nil
-function Mode.execute_instruction(instruction)
+function Mode:execute_instruction(instruction)
 	if type(instruction) == 'function' then
 		instruction()
 	else
 		vim.api.nvim_command(instruction)
 	end
+
+	self:redraw_virtual_cursor()
 end
 
 --- check the user's input against the `self.instruction` mappings to see if there is anything to execute.
@@ -67,7 +70,7 @@ function Mode:check_input_for_mapping()
 				TIMEOUT:SEND()
 				-- if there is a command, execute it.
 				if cmd[ParseTable.CR] then
-					self.execute_instruction(cmd[ParseTable.CR])
+					self:execute_instruction(cmd[ParseTable.CR])
 				end
 				-- clear input
 				self.input_bytes = {}
@@ -76,11 +79,16 @@ function Mode:check_input_for_mapping()
 		)
 	else -- the command was an actual vim command.
 		--- @diagnostic disable-next-line:param-type-mismatch already checked `cmd` != `table`
-		self.execute_instruction(cmd)
+		self:execute_instruction(cmd)
 		self.input_bytes = {}
 	end
 
 	self.popups:peek():refresh(self.input_bytes)
+end
+
+--- clears the virtual cursor from the screen
+function Mode:clear_virt_cursor()
+	vim.api.nvim_buf_clear_namespace(0, self.ns, 0, -1);
 end
 
 --- enter this mode.
@@ -91,6 +99,11 @@ function Mode:enter()
 		-- initialize the input history variable.
 		self.popups:push(utils.Popup.new())
 	end
+
+	--- HACK: https://github.com/neovim/neovim/issues/20793
+	vim.api.nvim_command 'highlight Cursor blend=100'
+	vim.schedule(function() vim.opt.guicursor:append { 'a:Cursor/lCursor' } end)
+	self:render_virt_cursor()
 
 	self.previous_mode_name = vim.g.libmodalActiveModeName
 	vim.g.libmodalActiveModeName = self.name
@@ -170,6 +183,11 @@ function Mode:tear_down()
 		self.popups:pop():close()
 	end
 
+	--- HACK: https://github.com/neovim/neovim/issues/20793
+	self:clear_virt_cursor()
+	vim.schedule(function() vim.opt.guicursor:remove { 'a:Cursor/lCursor' } end)
+	vim.api.nvim_command 'highlight Cursor blend=0'
+
 	if self.previous_mode_name and #vim.trim(self.previous_mode_name) < 1 then
 		vim.g.libmodalActiveModeName = nil
 	else
@@ -177,6 +195,19 @@ function Mode:tear_down()
 	end
 
 	utils.api.redraw()
+end
+
+--- clears and then renders the virtual cursor
+function Mode:redraw_virtual_cursor()
+	self:clear_virt_cursor()
+	self:render_virt_cursor()
+end
+
+--- render the virtual cursor using extmarks
+function Mode:render_virt_cursor()
+	local line_nr, col_nr = unpack(vim.api.nvim_win_get_cursor(0))
+	line_nr = line_nr - 1 -- win_get_cursor returns +1 for our purpose
+	vim.highlight.range(0, self.ns, 'Cursor', { line_nr, col_nr }, { line_nr, col_nr + 1 }, {})
 end
 
 --- create a new mode.
@@ -193,6 +224,7 @@ function Mode.new(name, instruction, supress_exit)
 			input = utils.Vars.new('input', name),
 			instruction = instruction,
 			name = name,
+			ns = vim.api.nvim_create_namespace('libmodal' .. name),
 		},
 		Mode
 	)
