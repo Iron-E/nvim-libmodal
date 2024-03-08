@@ -22,7 +22,6 @@ local HELP_CHAR = '?'
 local TIMEOUT =
 {
 	CHAR = ' ',
-	LEN  = vim.go.timeoutlen,
 	SEND = function(self) vim.api.nvim_feedkeys(self.CHAR, 'nt', false) end
 }
 TIMEOUT.CHAR_NUMBER = TIMEOUT.CHAR:byte()
@@ -64,8 +63,9 @@ function Mode:check_input_for_mapping()
 
 		self.input_bytes = {}
 	elseif command_type == 'table' and globals.is_true(self.timeouts_enabled) then -- the command was a table, meaning that it MIGHT match.
+		local timeout = vim.api.nvim_get_option_value('timeoutlen', {})
 		self.flush_input_timer:start( -- start the timer
-			TIMEOUT.LEN, 0, vim.schedule_wrap(function()
+			timeout, 0, vim.schedule_wrap(function()
 				-- send input to interrupt a blocking `getchar`
 				TIMEOUT:SEND()
 				-- if there is a command, execute it.
