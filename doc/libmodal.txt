@@ -108,9 +108,9 @@ VARIABLES                                               *libmodal-usage-variable
 		|g:|    For more information about global variables.
 		|vim.g| For info about accessing |g:| from lua.
 
-                                                              *libmodal.Mode-vars*
-                                                             *libmodal.Mode.count*
-`Mode`.count
+MODE                                                          *libmodal.Mode-vars*
+
+`Mode`.count                                                   *libmodal.Mode.count*
 
 	The |v:count| of the mode.
 
@@ -126,9 +126,7 @@ VARIABLES                                               *libmodal-usage-variable
 			end,
 		})
 <
-
-                                                              *libmodal.Mode.exit*
-`Mode`.exit
+`Mode`.exit                                                     *libmodal.Mode.exit*
 
 	If `true`, flags the mode to exit. It will read this value before reading
 	the user's next key.
@@ -146,8 +144,7 @@ VARIABLES                                               *libmodal-usage-variable
 		})
 <
 
-                                                          *libmodal.Mode.timeouts*
-`Mode`.timeouts
+`Mode`.timeouts                                             *libmodal.Mode.timeouts*
 
 	The |libmodal-timeouts| configuration for this mode.
 
@@ -167,9 +164,10 @@ VARIABLES                                               *libmodal-usage-variable
 --------------------------------------------------------------------------------
 FUNCTIONS                                               *libmodal-usage-functions*
 
-                            *libmodal-mode* *libmodal#Enter()* *libmodal.mode.enter()*
-`libmodal.mode`.enter({name}, {instruction} [, {supress_exit}])
-`libmodal`#Enter({name}, {instruction} [, {supress_exit}])
+MODE                                                 *libmodal-mode* *libmodal.mode*
+
+`libmodal.mode`.enter({name}, {instruction} [, {supress_exit}])    *libmodal.mode.enter()*
+`libmodal`#Enter({name}, {instruction} [, {supress_exit}])              *libmodal#Enter()*
 
 	Enter a new |vim-mode| using {instruction} to determine what actions will
 	be taken upon specific user inputs.
@@ -264,8 +262,7 @@ FUNCTIONS                                               *libmodal-usage-function
 		|lua-eval|          For type conversions between Vimscript to |Lua|.
 		|libmodal-examples| For examples of this function.
 
-                                                          *libmodal.mode:switch()*
-`libmodal.mode`.switch(...)
+`libmodal.mode`.switch(...)                                 *libmodal.mode:switch()*
 
 	Convenience wrapper for |Mode:switch()|.
 
@@ -283,15 +280,14 @@ FUNCTIONS                                               *libmodal-usage-function
 		})
 <
 
-                                                            *libmodal.Mode:exit()*
-`libmodal.Mode`:exit()
+`libmodal.Mode`:exit()                                        *libmodal.Mode:exit()*
 
 	When the {instruction} parameter to |libmodal.mode.enter()| is a
 	|lua-table|, one can use |lua-function|s as mappings. When this is done, the
 	`self` parameter becomes available, and from this the `:exit()` function can
 	be called.
 
-	WARNING: this call will *not* interrupt |getchar()| (see |libmodal-mode|).
+	WARNING: this call will _not_ interrupt |getchar()| (see |libmodal-mode|).
 	         call `exit` only inside a `function` mapping as shown below.
 
 	Example: ~
@@ -303,8 +299,7 @@ FUNCTIONS                                               *libmodal-usage-function
 		})
 <
 
-                                                          *libmodal.Mode:switch()*
-`libmodal.Mode`:switch(...)
+`libmodal.Mode`:switch(...)                                 *libmodal.Mode:switch()*
 
 	|libmodal.mode.enter()| a new mode, and when it is finished, |Mode:exit()|
 	the current mode.
@@ -324,8 +319,9 @@ FUNCTIONS                                               *libmodal-usage-function
 			end,
 		})
 <
-                                                   *libmodal-layer* *libmodal.layer*
-`libmodal.layer`.enter({keymap} [, {exit_char}])            *libmodal.layer.enter()*
+LAYER                                              *libmodal-layer* *libmodal.layer*
+
+`libmodal.layer`.enter({keymap} [, {exit_char}])                *libmodal.layer.enter()*
 
 	While a |libmodal-mode| ignores behavior that has not been explicitly
 	defined, a |libmodal-layer| allows unrecognized |input| to be passed back
@@ -362,7 +358,7 @@ FUNCTIONS                                               *libmodal-usage-function
 		|libmodal-examples| For an example.
 		|vim.keymap.set()|  For more information about `opts`.
 
-`libmodal.layer`.new({keymap})                                *libmodal.layer.new()*
+`libmodal.layer`.new({keymap})                                  *libmodal.layer.new()*
 
 	See |libmodal.layer.enter()| for more information. This function only
 	differs from |libmodal.layer.enter()| in that instead of entering the layer
@@ -420,7 +416,7 @@ FUNCTIONS                                               *libmodal-usage-function
 		|libmodal.Layer:enter()| A shortcut to access this function.
 		|libmodal.Layer.exit()|   How to create a |libmodal.Layer|
 
-`libmodal.Layer`:map({mode}, {lhs}, {rhs}, {opts})            *libmodal.Layer:map()*
+`libmodal.Layer`:map({mode}, {lhs}, {rhs}, {opts})                    *libmodal.Layer:map()*
 
 	{mode}, {lhs}, {rhs}, and {opts} are the same as in |vim.keymap.set()|
 	except that a {mode} table is not supported.
@@ -429,7 +425,7 @@ FUNCTIONS                                               *libmodal-usage-function
 		|libmodal-examples| For an example.
 		|vim.keymap.set()|  For information about the args.
 
-`libmodal.Layer`:unmap({mode}, {lhs})                       *libmodal.Layer:unmap()*
+`libmodal.Layer`:unmap({mode}, {lhs})                           *libmodal.Layer:unmap()*
 
 	{mode} and {lhs} are the same as in |vim.keymap.del()| except that a {mode}
 	table is not supported.
@@ -440,9 +436,10 @@ FUNCTIONS                                               *libmodal-usage-function
 		|libmodal-examples| For an example.
 		|vim.keymap.del()|  For information about the args.
 
-                      *libmodal-prompt* *libmodal#Prompt()*  *libmodal.prompt.enter()*
-`libmodal.prompt`.enter({name}, {instruction} [, {completions}])
-`libmodal`#Prompt({name}, {instruction} [, {completions}])
+PROMPT                                           *libmodal-prompt* *libmodal.prompt*
+
+`libmodal.prompt`.enter({name}, {instruction} [, {completions}]) *libmodal.prompt.enter()*
+`libmodal`#Prompt({name}, {instruction} [, {completions}])             *libmodal#Prompt()*
 
 	Besides accepting user input like keys in |Normal-mode|, |libmodal| is
 	also capable of prompting the user for |input| like |Cmdline-mode|. To
@@ -513,22 +510,19 @@ FUNCTIONS                                               *libmodal-usage-function
 		|lua-eval|          For type conversions between Vimscript to |Lua|.
 		|libmodal-examples| For examples of this function.
 
-                                                                    *libmodal-Var*
-`Var`
+VAR                                                    *libmodal-Var* *libmodal.Var*
 
 	Some values mentioned above may be typed `libmodal-Var`. By default, `Var`s
 	mirror a specific |g:var|, but they may be given instance-local values as
 	well. In this case, the instance value is preferred to the global value.
 
-                                                              *libmodal.Var:get()*
-`Var`:get()
+`Var`:get()                                                     *libmodal.Var:get()*
 
 	Return: ~
 		|libmodal.Var:get_local()| if a local value exists, or
 		|libmodal.Var:get_global()|.
 
-                                                       *libmodal.Var:get_global()*
-`Var`:get_global()
+`Var`:get_global()                                       *libmodal.Var:get_global()*
 
 	Return: ~
 		The global value.
@@ -537,14 +531,12 @@ FUNCTIONS                                               *libmodal-usage-function
 		|g:|    For more information about global variables.
 		|vim.g| For info about accessing |g:| from lua.
 
-                                                        *libmodal.Var:get_local()*
-`Var`:get_local()
+`Var`:get_local()                                         *libmodal.Var:get_local()*
 
 	Return: ~
 		The local value.
 
-                                                              *libmodal.Var:set()*
-`Var`:set({value})
+`Var`:set({value})                                                *libmodal.Var:set()*
 
 	|libmodal.Var:set_local()| if a local value exists, otherwise
 	|libmodal.Var:set_global()|.
@@ -552,8 +544,7 @@ FUNCTIONS                                               *libmodal-usage-function
 	Parameters: ~
 		{value}  to set.
 
-                                                       *libmodal.Var:set_global()*
-`Var`:set_global({value})
+`Var`:set_global({value})                                  *libmodal.Var:set_global()*
 
 	Set a {value} locally.
 
@@ -564,8 +555,7 @@ FUNCTIONS                                               *libmodal-usage-function
 		|g:|    For more information about global variables.
 		|vim.g| For info about accessing |g:| from lua.
 
-                                                        *libmodal.Var:set_local()*
-`Var`:set_local()
+`Var`:set_local({value})                                  *libmodal.Var:set_local()*
 
 	Set a {value} globally.
 
