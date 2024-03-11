@@ -47,8 +47,8 @@ function Mode:execute_instruction(instruction)
 		vim.api.nvim_command(instruction)
 	end
 
-	self.count:set(0)
-	self.count1:set(1)
+	self.count:set_global(0)
+	self.count1:set_global(1)
 	self:redraw_virtual_cursor()
 end
 
@@ -61,7 +61,7 @@ function Mode:check_input_for_mapping()
 	self.flush_input_timer:stop()
 
 	-- append the latest input to the locally stored input history.
-	self.input_bytes[#self.input_bytes + 1] = self.global_input:get()
+	self.input_bytes[#self.input_bytes + 1] = self.global_input:get_global()
 
 	-- get the command based on the users input.
 	local cmd = self.mappings:get(self.input_bytes)
@@ -115,8 +115,8 @@ function Mode:enter()
 		self.popups:push(utils.Popup.new())
 	end
 
-	self.count:set(0)
-	self.count1:set(1)
+	self.count:set_global(0)
+	self.count1:set_global(1)
 
 	self.local_exit = false
 
@@ -162,7 +162,7 @@ end
 --- @private
 --- @return boolean `true` if the mode's exit was flagged
 function Mode:exit_flagged()
-	return self.local_exit or globals.is_true(self.global_exit:get())
+	return self.local_exit or globals.is_true(self.global_exit:get_global())
 end
 
 --- get input from the user.
@@ -185,13 +185,13 @@ function Mode:get_user_input()
 	end
 
 	-- set the global input variable to the new input.
-	self.global_input:set(user_input)
+	self.global_input:set_global(user_input)
 
 	if ZERO <= user_input and user_input <= NINE then
-		local oldCount = self.count:get()
+		local oldCount = self.count:get_global()
 		local newCount = tonumber(oldCount .. string.char(user_input))
-		self.count:set(newCount)
-		self.count1:set(math.max(1, newCount))
+		self.count:set_global(newCount)
+		self.count1:set_global(math.max(1, newCount))
 	end
 
 	if not self.supress_exit and user_input == globals.ESC_NR then -- the user wants to exit.
@@ -321,7 +321,7 @@ function Mode.new(name, instruction, supress_exit)
 		self.timeouts = utils.Vars.new('timeouts', self.name)
 
 		-- read the correct timeout variable.
-		self.timeouts_enabled = self.timeouts:get() or vim.g.libmodalTimeouts
+		self.timeouts_enabled = self.timeouts:get_global() or vim.g.libmodalTimeouts
 	end
 
 	return self

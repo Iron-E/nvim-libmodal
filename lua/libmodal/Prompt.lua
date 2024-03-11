@@ -60,10 +60,10 @@ function Prompt:get_user_input()
 	--- @param user_input string
 	local function user_input_callback(user_input)
 		if user_input and user_input:len() > 0 then -- the user actually entered something.
-			self.input:set(user_input)
+			self.input:set_global(user_input)
 			self:execute_instruction(user_input)
 
-			local should_exit = self.exit:get()
+			local should_exit = self.exit:get_global()
 			if should_exit ~= nil then
 				continue_prompt = not should_exit
 			end
