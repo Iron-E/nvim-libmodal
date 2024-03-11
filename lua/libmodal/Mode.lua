@@ -4,22 +4,20 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 
 --- @class libmodal.Mode
 --- @field private flush_input_timer unknown
---- @field private global_exit libmodal.utils.Vars
---- @field private global_input libmodal.utils.Vars
 --- @field private help? libmodal.utils.Help
---- @field private input libmodal.utils.Vars
---- @field private count libmodal.utils.Vars
---- @field private count1 libmodal.utils.Vars
---- @field private input_bytes? number[]
+--- @field private input_bytes? number[] local `input` history
 --- @field private instruction fun()|{[string]: fun()|string}
---- @field private local_exit boolean
 --- @field private mappings libmodal.collections.ParseTable
+--- @field private modeline string[][]
 --- @field private name string
 --- @field private ns number the namespace where cursor highlights are drawn on
 --- @field private popups libmodal.collections.Stack
---- @field private show_name fun()
 --- @field private supress_exit boolean
---- @field private timeouts_enabled boolean
+--- @field public count libmodal.utils.Vars[number]
+--- @field public count1 libmodal.utils.Vars[number]
+--- @field public exit libmodal.utils.Vars[boolean]
+--- @field public input libmodal.utils.Vars[number]
+--- @field public timeouts? libmodal.utils.Vars[boolean]
 local Mode = utils.classes.new()
 
 local HELP_CHAR = '?'
@@ -47,8 +45,8 @@ function Mode:execute_instruction(instruction)
 		vim.api.nvim_command(instruction)
 	end
 
-	self.count:set_global(0)
-	self.count1:set_global(1)
+	self.count:set(0)
+	self.count1:set(1)
 	self:redraw_virtual_cursor()
 end
 
@@ -61,7 +59,7 @@ function Mode:check_input_for_mapping()
 	self.flush_input_timer:stop()
 
 	-- append the latest input to the locally stored input history.
-	self.input_bytes[#self.input_bytes + 1] = self.global_input:get_global()
+	self.input_bytes[#self.input_bytes + 1] = self.input:get()
 
 	-- get the command based on the users input.
 	local cmd = self.mappings:get(self.input_bytes)
@@ -76,7 +74,7 @@ function Mode:check_input_for_mapping()
 		end
 
 		self.input_bytes = {}
-	elseif command_type == 'table' and globals.is_true(self.timeouts_enabled) then -- the command was a table, meaning that it MIGHT match.
+	elseif command_type == 'table' and globals.is_true(self.timeouts:get()) then -- the command was a table, meaning that it MIGHT match.
 		local timeout = vim.api.nvim_get_option_value('timeoutlen', {})
 		self.flush_input_timer:start( -- start the timer
 			timeout, 0, vim.schedule_wrap(function()
@@ -115,10 +113,8 @@ function Mode:enter()
 		self.popups:push(utils.Popup.new())
 	end
 
-	self.count:set_global(0)
-	self.count1:set_global(1)
-
-	self.local_exit = false
+	self.count:set(0)
+	self.count1:set(1)
 
 	--- HACK: https://github.com/neovim/neovim/issues/20793
 	vim.api.nvim_command 'highlight Cursor blend=100'
@@ -151,30 +147,16 @@ function Mode:enter()
 	vim.api.nvim_exec_autocmds('ModeChanged', {pattern = self.name .. ':' .. previous_mode})
 end
 
---- exit this instance of the mode.
---- WARN: does not interrupt the current mode to exit. It only flags that exit is desired for when control yields back
----       to the mode.
---- @return nil
-function Mode:exit()
-	self.local_exit = true
-end
-
---- @private
---- @return boolean `true` if the mode's exit was flagged
-function Mode:exit_flagged()
-	return self.local_exit or globals.is_true(self.global_exit:get_global())
-end
-
 --- get input from the user.
 --- @private
 --- @return boolean more_input
 function Mode:get_user_input()
-	if self:exit_flagged() then
+	if self.exit:get() then
 		return false
 	end
 
 	-- echo the indicator.
-	self.show_name()
+	self:show_mode()
 
 	-- capture input.
 	local user_input = vim.fn.getchar()
@@ -185,13 +167,13 @@ function Mode:get_user_input()
 	end
 
 	-- set the global input variable to the new input.
-	self.global_input:set_global(user_input)
+	self.input:set(user_input)
 
 	if ZERO <= user_input and user_input <= NINE then
-		local oldCount = self.count:get_global()
+		local oldCount = self.count:get()
 		local newCount = tonumber(oldCount .. string.char(user_input))
-		self.count:set_global(newCount)
-		self.count1:set_global(math.max(1, newCount))
+		self.count:set(newCount)
+		self.count1:set(math.max(1, newCount))
 	end
 
 	if not self.supress_exit and user_input == globals.ESC_NR then -- the user wants to exit.
@@ -227,6 +209,16 @@ function Mode:render_virt_cursor()
 	local line_nr, col_nr = unpack(vim.api.nvim_win_get_cursor(0))
 	line_nr = line_nr - 1 -- win_get_cursor returns +1 for our purpose
 	vim.highlight.range(0, self.ns, 'Cursor', { line_nr, col_nr }, { line_nr, col_nr + 1 }, {})
+end
+
+--- show the mode indicator, if it is enabled
+function Mode:show_mode()
+	utils.api.redraw()
+
+	local showmode = vim.api.nvim_get_option_value('showmode', {})
+	if showmode then
+		vim.api.nvim_echo({{'-- ' .. self.name .. ' --', 'LibmodalPrompt'}}, false, {})
+	end
 end
 
 --- `enter` a `Mode` using the arguments given, and then flag the current mode to exit.
@@ -279,22 +271,15 @@ function Mode.new(name, instruction, supress_exit)
 		{
 			count = utils.Vars.new('count', name),
 			count1 = utils.Vars.new('count1', name),
-			global_exit = utils.Vars.new('exit', name),
-			global_input = utils.Vars.new('input', name),
+			exit = utils.Vars.new('exit', name),
+			input = utils.Vars.new('input', name),
 			instruction = instruction,
-			local_exit = false,
 			name = name,
 			ns = vim.api.nvim_create_namespace('libmodal' .. name),
+			modeline = {{'-- ' .. name .. ' --', 'LibmodalPrompt'}},
 		},
 		Mode
 	)
-
-	self.show_name = vim.o.showmode and
-		function()
-			utils.api.redraw()
-			vim.api.nvim_echo({{'-- ' .. name .. ' --', 'LibmodalPrompt'}}, false, {})
-		end or
-		utils.api.redraw
 
 	-- define the exit flag
 	self.supress_exit = supress_exit or false
@@ -318,10 +303,7 @@ function Mode.new(name, instruction, supress_exit)
 		self.popups = require('libmodal.collections.Stack').new()
 
 		-- create a variable for whether or not timeouts are enabled.
-		self.timeouts = utils.Vars.new('timeouts', self.name)
-
-		-- read the correct timeout variable.
-		self.timeouts_enabled = self.timeouts:get_global() or vim.g.libmodalTimeouts
+		self.timeouts = utils.Vars.new('timeouts', self.name, vim.g.libmodalTimeouts)
 	end
 
 	return self
