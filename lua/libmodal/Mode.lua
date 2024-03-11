@@ -138,6 +138,8 @@ function Mode:enter()
 end
 
 --- exit this instance of the mode.
+--- WARN: does not interrupt the current mode to exit. It only flags that exit is desired for when control yields back
+---       to the mode.
 --- @return nil
 function Mode:exit()
 	self.local_exit = true
@@ -191,6 +193,32 @@ function Mode:get_user_input()
 	return true
 end
 
+--- clears and then renders the virtual cursor
+--- @private
+function Mode:redraw_virtual_cursor()
+	self:clear_virt_cursor()
+	self:render_virt_cursor()
+end
+
+--- render the virtual cursor using extmarks
+--- @private
+function Mode:render_virt_cursor()
+	local line_nr, col_nr = unpack(vim.api.nvim_win_get_cursor(0))
+	line_nr = line_nr - 1 -- win_get_cursor returns +1 for our purpose
+	vim.highlight.range(0, self.ns, 'Cursor', { line_nr, col_nr }, { line_nr, col_nr + 1 }, {})
+end
+
+--- `enter` a `Mode` using the arguments given, and then flag the current mode to exit.
+--- @param ... unknown arguments to `Mode.new`
+--- @return nil
+--- @see libmodal.Mode.enter which `...` shares the layout of
+--- @see libmodal.Mode.exit
+function Mode:switch(...)
+	local mode = Mode.new(...)
+	mode:enter()
+	self:exit()
+end
+
 --- uninitialize variables from after exiting the mode.
 --- @private
 --- @return nil
@@ -214,21 +242,6 @@ function Mode:tear_down()
 	end
 
 	utils.api.redraw()
-end
-
---- clears and then renders the virtual cursor
---- @private
-function Mode:redraw_virtual_cursor()
-	self:clear_virt_cursor()
-	self:render_virt_cursor()
-end
-
---- render the virtual cursor using extmarks
---- @private
-function Mode:render_virt_cursor()
-	local line_nr, col_nr = unpack(vim.api.nvim_win_get_cursor(0))
-	line_nr = line_nr - 1 -- win_get_cursor returns +1 for our purpose
-	vim.highlight.range(0, self.ns, 'Cursor', { line_nr, col_nr }, { line_nr, col_nr + 1 }, {})
 end
 
 --- create a new mode.
