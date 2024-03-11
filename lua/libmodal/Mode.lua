@@ -113,8 +113,9 @@ function Mode:enter()
 		self.popups:push(utils.Popup.new())
 	end
 
-	self.count:set(0)
 	self.count1:set(1)
+	self.count:set(0)
+	self.exit:set(false)
 
 	--- HACK: https://github.com/neovim/neovim/issues/20793
 	vim.api.nvim_command 'highlight Cursor blend=100'
@@ -128,20 +129,17 @@ function Mode:enter()
 	local previous_mode = self.previous_mode_name or vim.api.nvim_get_mode().mode
 	vim.api.nvim_exec_autocmds('ModeChanged', {pattern = previous_mode .. ':' .. self.name})
 
-	local continue_mode = true
-	while continue_mode do
+	repeat
 		-- try (using pcall) to use the mode.
-		local ok, mode_result = pcall(self.get_user_input, self)
+		local ok, result = pcall(self.get_user_input, self)
 
 		-- if there were errors, handle them.
 		if not ok then
 			--- @diagnostic disable-next-line:param-type-mismatch if `not ok` then `mode_result` is a string
-			utils.notify_error('Error during nvim-libmodal mode', mode_result)
-			continue_mode = false
-		else
-			continue_mode = mode_result
+			utils.notify_error('Error during nvim-libmodal mode', result)
+			self.exit:set_local(true)
 		end
-	end
+	until self.exit:get()
 
 	self:tear_down()
 	vim.api.nvim_exec_autocmds('ModeChanged', {pattern = self.name .. ':' .. previous_mode})
@@ -149,12 +147,7 @@ end
 
 --- get input from the user.
 --- @private
---- @return boolean more_input
 function Mode:get_user_input()
-	if self.exit:get() then
-		return false
-	end
-
 	-- echo the indicator.
 	self:show_mode()
 
@@ -177,23 +170,20 @@ function Mode:get_user_input()
 	end
 
 	if not self.supress_exit and user_input == globals.ESC_NR then -- the user wants to exit.
-		return false -- as in, "I don't want to continue."
-	else -- the user wants to continue.
-
-		--[[ The instruction type is determined every cycle, because the user may be assuming a more direct control
-			over the instruction and it may change over the course of execution. ]]
-		local instruction_type = type(self.instruction)
-
-		if instruction_type == 'table' then -- the instruction was provided as a was a set of mappings.
-			self:check_input_for_mapping()
-		elseif instruction_type == 'string' then -- the instruction is the name of a Vimscript function.
-			vim.fn[self.instruction]()
-		else -- the instruction is a function.
-			self.instruction()
-		end
+		return self.exit:set_local(true)
 	end
 
-	return true
+	--[[ The instruction type is determined every cycle, because the user may be assuming a more direct control
+		over the instruction and it may change over the course of execution. ]]
+	local instruction_type = type(self.instruction)
+
+	if instruction_type == 'table' then -- the instruction was provided as a was a set of mappings.
+		self:check_input_for_mapping()
+	elseif instruction_type == 'string' then -- the instruction is the name of a Vimscript function.
+		vim.fn[self.instruction]()
+	else -- the instruction is a function.
+		self.instruction()
+	end
 end
 
 --- clears and then renders the virtual cursor
@@ -229,7 +219,7 @@ end
 function Mode:switch(...)
 	local mode = Mode.new(...)
 	mode:enter()
-	self:exit()
+	self.exit:set_local(true)
 end
 
 --- uninitialize variables from after exiting the mode.
