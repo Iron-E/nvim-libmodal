@@ -113,9 +113,9 @@ function Prompt.new(name, instruction, user_completions)
 
 	local self = setmetatable(
 		{
-			exit = utils.Vars.new('exit', name),
+			exit = utils.Vars.new(name, 'exit'),
 			indicator = {hl = 'LibmodalStar', text = '* ' .. name .. ' > '},
-			input = utils.Vars.new('input', name),
+			input = utils.Vars.new(name, 'input'),
 			instruction = instruction,
 			name = name
 		},

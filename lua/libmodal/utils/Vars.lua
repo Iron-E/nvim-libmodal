@@ -5,11 +5,11 @@
 local Vars = require('libmodal.utils.classes').new()
 
 --- create a new set of variables
---- @param var_name string the name of the key used to refer to this variable in `Vars`.
 --- @param mode_name string the name of the mode
+--- @param var_name string the name of the key used to refer to this variable in `Vars`.
 --- @param default_global? unknown the default global value
 --- @return libmodal.utils.Vars
-function Vars.new(var_name, mode_name, default_global)
+function Vars.new(mode_name, var_name, default_global)
 	local self = setmetatable({}, Vars)
 
 	--- @param str_with_spaces string

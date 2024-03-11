@@ -259,10 +259,10 @@ function Mode.new(name, instruction, supress_exit)
 	-- inherit the metatable.
 	local self = setmetatable(
 		{
-			count = utils.Vars.new('count', name),
-			count1 = utils.Vars.new('count1', name),
-			exit = utils.Vars.new('exit', name),
-			input = utils.Vars.new('input', name),
+			count = utils.Vars.new(name, 'count'),
+			count1 = utils.Vars.new(name, 'count1'),
+			exit = utils.Vars.new(name, 'exit'),
+			input = utils.Vars.new(name, 'input'),
 			instruction = instruction,
 			name = name,
 			ns = vim.api.nvim_create_namespace('libmodal' .. name),
@@ -293,7 +293,7 @@ function Mode.new(name, instruction, supress_exit)
 		self.popups = require('libmodal.collections.Stack').new()
 
 		-- create a variable for whether or not timeouts are enabled.
-		self.timeouts = utils.Vars.new('timeouts', self.name, vim.g.libmodalTimeouts)
+		self.timeouts = utils.Vars.new(self.name, 'timeouts', vim.g.libmodalTimeouts)
 	end
 
 	return self
