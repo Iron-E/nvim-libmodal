@@ -198,7 +198,26 @@ FUNCTIONS                                               *libmodal-usage-function
 		|lua-eval|          For type conversions between Vimscript to |Lua|.
 		|libmodal-examples| For examples of this function.
 
-                                                          *libmodal.Mode:exit()*
+                                                          *libmodal.mode:switch()*
+`libmodal.mode`.switch(...)
+
+	Convenience wrapper for |Mode:switch()|.
+
+	Parameters: ~
+		See |Mode:switch()|.
+
+	Example: ~
+>lua
+		libmodal.mode.enter('Foo', {
+			f = libmodal.mode.switch('Bar', {
+				b = function()
+					vim.notify('Inside Bar mode')
+				end,
+			}),
+		})
+<
+
+                                                            *libmodal.Mode:exit()*
 `libmodal.Mode`:exit()
 
 	When the {instruction} parameter to |libmodal.mode.enter()| is a
