@@ -5,6 +5,7 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @class libmodal.Mode
 --- @field private flush_input_timer unknown
 --- @field private help? libmodal.utils.Help
+--- @field private input libmodal.utils.Var[number]
 --- @field private input_bytes? number[] local `input` history
 --- @field private instruction fun()|{[string]: fun()|string}
 --- @field private mappings libmodal.collections.ParseTable
@@ -16,7 +17,6 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field public count libmodal.utils.Var[number]
 --- @field public count1 libmodal.utils.Var[number]
 --- @field public exit libmodal.utils.Var[boolean]
---- @field public input libmodal.utils.Var[number]
 --- @field public timeouts? libmodal.utils.Var[boolean]
 local Mode = utils.classes.new()
 
@@ -139,7 +139,7 @@ function Mode:enter()
 			utils.notify_error('Error during nvim-libmodal mode', result)
 			self.exit:set_local(true)
 		end
-	until self.exit:get()
+	until globals.is_true(self.exit:get())
 
 	self:tear_down()
 	vim.api.nvim_exec_autocmds('ModeChanged', {pattern = self.name .. ':' .. previous_mode})
