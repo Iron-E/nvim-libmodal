@@ -127,14 +127,6 @@ VARIABLES                                               *libmodal-usage-variable
 		})
 <
 
-                                                            *libmodal.Mode.count1*
-`Mode`.count1
-
-	The |v:count1| equivalent of |libmodal.Mode.count|.
-
-	Type: ~
-		|libmodal-Var| of |lua-number|
-
                                                               *libmodal.Mode.exit*
 `Mode`.exit
 
@@ -211,7 +203,7 @@ FUNCTIONS                                               *libmodal-usage-function
 			          -- You can also use lua functions
 			          zfc = function() vim.api.nvim_command 'tabnew' end
 			      }
-< >vim
+<>vim
 			    let s:modeInstruction = {
 			        'zf': 'split',
 			        'zfo': 'vsplit',
@@ -225,8 +217,13 @@ FUNCTIONS                                               *libmodal-usage-function
 			  that |getchar()| completes. The user input is received through
 			  `g:{name}ModeInput` (see above).
 
-			- |v:count| and |v:count1| are provided through `g:{name}ModeCount`
-			  and `g:{name}ModeCount1` respectively.
+			- |v:count| is provided through `g:{name}ModeCount`. For |v:count1|
+			  do: >lua
+				local count1 = math.max(1, count) -- lua
+<>vim
+				let count1 = max(1, count) " vimscript
+<
+
 
 			*Error	you cannot pass a funcref to Lua from Vimscript!
 			      	- If you want to use a |funcref()| for {instruction}, it

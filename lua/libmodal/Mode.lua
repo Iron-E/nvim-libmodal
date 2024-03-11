@@ -15,7 +15,6 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field private popups libmodal.collections.Stack
 --- @field private supress_exit boolean
 --- @field public count libmodal.utils.Var[number]
---- @field public count1 libmodal.utils.Var[number]
 --- @field public exit libmodal.utils.Var[boolean]
 --- @field public timeouts? libmodal.utils.Var[boolean]
 local Mode = utils.classes.new()
@@ -46,7 +45,6 @@ function Mode:execute_instruction(instruction)
 	end
 
 	self.count:set(0)
-	self.count1:set(1)
 	self:redraw_virtual_cursor()
 end
 
@@ -113,7 +111,6 @@ function Mode:enter()
 		self.popups:push(utils.Popup.new())
 	end
 
-	self.count1:set(1)
 	self.count:set(0)
 	self.exit:set(false)
 
@@ -166,7 +163,6 @@ function Mode:get_user_input()
 		local oldCount = self.count:get()
 		local newCount = tonumber(oldCount .. string.char(user_input))
 		self.count:set(newCount)
-		self.count1:set(math.max(1, newCount))
 	end
 
 	if not self.supress_exit and user_input == globals.ESC_NR then -- the user wants to exit.
@@ -260,7 +256,6 @@ function Mode.new(name, instruction, supress_exit)
 	local self = setmetatable(
 		{
 			count = utils.Var.new(name, 'count'),
-			count1 = utils.Var.new(name, 'count1'),
 			exit = utils.Var.new(name, 'exit'),
 			input = utils.Var.new(name, 'input'),
 			instruction = instruction,
