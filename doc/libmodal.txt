@@ -217,6 +217,28 @@ FUNCTIONS                                               *libmodal-usage-function
 			end,
 		})
 <
+
+                                                          *libmodal.Mode:switch()*
+`libmodal.Mode`:switch(...)
+
+	|libmodal.mode.enter()| a new mode, and when it is finished, |Mode:exit()|
+	the current mode.
+
+	Parameters: ~
+		See |libmodal.mode.enter()|.
+
+	Example: ~
+>lua
+		libmodal.mode.enter('Foo', {
+			f = function(self)
+				self:switch('Bar', {
+					b = function()
+						vim.notify('Inside Bar mode')
+					end,
+				})
+			end,
+		})
+<
                                                    *libmodal-layer* *libmodal.layer*
 `libmodal.layer`.enter({keymap} [, {exit_char}])            *libmodal.layer.enter()*
 
