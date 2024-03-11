@@ -13,11 +13,11 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field private ns number the namespace where cursor highlights are drawn on
 --- @field private popups libmodal.collections.Stack
 --- @field private supress_exit boolean
---- @field public count libmodal.utils.Vars[number]
---- @field public count1 libmodal.utils.Vars[number]
---- @field public exit libmodal.utils.Vars[boolean]
---- @field public input libmodal.utils.Vars[number]
---- @field public timeouts? libmodal.utils.Vars[boolean]
+--- @field public count libmodal.utils.Var[number]
+--- @field public count1 libmodal.utils.Var[number]
+--- @field public exit libmodal.utils.Var[boolean]
+--- @field public input libmodal.utils.Var[number]
+--- @field public timeouts? libmodal.utils.Var[boolean]
 local Mode = utils.classes.new()
 
 local HELP_CHAR = '?'
@@ -259,10 +259,10 @@ function Mode.new(name, instruction, supress_exit)
 	-- inherit the metatable.
 	local self = setmetatable(
 		{
-			count = utils.Vars.new(name, 'count'),
-			count1 = utils.Vars.new(name, 'count1'),
-			exit = utils.Vars.new(name, 'exit'),
-			input = utils.Vars.new(name, 'input'),
+			count = utils.Var.new(name, 'count'),
+			count1 = utils.Var.new(name, 'count1'),
+			exit = utils.Var.new(name, 'exit'),
+			input = utils.Var.new(name, 'input'),
 			instruction = instruction,
 			name = name,
 			ns = vim.api.nvim_create_namespace('libmodal' .. name),
@@ -293,7 +293,7 @@ function Mode.new(name, instruction, supress_exit)
 		self.popups = require('libmodal.collections.Stack').new()
 
 		-- create a variable for whether or not timeouts are enabled.
-		self.timeouts = utils.Vars.new(self.name, 'timeouts', vim.g.libmodalTimeouts)
+		self.timeouts = utils.Var.new(self.name, 'timeouts', vim.g.libmodalTimeouts)
 	end
 
 	return self

@@ -3,7 +3,7 @@
 ]]
 
 --- WARN: do not import this in your code! it is not part of the public API.
-local Vars = require 'libmodal.utils.Vars'
+local Var = require 'libmodal.utils.Var'
 
 --- Check the value of the local var
 --- @param var any
@@ -41,7 +41,7 @@ local mode_name = 'Foo'
 local var_name = 'Bar'
 
 --- WARN: do not use this function in your code! It is not part of the public API.
-local foo = Vars.new(mode_name, var_name)
+local foo = Var.new(mode_name, var_name)
 
 -- 1. baseline
 
