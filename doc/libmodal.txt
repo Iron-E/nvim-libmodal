@@ -108,6 +108,70 @@ VARIABLES                                               *libmodal-usage-variable
 		|g:|    For more information about global variables.
 		|vim.g| For info about accessing |g:| from lua.
 
+                                                              *libmodal.Mode-vars*
+                                                             *libmodal.Mode.count*
+`Mode`.count
+
+	The |v:count| of the mode.
+
+	Type: ~
+		|libmodal-Var| of |lua-number|
+
+	Example: ~
+>lua
+		libmodal.mode.enter('Foo', {
+			G = function(self)
+				local count = self.count:get()
+				vim.api.nvim_command('norm! ' .. tostring(count) .. 'G')
+			end,
+		})
+<
+
+                                                            *libmodal.Mode.count1*
+`Mode`.count1
+
+	The |v:count1| equivalent of |libmodal.Mode.count|.
+
+	Type: ~
+		|libmodal-Var| of |lua-number|
+
+                                                              *libmodal.Mode.exit*
+`Mode`.exit
+
+	If `true`, flags the mode to exit. It will read this value before reading
+	the user's next key.
+
+	Type: ~
+		|libmodal-Var| of `boolean`
+
+	Example: ~
+>lua
+		libmodal.mode.enter('Foo', {
+			q = function(self)
+				vim.notify('Hello!')
+				self.exit:set_local(true)
+			end,
+		})
+<
+
+                                                          *libmodal.Mode.timeouts*
+`Mode`.timeouts
+
+	The |libmodal-timeouts| configuration for this mode.
+
+	Type: ~
+		|libmodal-Var| of `boolean`
+
+	Example: ~
+>lua
+		libmodal.mode.enter('Foo', {
+			t = function(self)
+				local timeouts = self.timeouts:get()
+				self.timeouts:set_local(not timeouts) -- toggle timeouts
+			end,
+		})
+<
+
 --------------------------------------------------------------------------------
 FUNCTIONS                                               *libmodal-usage-functions*
 
@@ -176,10 +240,12 @@ FUNCTIONS                                               *libmodal-usage-function
 <
 
 			NOTE: Some QoL features are available by default when
-			      specifying a `dict`/`table` value for {instruction} that
+			      specifying a `dict` / |lua-table| value for {instruction} that
 			      would otherwise have to be programmed manually if a
 			      `function` is specified.
 
+			      - Bound |lua-function|s may accept a `self` parameter, which
+					allows access to |libmodal.Mode-vars|.
 			      - A user's typed characters will show in the
 			        lower right corner when {instruction} is a table.
 			      - If `g:libmodalTimeouts` is enabled, then user input will be
@@ -449,6 +515,65 @@ FUNCTIONS                                               *libmodal-usage-function
 	See also: ~
 		|lua-eval|          For type conversions between Vimscript to |Lua|.
 		|libmodal-examples| For examples of this function.
+
+                                                                    *libmodal-Var*
+`Var`
+
+	Some values mentioned above may be typed `libmodal-Var`. By default, `Var`s
+	mirror a specific |g:var|, but they may be given instance-local values as
+	well. In this case, the instance value is preferred to the global value.
+
+                                                              *libmodal.Var:get()*
+`Var`:get()
+
+	Return: ~
+		|libmodal.Var:get_local()| if a local value exists, or
+		|libmodal.Var:get_global()|.
+
+                                                       *libmodal.Var:get_global()*
+`Var`:get_global()
+
+	Return: ~
+		The global value.
+
+	See also: ~
+		|g:|    For more information about global variables.
+		|vim.g| For info about accessing |g:| from lua.
+
+                                                        *libmodal.Var:get_local()*
+`Var`:get_local()
+
+	Return: ~
+		The local value.
+
+                                                              *libmodal.Var:set()*
+`Var`:set({value})
+
+	|libmodal.Var:set_local()| if a local value exists, otherwise
+	|libmodal.Var:set_global()|.
+
+	Parameters: ~
+		{value}  to set.
+
+                                                       *libmodal.Var:set_global()*
+`Var`:set_global({value})
+
+	Set a {value} locally.
+
+	Parameters: ~
+		{value}  to set globally.
+
+	See also: ~
+		|g:|    For more information about global variables.
+		|vim.g| For info about accessing |g:| from lua.
+
+                                                        *libmodal.Var:set_local()*
+`Var`:set_local()
+
+	Set a {value} globally.
+
+	Parameters: ~
+		{value}  to set locally.
 
 --------------------------------------------------------------------------------
 EVENTS                                                     *libmodal-usage-events*

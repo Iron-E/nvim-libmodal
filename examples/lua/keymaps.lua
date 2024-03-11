@@ -13,6 +13,10 @@ local fooModeKeymaps =
 	j = 'norm j',
 	k = 'norm k',
 	l = 'norm l',
+	G = function(self)
+		local count = self.count:get()
+		vim.api.nvim_command('norm! ' .. count .. 'G')
+	end,
 	zf = 'split',
 	zfc = 'q',
 	zff = split_twice,
