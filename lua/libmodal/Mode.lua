@@ -93,7 +93,15 @@ function Mode:check_input_for_mapping()
 		self.input_bytes = {}
 	end
 
-	self.popups:peek():refresh(self.input_bytes)
+	local input_bytes = self.input_bytes or {}
+
+	local count = self.count:get()
+	if count > 0 then
+		local count_bytes = { tostring(count):byte(1, -1) }
+		input_bytes = vim.list_extend(count_bytes, input_bytes)
+	end
+
+	self.popups:peek():refresh(input_bytes)
 end
 
 --- clears the virtual cursor from the screen
@@ -166,7 +174,11 @@ function Mode:get_user_input()
 	end
 
 	if not self.supress_exit and user_input == globals.ESC_NR then -- the user wants to exit.
-		return self.exit:set_local(true)
+		if self.count:get() < 1 then -- exit
+			return self.exit:set_local(true)
+		end
+
+		self.count:set(0) -- reset count count
 	end
 
 	--[[ The instruction type is determined every cycle, because the user may be assuming a more direct control
