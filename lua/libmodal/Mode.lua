@@ -5,18 +5,25 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @class libmodal.Mode
 --- @field private flush_input_timer unknown
 --- @field private help? libmodal.utils.Help
---- @field private input libmodal.utils.Var[number]
---- @field private input_bytes? number[] local `input` history
+--- @field private input libmodal.utils.Var[integer]
+--- @field private input_bytes? integer[] local `input` history
 --- @field private instruction fun()|{[string]: fun()|string}
 --- @field private mappings libmodal.collections.ParseTable
 --- @field private modeline string[][]
 --- @field private name string
 --- @field private popups libmodal.collections.Stack
 --- @field private supress_exit boolean
---- @field public count libmodal.utils.Var[number]
+--- @field private virtual_cursor_autocmd integer
+--- @field public count libmodal.utils.Var[integer]
 --- @field public exit libmodal.utils.Var[boolean]
 --- @field public timeouts? libmodal.utils.Var[boolean]
 local Mode = utils.classes.new()
+
+--- The namespaces used by modes
+local NS = {
+	--- The virtual cursor namespace. Used to workaround neovim/neovim#20793
+	CURSOR = vim.api.nvim_create_namespace('libmodal-mode-virtual_cursor'),
+}
 
 local HELP_CHAR = '?'
 local TIMEOUT =
@@ -25,12 +32,6 @@ local TIMEOUT =
 	SEND = function(self) vim.api.nvim_feedkeys(self.CHAR, 'nt', false) end
 }
 TIMEOUT.CHAR_NUMBER = TIMEOUT.CHAR:byte()
-
---- Namespaces
-local NS = {
-	--- The virtual cursor namespace. Used to workaround neovim/neovim#20793
-	CURSOR = vim.api.nvim_create_namespace('libmodal-mode-virtual_cursor'),
-}
 
 --- Byte for 0
 local ZERO = string.byte(0)
@@ -50,7 +51,7 @@ function Mode:execute_instruction(instruction)
 	end
 
 	self.count:set(0)
-	self:redraw_virtual_cursor()
+	self:render_virt_cursor(0, true)
 end
 
 --- check the user's input against the `self.instruction` mappings to see if there is anything to execute.
@@ -110,9 +111,11 @@ function Mode:check_input_for_mapping()
 end
 
 --- clears the virtual cursor from the screen
+--- @param bufnr integer to clear the cursor on
 --- @private
-function Mode:clear_virt_cursor()
-	vim.api.nvim_buf_clear_namespace(0, NS.CURSOR, 0, -1);
+function Mode:clear_virt_cursor(bufnr)
+	vim.api.nvim_buf_clear_namespace(bufnr, NS.CURSOR, 0, -1);
+
 end
 
 --- enter this mode.
@@ -130,7 +133,18 @@ function Mode:enter()
 	--- HACK: neovim/neovim#20793
 	vim.api.nvim_command 'highlight Cursor blend=100'
 	vim.schedule(function() vim.opt.guicursor:append { 'a:Cursor/lCursor' } end)
-	self:render_virt_cursor()
+	self:render_virt_cursor(0)
+
+	do
+		local augroup = vim.api.nvim_create_augroup('libmodal-mode-' .. self.name, { clear = false })
+		self.virtual_cursor_autocmd = vim.api.nvim_create_autocmd('BufLeave', {
+			callback = function(ev)
+				local bufnr = ev.buf
+				self:clear_virt_cursor(bufnr)
+			end,
+			group = augroup,
+		})
+	end
 
 	self.previous_mode_name = vim.g.libmodalActiveModeName
 	vim.g.libmodalActiveModeName = self.name
@@ -199,19 +213,20 @@ function Mode:get_user_input()
 	end
 end
 
---- clears and then renders the virtual cursor
---- @private
-function Mode:redraw_virtual_cursor()
-	self:clear_virt_cursor()
-	self:render_virt_cursor()
-end
-
 --- render the virtual cursor using extmarks
+--- @param winid integer
+--- @param clear? boolean if true, clear other virtual cursors before rendering the new one
 --- @private
-function Mode:render_virt_cursor()
-	local line_nr, col_nr = unpack(vim.api.nvim_win_get_cursor(0))
-	line_nr = line_nr - 1 -- win_get_cursor returns +1 for our purpose
-	vim.highlight.range(0, NS.CURSOR, 'Cursor', { line_nr, col_nr }, { line_nr, col_nr + 1 }, {})
+function Mode:render_virt_cursor(winid, clear)
+	local bufnr = vim.api.nvim_win_get_buf(winid)
+	if clear then
+		self:clear_virt_cursor(bufnr)
+	end
+
+	local cursor = vim.api.nvim_win_get_cursor(winid)
+	cursor[1] = cursor[1] - 1 -- win_get_cursor returns +1 for our purpose
+
+	vim.highlight.range(bufnr, NS.CURSOR, 'Cursor', cursor, cursor, { inclusive = true })
 end
 
 --- show the mode indicator, if it is enabled
@@ -239,17 +254,18 @@ end
 --- @private
 --- @return nil
 function Mode:tear_down()
+	--- HACK: neovim/neovim#20793
+	self:clear_virt_cursor(0)
+	vim.schedule(function() vim.opt.guicursor:remove { 'a:Cursor/lCursor' } end)
+	vim.api.nvim_command 'highlight Cursor blend=0'
+	vim.api.nvim_del_autocmd(self.virtual_cursor_autocmd)
+
 	if type(self.instruction) == 'table' then
 		self.flush_input_timer:stop()
 		self.input_bytes = nil
 
 		self.popups:pop():close()
 	end
-
-	--- HACK: neovim/neovim#20793
-	self:clear_virt_cursor()
-	vim.schedule(function() vim.opt.guicursor:remove { 'a:Cursor/lCursor' } end)
-	vim.api.nvim_command 'highlight Cursor blend=0'
 
 	if self.previous_mode_name and #vim.trim(self.previous_mode_name) < 1 then
 		vim.g.libmodalActiveModeName = nil

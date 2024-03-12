@@ -21,6 +21,9 @@ local fooModeKeymaps =
 	zfc = 'q',
 	zff = split_twice,
 	zfo = 'vsplit',
+	e = 'edit foo',
+	p = 'bp',
+	o = 'norm o',
 }
 
 -- enter the mode using the keymaps
