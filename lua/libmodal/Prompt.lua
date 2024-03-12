@@ -3,9 +3,9 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @class libmodal.Prompt
 --- @field private completions? string[]
 --- @field private indicator {hl: string, text: string}
---- @field private exit libmodal.utils.Vars
+--- @field private exit libmodal.utils.Var
 --- @field private help? libmodal.utils.Help
---- @field private input libmodal.utils.Vars
+--- @field private input libmodal.utils.Var
 --- @field private instruction fun()|{[string]: fun()|string}
 --- @field private name string
 local Prompt = utils.classes.new()
@@ -113,9 +113,9 @@ function Prompt.new(name, instruction, user_completions)
 
 	local self = setmetatable(
 		{
-			exit = utils.Vars.new('exit', name),
+			exit = utils.Var.new(name, 'exit'),
 			indicator = {hl = 'LibmodalStar', text = '* ' .. name .. ' > '},
-			input = utils.Vars.new('input', name),
+			input = utils.Var.new(name, 'input'),
 			instruction = instruction,
 			name = name
 		},
