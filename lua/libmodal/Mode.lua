@@ -11,7 +11,6 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field private mappings libmodal.collections.ParseTable
 --- @field private modeline string[][]
 --- @field private name string
---- @field private ns number the namespace where cursor highlights are drawn on
 --- @field private popups libmodal.collections.Stack
 --- @field private supress_exit boolean
 --- @field public count libmodal.utils.Var[number]
@@ -26,6 +25,12 @@ local TIMEOUT =
 	SEND = function(self) vim.api.nvim_feedkeys(self.CHAR, 'nt', false) end
 }
 TIMEOUT.CHAR_NUMBER = TIMEOUT.CHAR:byte()
+
+--- Namespaces
+local NS = {
+	--- The virtual cursor namespace. Used to workaround neovim/neovim#20793
+	CURSOR = vim.api.nvim_create_namespace('libmodal-mode-virtual_cursor'),
+}
 
 --- Byte for 0
 local ZERO = string.byte(0)
@@ -107,7 +112,7 @@ end
 --- clears the virtual cursor from the screen
 --- @private
 function Mode:clear_virt_cursor()
-	vim.api.nvim_buf_clear_namespace(0, self.ns, 0, -1);
+	vim.api.nvim_buf_clear_namespace(0, NS.CURSOR, 0, -1);
 end
 
 --- enter this mode.
@@ -122,7 +127,7 @@ function Mode:enter()
 	self.count:set(0)
 	self.exit:set(false)
 
-	--- HACK: https://github.com/neovim/neovim/issues/20793
+	--- HACK: neovim/neovim#20793
 	vim.api.nvim_command 'highlight Cursor blend=100'
 	vim.schedule(function() vim.opt.guicursor:append { 'a:Cursor/lCursor' } end)
 	self:render_virt_cursor()
@@ -206,7 +211,7 @@ end
 function Mode:render_virt_cursor()
 	local line_nr, col_nr = unpack(vim.api.nvim_win_get_cursor(0))
 	line_nr = line_nr - 1 -- win_get_cursor returns +1 for our purpose
-	vim.highlight.range(0, self.ns, 'Cursor', { line_nr, col_nr }, { line_nr, col_nr + 1 }, {})
+	vim.highlight.range(0, NS.CURSOR, 'Cursor', { line_nr, col_nr }, { line_nr, col_nr + 1 }, {})
 end
 
 --- show the mode indicator, if it is enabled
@@ -241,7 +246,7 @@ function Mode:tear_down()
 		self.popups:pop():close()
 	end
 
-	--- HACK: https://github.com/neovim/neovim/issues/20793
+	--- HACK: neovim/neovim#20793
 	self:clear_virt_cursor()
 	vim.schedule(function() vim.opt.guicursor:remove { 'a:Cursor/lCursor' } end)
 	vim.api.nvim_command 'highlight Cursor blend=0'
@@ -272,7 +277,6 @@ function Mode.new(name, instruction, supress_exit)
 			input = utils.Var.new(name, 'input'),
 			instruction = instruction,
 			name = name,
-			ns = vim.api.nvim_create_namespace('libmodal' .. name),
 			modeline = {{'-- ' .. name .. ' --', 'LibmodalPrompt'}},
 		},
 		Mode
