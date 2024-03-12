@@ -2,7 +2,10 @@ local globals = require 'libmodal.globals'
 local ParseTable = require 'libmodal.collections.ParseTable'
 local utils = require 'libmodal.utils' --- @type libmodal.utils
 
+--- @alias CursorPosition {[1]: integer, [2]: integer} see `nvim_win_get_cursor`
+
 --- @class libmodal.Mode
+--- @field private cursor CursorPosition
 --- @field private flush_input_timer unknown
 --- @field private help? libmodal.utils.Help
 --- @field private input libmodal.utils.Var[integer]
@@ -18,6 +21,21 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field public exit libmodal.utils.Var[boolean]
 --- @field public timeouts? libmodal.utils.Var[boolean]
 local Mode = utils.classes.new()
+
+--- Cursor events triggered by which modes
+local CURSOR_EVENTS_BY_MODE = {
+	CursorMoved = {
+		n = true,
+		V = true,
+		v = true,
+		[utils.api.replace_termcodes '<C-v>'] = true,
+	},
+
+	CursorMovedI = {
+		i = true,
+		R = true,
+	},
+}
 
 --- The namespaces used by modes
 local NS = {
@@ -51,7 +69,7 @@ function Mode:execute_instruction(instruction)
 	end
 
 	self.count:set(0)
-	self:render_virt_cursor(0, true)
+	self:render_virtual_cursor(0, true)
 end
 
 --- check the user's input against the `self.instruction` mappings to see if there is anything to execute.
@@ -113,7 +131,7 @@ end
 --- clears the virtual cursor from the screen
 --- @param bufnr integer to clear the cursor on
 --- @private
-function Mode:clear_virt_cursor(bufnr)
+function Mode:clear_virtual_cursor(bufnr)
 	vim.api.nvim_buf_clear_namespace(bufnr, NS.CURSOR, 0, -1);
 
 end
@@ -133,14 +151,15 @@ function Mode:enter()
 	--- HACK: neovim/neovim#20793
 	vim.api.nvim_command 'highlight Cursor blend=100'
 	vim.schedule(function() vim.opt.guicursor:append { 'a:Cursor/lCursor' } end)
-	self:render_virt_cursor(0)
+	self.cursor = self:cursor_in(0)
+	self:render_virtual_cursor(0)
 
 	do
 		local augroup = vim.api.nvim_create_augroup('libmodal-mode-' .. self.name, { clear = false })
 		self.virtual_cursor_autocmd = vim.api.nvim_create_autocmd('BufLeave', {
 			callback = function(ev)
 				local bufnr = ev.buf
-				self:clear_virt_cursor(bufnr)
+				self:clear_virtual_cursor(bufnr)
 			end,
 			group = augroup,
 		})
@@ -213,20 +232,37 @@ function Mode:get_user_input()
 	end
 end
 
+--- @param winid integer
+--- @return CursorPosition line_and_col
+function Mode:cursor_in(winid)
+	local cursor = vim.api.nvim_win_get_cursor(winid)
+	cursor[1] = cursor[1] - 1 -- win_get_cursor returns +1 for our purpose
+	return cursor
+end
+
 --- render the virtual cursor using extmarks
 --- @param winid integer
 --- @param clear? boolean if true, clear other virtual cursors before rendering the new one
 --- @private
-function Mode:render_virt_cursor(winid, clear)
+function Mode:render_virtual_cursor(winid, clear)
 	local bufnr = vim.api.nvim_win_get_buf(winid)
 	if clear then
-		self:clear_virt_cursor(bufnr)
+		self:clear_virtual_cursor(bufnr)
 	end
 
-	local cursor = vim.api.nvim_win_get_cursor(winid)
-	cursor[1] = cursor[1] - 1 -- win_get_cursor returns +1 for our purpose
-
+	local cursor = self:cursor_in(winid)
 	vim.highlight.range(bufnr, NS.CURSOR, 'Cursor', cursor, cursor, { inclusive = true })
+
+	if not vim.deep_equal(self.cursor, cursor) then
+		local mode = vim.api.nvim_get_mode().mode
+		if CURSOR_EVENTS_BY_MODE.CursorMoved[mode] then
+			vim.api.nvim_exec_autocmds('CursorMoved', {})
+		elseif CURSOR_EVENTS_BY_MODE.CursorMovedI[mode] then
+			vim.api.nvim_exec_autocmds('CursorMovedI', {})
+		end
+
+		self.cursor = cursor
+	end
 end
 
 --- show the mode indicator, if it is enabled
@@ -255,10 +291,11 @@ end
 --- @return nil
 function Mode:tear_down()
 	--- HACK: neovim/neovim#20793
-	self:clear_virt_cursor(0)
+	self:clear_virtual_cursor(0)
 	vim.schedule(function() vim.opt.guicursor:remove { 'a:Cursor/lCursor' } end)
 	vim.api.nvim_command 'highlight Cursor blend=0'
 	vim.api.nvim_del_autocmd(self.virtual_cursor_autocmd)
+	self.cursor = nil
 
 	if type(self.instruction) == 'table' then
 		self.flush_input_timer:stop()
