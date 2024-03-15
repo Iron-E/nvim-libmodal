@@ -13,18 +13,31 @@ local fooModeKeymaps =
 	j = 'norm j',
 	k = 'norm k',
 	l = 'norm l',
+
 	G = function(self)
 		local count = self.count:get()
 		vim.api.nvim_command('norm! ' .. count .. 'G')
 	end,
+
+	d = 'delete',
+	e = 'edit foo',
+	o = 'norm o',
+	p = 'bp',
+
 	zf = 'split',
 	zfc = 'q',
 	zff = split_twice,
 	zfo = 'vsplit',
-	e = 'edit foo',
-	p = 'bp',
-	o = 'norm o',
 }
+
+-- show that events work as expected
+local id = vim.api.nvim_create_autocmd(
+	{ 'CursorMoved', 'CursorMovedI', 'TextChanged', 'TextChangedI', 'TextChangedP', 'TextChangedT' },
+	{ callback = function(ev) vim.notify(vim.inspect(ev)) end }
+)
 
 -- enter the mode using the keymaps
 libmodal.mode.enter('FOO', fooModeKeymaps)
+
+-- remove setup
+vim.api.nvim_del_autocmd(id)
