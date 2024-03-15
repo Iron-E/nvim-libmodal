@@ -5,6 +5,7 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @alias CursorPosition {[1]: integer, [2]: integer} see `nvim_win_get_cursor`
 
 --- @class libmodal.Mode
+--- @field private autocmds integer[]
 --- @field private cursor CursorPosition
 --- @field private flush_input_timer unknown
 --- @field private help? libmodal.utils.Help
@@ -16,7 +17,6 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field private name string
 --- @field private popups libmodal.collections.Stack
 --- @field private supress_exit boolean
---- @field private virtual_cursor_autocmd integer
 --- @field public count libmodal.utils.Var[integer]
 --- @field public exit libmodal.utils.Var[boolean]
 --- @field public timeouts? libmodal.utils.Var[boolean]
@@ -133,7 +133,6 @@ end
 --- @private
 function Mode:clear_virtual_cursor(bufnr)
 	vim.api.nvim_buf_clear_namespace(bufnr, NS.CURSOR, 0, -1);
-
 end
 
 --- enter this mode.
@@ -156,13 +155,15 @@ function Mode:enter()
 
 	do
 		local augroup = vim.api.nvim_create_augroup('libmodal-mode-' .. self.name, { clear = false })
-		self.virtual_cursor_autocmd = vim.api.nvim_create_autocmd('BufLeave', {
-			callback = function(ev)
-				local bufnr = ev.buf
-				self:clear_virtual_cursor(bufnr)
-			end,
-			group = augroup,
-		})
+		self.autocmds = {
+			vim.api.nvim_create_autocmd('BufLeave', {
+				callback = function(ev)
+					local bufnr = ev.buf
+					self:clear_virtual_cursor(bufnr)
+				end,
+				group = augroup,
+			}),
+		}
 	end
 
 	self.previous_mode_name = vim.g.libmodalActiveModeName
@@ -294,7 +295,9 @@ function Mode:tear_down()
 	self:clear_virtual_cursor(0)
 	vim.schedule(function() vim.opt.guicursor:remove { 'a:Cursor/lCursor' } end)
 	vim.api.nvim_command 'highlight Cursor blend=0'
-	vim.api.nvim_del_autocmd(self.virtual_cursor_autocmd)
+	for _, autocmd in ipairs(self.autocmds) do
+		vim.api.nvim_del_autocmd(autocmd)
+	end
 	self.cursor = nil
 
 	if type(self.instruction) == 'table' then
