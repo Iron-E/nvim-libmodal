@@ -6,6 +6,7 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 
 --- @class libmodal.Mode
 --- @field private autocmds integer[]
+--- @field private changedtick integer
 --- @field private cursor CursorPosition
 --- @field private flush_input_timer unknown
 --- @field private help? libmodal.utils.Help
@@ -22,18 +23,64 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field public timeouts? libmodal.utils.Var[boolean]
 local Mode = utils.classes.new()
 
---- Cursor events triggered by which modes
-local CURSOR_EVENTS_BY_MODE = {
-	CursorMoved = {
-		n = true,
-		V = true,
-		v = true,
-		[utils.api.replace_termcodes '<C-v>'] = true,
+local C_v = utils.api.replace_termcodes '<C-v>'
+local C_s = utils.api.replace_termcodes '<C-s>'
+
+--- Event groups organized by modes
+local EVENTS_BY_MODE = {
+	--- Cursor events triggered by which modes
+	CURSOR_MOVED = {
+		CursorMoved = {
+			n = true,
+			nt = true,
+			ntT = true,
+			s = true,
+			S = true,
+			[C_s] = true,
+			v = true,
+			V = true,
+			[C_v] = true,
+			vs = true,
+			Vs = true,
+			[C_v .. 's'] = true,
+		},
+
+		CursorMovedI = {
+			i = true,
+			niI = true,
+			niR = true,
+			R = true,
+			Rv = true,
+		},
 	},
 
-	CursorMovedI = {
-		i = true,
-		R = true,
+	TEXT_CHANGED = {
+		TextChanged = {
+			n = true,
+			nt = true,
+			ntT = true,
+		},
+
+		TextChangedI = {
+			i = true,
+			niI = true,
+			niR = true,
+			R = true,
+			Rv = true,
+		},
+
+		TextChangedP = {
+			ic = true,
+			ix = true,
+			Rc = true,
+			Rvc = true,
+			Rx = true,
+			Rvx = true,
+		},
+
+		TextChangedT = {
+			t = true,
+		},
 	},
 }
 
@@ -57,6 +104,18 @@ local ZERO = string.byte(0)
 --- Byte for 9
 local NINE = string.byte(9)
 
+--- Execute events depending on current mode
+--- @param events_by_mode {[string]: {[string]: true}}
+local function execute_event_by_mode(events_by_mode)
+	local mode = vim.api.nvim_get_mode().mode
+	for event, modes in pairs(events_by_mode) do
+		if modes[mode] then
+			vim.api.nvim_exec_autocmds(event, {})
+			break
+		end
+	end
+end
+
 --- execute the `instruction`.
 --- @private
 --- @param instruction fun(libmodal.Mode)|string a Lua function or Vimscript command.
@@ -70,6 +129,7 @@ function Mode:execute_instruction(instruction)
 
 	self.count:set(0)
 	self:render_virtual_cursor(0, true)
+	self:execute_text_changed_events()
 end
 
 --- check the user's input against the `self.instruction` mappings to see if there is anything to execute.
@@ -135,6 +195,24 @@ function Mode:clear_virtual_cursor(bufnr)
 	vim.api.nvim_buf_clear_namespace(bufnr, NS.CURSOR, 0, -1);
 end
 
+--- Runs CursorMoved* events, if applicable
+--- @param cursor CursorPosition the current cursor position
+function Mode:execute_cursor_moved_events(cursor)
+	if not vim.deep_equal(self.cursor, cursor) then
+		execute_event_by_mode(EVENTS_BY_MODE.CURSOR_MOVED)
+		self.cursor = cursor
+	end
+end
+
+--- Runs TextChanged* events, if applicable
+function Mode:execute_text_changed_events()
+	local changedtick = vim.api.nvim_buf_get_changedtick(0)
+	if self.changedtick ~= changedtick then
+		execute_event_by_mode(EVENTS_BY_MODE.TEXT_CHANGED)
+		self.changedtick = changedtick
+	end
+end
+
 --- enter this mode.
 --- @return nil
 function Mode:enter()
@@ -163,8 +241,17 @@ function Mode:enter()
 				end,
 				group = augroup,
 			}),
+
+			vim.api.nvim_create_autocmd('BufEnter', {
+				callback = function(ev)
+					local bufnr = ev.buf
+					self.changedtick = vim.api.nvim_buf_get_changedtick(bufnr)
+				end,
+			});
 		}
 	end
+
+	self.changedtick = vim.api.nvim_buf_get_changedtick(0)
 
 	self.previous_mode_name = vim.g.libmodalActiveModeName
 	vim.g.libmodalActiveModeName = self.name
@@ -254,17 +341,7 @@ function Mode:render_virtual_cursor(winid, clear)
 	local cursor = self:cursor_in(winid)
 	vim.highlight.range(bufnr, NS.CURSOR, 'Cursor', cursor, cursor, { inclusive = true })
 
-	if not vim.deep_equal(self.cursor, cursor) then
-		local mode = vim.api.nvim_get_mode().mode
-		for event, modes in pairs(CURSOR_EVENTS_BY_MODE) do
-			if modes[mode] then
-				vim.api.nvim_exec_autocmds(event, {})
-				break
-			end
-		end
-
-		self.cursor = cursor
-	end
+	self:execute_cursor_moved_events(cursor)
 end
 
 --- show the mode indicator, if it is enabled
