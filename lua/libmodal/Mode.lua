@@ -256,10 +256,11 @@ function Mode:render_virtual_cursor(winid, clear)
 
 	if not vim.deep_equal(self.cursor, cursor) then
 		local mode = vim.api.nvim_get_mode().mode
-		if CURSOR_EVENTS_BY_MODE.CursorMoved[mode] then
-			vim.api.nvim_exec_autocmds('CursorMoved', {})
-		elseif CURSOR_EVENTS_BY_MODE.CursorMovedI[mode] then
-			vim.api.nvim_exec_autocmds('CursorMovedI', {})
+		for event, modes in pairs(CURSOR_EVENTS_BY_MODE) do
+			if modes[mode] then
+				vim.api.nvim_exec_autocmds(event, {})
+				break
+			end
 		end
 
 		self.cursor = cursor
