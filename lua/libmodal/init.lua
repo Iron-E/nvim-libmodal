@@ -61,6 +61,26 @@ end
 
 libmodal.mode.map = {}
 
+--- Example:
+--- ```lua
+--- {
+---   a = vim.cmd.undo, -- Error
+---   b = function() vim.cmd.undo() end, -- OK
+---   c = fn(vim.cmd.undo), -- Good
+--- }
+--- ```
+---
+--- @generic T
+--- @param f fun(...: T) the function to map
+--- @param ... T arguments to `f`
+--- @return fun() # that calls `f` which the arguments provided
+function libmodal.mode.map.fn(f, ...)
+	local args = { ... }
+	return function()
+		f(unpack(args))
+	end
+end
+
 --- `enter` a mode using the arguments given, and do not return to the current mode.
 ---
 --- Example:
