@@ -53,11 +53,27 @@ function libmodal.mode.enter(name, instruction, supress_exit)
 	mode:enter()
 end
 
+--- @see libmodal.mode.map.switch
+function libmodal.mode.switch(...)
+	vim.deprecate('libmodal.mode.switch', 'libmodal.mode.map.switch', '4.0.0', 'nvim-libmodal')
+	return libmodal.mode.map.switch(...)
+end
+
+libmodal.mode.map = {}
+
 --- `enter` a mode using the arguments given, and do not return to the current mode.
+---
+--- Example:
+--- ```lua
+--- {
+---   a = switch('foo', {--[[Foo mode keymaps go here]]}),
+--- }
+--- ```
+---
 --- @param ... unknown arguments to `libmodal.mode.enter`
 --- @return fun(self: libmodal.Mode) switcher enters the mode
 --- @see libmodal.mode.enter which this function takes the same arguments as
-function libmodal.mode.switch(...)
+function libmodal.mode.map.switch(...)
 	local args = { ... }
 	return function(self)
 		self:switch(unpack(args))
