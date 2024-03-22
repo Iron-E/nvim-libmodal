@@ -24,7 +24,9 @@ local fooModeKeymaps =
 	o = 'norm o',
 	p = 'bp',
 
-	zf = 'split',
+	x = libmodal.mode.map.fn(vim.notify, 'hello'),
+
+	zf = libmodal.mode.map.fn(vim.cmd.split),
 	zfc = 'q',
 	zff = split_twice,
 	zfo = 'vsplit',

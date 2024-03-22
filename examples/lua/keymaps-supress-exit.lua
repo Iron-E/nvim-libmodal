@@ -22,7 +22,7 @@ local fooModeKeymaps =
 	y = function(self)
 		self:switch('Bar', barModeKeymaps) -- enters Bar and then exits Foo when it is done
 	end,
-	z = libmodal.mode.switch('Bar', barModeKeymaps), -- the same as above, but more convenience
+	z = libmodal.mode.map.switch('Bar', barModeKeymaps), -- the same as above, but more convenience
 }
 
 -- tell the mode not to exit automatically
