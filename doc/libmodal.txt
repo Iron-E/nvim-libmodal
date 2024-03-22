@@ -262,7 +262,45 @@ MODE                                                 *libmodal-mode* *libmodal.m
 		|lua-eval|          For type conversions between Vimscript to |Lua|.
 		|libmodal-examples| For examples of this function.
 
-`libmodal.mode`.switch(...)                                 *libmodal.mode:switch()*
+`libmodal.mode.map`.fn({f}, ...)                              *libmodal.mode.map.fn()*
+
+	Because |libmodal-mode|s expose the `self` parameter to |lua-function|s in
+	|lua-table|s, mapping certain functions may not work as you expect. For
+	example: >lua
+		libmodel.mode.enter('foo', {
+			a = vim.cmd.undo, -- error!
+		})
+<
+	This is because some functions accept |lua-nil| as a parameter (e.g.
+	`vim.cmd.undo()` is OK) but not accept parameters of certain types (e.g.
+	`vim.cmd.undo('foo')` is an error).  In this case (expanding the previous
+	example to highlight the problem): >lua
+		libmodel.mode.enter('foo', {
+			-- equivalent to `a = vim.cmd.undo`
+			a = function(self) vim.cmd.undo(self) end,
+		})
+<	`self` (a |libmodal.Mode|) is not an appropriate parmeter to `vim.cmd.undo`.
+
+	To fix this, one can explcitly write the following as mapping: >lua
+		libmodel.mode.enter('foo', {
+			a = function() vim.cmd.undo() end, -- error!
+		})
+<	However, this is tiresome. To simplify this process, `libmodal.mode.map.fn`
+	was created.
+
+	Parameters: ~
+		{f}  the function to map
+		...  arguments to the function
+
+	Example: ~
+>lua
+		local fn = libomdal.mode.map.fn
+		libmodal.mode.enter('Foo', {
+			a = fn(vim.cmd.undo),
+			b = fn(print, 'hello'),
+		})
+
+`libmodal.mode.map`.switch(...)                         *libmodal.mode.map.switch()*
 
 	Convenience wrapper for |Mode:switch()|.
 
@@ -272,7 +310,7 @@ MODE                                                 *libmodal-mode* *libmodal.m
 	Example: ~
 >lua
 		libmodal.mode.enter('Foo', {
-			f = libmodal.mode.switch('Bar', {
+			f = libmodal.mode.map.switch('Bar', {
 				b = function()
 					vim.notify('Inside Bar mode')
 				end,
