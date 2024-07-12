@@ -40,7 +40,7 @@ end
 --- @param keymap table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
 --- @return libmodal.Layer
 function libmodal.layer.new(keymap)
-		return require('libmodal.Layer').new(keymap)
+	return require('libmodal.Layer').new(keymap)
 end
 
 libmodal.mode = {}
