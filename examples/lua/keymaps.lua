@@ -38,8 +38,16 @@ local id = vim.api.nvim_create_autocmd(
 	{ callback = function(ev) vim.notify(vim.inspect(ev)) end }
 )
 
--- enter the mode using the keymaps
-libmodal.mode.enter('FOO', fooModeKeymaps)
+local mode =
+	-- create a mode from the keymaps
+	libmodal.mode.new('FOO', fooModeKeymaps)
+	-- OPTIONAL: assign a fallback for the mode
+	:with_fallback(function (_, keys)
+		vim.notify(vim.inspect(keys))
+	end)
+
+-- enter the mode
+mode:enter()
 
 -- remove setup
 vim.api.nvim_del_autocmd(id)
