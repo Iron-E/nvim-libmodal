@@ -14,6 +14,7 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 --- @field private input_bytes? integer[] local `input` history
 --- @field private instruction fun()|{[string]: fun()|string}
 --- @field private mappings libmodal.collections.ParseTable
+--- @field private mapping_fallback nil|fun(mode: libmodal.Mode, keys: string)
 --- @field private modeline string[][]
 --- @field private name string
 --- @field private popups libmodal.collections.Stack
@@ -151,8 +152,11 @@ function Mode:check_input_for_mapping()
 
 	-- if there was no matching command
 	if not cmd then
-		if #self.input_bytes < 2 and self.input_bytes[1] == HELP_CHAR:byte() then
+		if #self.input_bytes < 2 and self.input_bytes[1] == HELP_CHAR:byte() then -- the user asked for help
 			self.help:show()
+		elseif self.mapping_fallback ~= nil then
+			local str = string.char(unpack(self.input_bytes))
+			self.mapping_fallback(self, str)
 		end
 
 		self.input_bytes = {}
@@ -392,6 +396,14 @@ function Mode:tear_down()
 	end
 
 	utils.api.redraw()
+end
+
+--- @param keymap table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
+--- @param f fun(mode: libmodal.Mode, keys: string)
+--- @return libmodal.Mode
+function Mode:with_fallback(f)
+	self.mapping_fallback = f
+	return self
 end
 
 --- create a new mode.
