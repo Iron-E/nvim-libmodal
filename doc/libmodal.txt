@@ -380,7 +380,9 @@ MODE                                                 *libmodal-mode* *libmodal.m
 	the current mode.
 
 	Parameters: ~
-		See |libmodal.mode.enter()|.
+		Either:
+		- A `libmodal.Mode` to enter
+		- Parameters to |libmodal.mode.new()|.
 
 	Example: ~
 >lua

@@ -12,6 +12,9 @@ local barModeKeymaps = {
 local fooModeKeymaps =
 {
 	[k '<Esc>'] = 'echom "You cant exit using escape."',
+	h = function(self)
+		self:switch(libmodal.mode.new('Bar', barModeKeymaps)) -- enters Bar and then exits Foo when it is done
+	end,
 	q = 'let g:fooModeExit = 1', -- exits all instances of this mode
 	w = function(self)
 		self.exit:set_global(true) -- exits all instances of the mode (with lua)

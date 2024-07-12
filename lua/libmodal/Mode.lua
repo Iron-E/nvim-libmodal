@@ -364,7 +364,13 @@ end
 --- @see libmodal.Mode.enter which `...` shares the layout of
 --- @see libmodal.Mode.exit
 function Mode:switch(...)
-	local mode = Mode.new(...)
+	local mode
+	if type(...) == 'table' then
+		mode = ...
+	else
+		mode = Mode.new(...)
+	end
+
 	mode:enter()
 	self.exit:set_local(true)
 end
