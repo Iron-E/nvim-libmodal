@@ -40,17 +40,24 @@ end
 --- @param keymap table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
 --- @return libmodal.Layer
 function libmodal.layer.new(keymap)
-		return require('libmodal.Layer').new(keymap)
+	return require('libmodal.Layer').new(keymap)
 end
 
 libmodal.mode = {}
 
 --- enter a mode.
+--- @param ... any arguments to `libmodal.mode.new`
+function libmodal.mode.enter(...)
+	local mode = libmodal.mode.new(...)
+	mode:enter()
+end
+
+--- create a new mode
 --- @param name string the name of the mode.
 --- @param instruction fun()|string|table a Lua function, keymap dictionary, Vimscript command.
-function libmodal.mode.enter(name, instruction, supress_exit)
-	local mode = require('libmodal.Mode').new(name, instruction, supress_exit)
-	mode:enter()
+--- @return libmodal.Mode
+function libmodal.mode.new(name, instruction, supress_exit)
+	return require('libmodal.Mode').new(name, instruction, supress_exit)
 end
 
 --- @see libmodal.mode.map.switch

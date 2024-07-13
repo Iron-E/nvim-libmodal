@@ -166,25 +166,29 @@ FUNCTIONS                                               *libmodal-usage-function
 
 MODE                                                 *libmodal-mode* *libmodal.mode*
 
-`libmodal.mode`.enter({name}, {instruction} [, {supress_exit}])    *libmodal.mode.enter()*
-`libmodal`#Enter({name}, {instruction} [, {supress_exit}])              *libmodal#Enter()*
+`libmodal.mode`.enter(...)    *libmodal.mode.enter()*
+`libmodal`#Enter(...)              *libmodal#Enter()*
 
-	Enter a new |vim-mode| using {instruction} to determine what actions will
-	be taken upon specific user inputs.
+	Creates a mode (see |libmodal.mode.new()|) and then immediately enters it
+	(see |libmodal.Mode:enter()|).
 
-	User input is taken one character at a time using |getchar()|. It is
-	passed through a |g:var| determined by the {name} of the mode. For
-	example, if {name} is "FOO" then the |g:var| is `g:fooModeInput`.
-	Additionally, this input is reported as a |char2nr| number, and as such
-	should be decoded with `string.char()` (|nr2char| in |Lua|) if working
-	with raw characters is desired.
+	For additional notes on how a `Mode` works, see |libmodal.Mode:enter()|.
 
-	To take input on a line-by-line basis, see |libmodal-prompt|.
+	Parameters: ~
+		Same as |libmodal.mode.new()|
 
-	NOTE: mode transitions trigger |ModeChanged| events.
+	See also: ~
+		|libmodal-examples| For examples of this function.
+		|libmodal.mode.new| For an alternative that allows additional
+		                    customization before entering the mode.
 
-	NOTE: `libmodal.mode.enter()`/`libmodal#Enter()` may be called from inside
-	      itself. See |libmodal-examples| for an example.
+`libmodal.mode`.new({name}, {instruction} [, {supress_exit}])        *libmodal.mode.new()*
+
+	Create a new |vim-mode| using {instruction} to determine what actions will
+	be taken upon specific user inputs. To enter the mode use either
+	|libmodal.Mode:enter()| or |libmodal.mode.enter|.
+
+	For additional notes on how a mode works, see |libmodal.Mode:enter()|.
 
 	Parameters: ~
 		{name}         The name of the mode (e.g. |INSERT|).
@@ -258,9 +262,15 @@ MODE                                                 *libmodal-mode* *libmodal.m
 			  - use |libmodal.Mode:exit()|
 			  See |libmodal-examples|.
 
+	Return: ~
+		A `libmodal.Mode` object
+
 	See also: ~
-		|lua-eval|          For type conversions between Vimscript to |Lua|.
-		|libmodal-examples| For examples of this function.
+		|lua-eval|               For type conversions between Vimscript to |Lua|.
+		|libmodal-examples|      For examples of this function.
+		|libmodal.Mode:enter()|  For how to enter a mode using a `libmodal.Mode`
+		|libmodal.mode.enter|    For a convenient way to create and enter a
+		                         mode at once.
 
 `libmodal.mode.map`.fn({f}, ...)                              *libmodal.mode.map.fn()*
 
@@ -318,6 +328,33 @@ MODE                                                 *libmodal-mode* *libmodal.m
 		})
 <
 
+`libmodal.Mode`:enter()                                      *libmodal.Mode:enter()*
+
+	Enters the given mode.
+
+	While the mode is entered, user input is taken one character at a time using
+	|getchar()|. It is passed through a |g:var| determined by the {name} of the
+	mode. For example, if {name} is "FOO" then the |g:var| is `g:fooModeInput`.
+	Additionally, this input is reported as a |char2nr| number, and as such
+	should be decoded with `string.char()` (|nr2char| in |Lua|) if working
+	with raw characters is desired.
+
+	To take input on a line-by-line basis, see |libmodal-prompt|.
+
+	NOTE: mode transitions trigger |ModeChanged| events.
+
+	NOTE: `libmodal.mode.enter()`/`libmodal#Enter()` may be called from inside
+	      itself. See |libmodal-examples| for an example.
+
+	WARN: this function should not be called again while the mode is active!
+		  Either use |libmodal.mode.enter()| or create a new mode with
+		  |libmodal.mode.new()| and enter that instead.
+
+	See also: ~
+		|libmodal.mode.enter()|  For a helper to create and enter a function at
+		                         once.
+		|libmodal.mode.new()|    For how to create a `Mode`.
+
 `libmodal.Mode`:exit()                                        *libmodal.Mode:exit()*
 
 	When the {instruction} parameter to |libmodal.mode.enter()| is a
@@ -343,7 +380,9 @@ MODE                                                 *libmodal-mode* *libmodal.m
 	the current mode.
 
 	Parameters: ~
-		See |libmodal.mode.enter()|.
+		Either:
+		- A `libmodal.Mode` to enter
+		- Parameters to |libmodal.mode.new()|.
 
 	Example: ~
 >lua
@@ -356,6 +395,30 @@ MODE                                                 *libmodal-mode* *libmodal.m
 				})
 			end,
 		})
+<
+
+`libmodal.Mode`:with_fallback({f})                     *libmodal.Mode:with_fallback()*
+
+	Set a fallback for the `Mode` such that when keys are entered by a user and
+	no mapping is defined for them, this function will be called.
+
+	Parameters: ~
+		{f}  a |lua-function| with the signature
+		   `fun(mode: libmodal.Mode, keys: string)`
+
+	Return: ~
+		- The same `libmodal.Mode`, but with the fallback applied. The return
+		  value can be safely ignored, as the fallback is applied even without
+		  variable reassignment.
+
+	Example: ~
+>lua
+	libmodal.mode
+		.new('FOO', {--[[your keymaps here]]})
+		:with_fallback(function (_, keys)
+			vim.notify(vim.inspect(keys))
+		end)
+		:enter()
 <
 LAYER                                              *libmodal-layer* *libmodal.layer*
 
