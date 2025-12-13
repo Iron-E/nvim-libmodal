@@ -16,10 +16,11 @@ local function normalize_buffer(buffer)
 end
 
 --- Normalizes a keymap from `vim.api.nvim_get_keymap` so it can be passed to `vim.keymap.set`
---- @param keymap table
---- @return table normalized
+--- @param keymap vim.api.keyset.get_keymap
+--- @return libmodal.layer.keymap.options normalized
 local function normalize_keymap(keymap)
 	local to_return = {}
+
 	-- Keys which must be manually edited
 	to_return.buffer = keymap.buffer > 0 and keymap.buffer or nil
 	to_return.rhs = keymap.callback or keymap.rhs
@@ -36,8 +37,8 @@ local function normalize_keymap(keymap)
 end
 
 --- remove and return the right-hand side of a `keymap`.
---- @param keymap table the keymap to unpack
---- @return fun()|string rhs, table options
+--- @param keymap libmodal.layer.keymap.options the keymap to unpack
+--- @return fun()|string rhs, vim.keymap.set.Opts options
 local function unpack_keymap_rhs(keymap)
 	local rhs = keymap.rhs
 	keymap.rhs = nil
@@ -78,10 +79,16 @@ local function restore_map(layer, buffer, mode, lhs)
 	return true
 end
 
+--- @class libmodal.layer.keymap.options: vim.keymap.set.Opts
+--- @field rhs string|fun()
+--- @field buffer integer
+
+--- @alias libmodal.layer.keymap.options_by_mode { [string]: { [string]: libmodal.layer.keymap.options } }
+
 --- @class libmodal.Layer
 --- @field private active boolean whether the layer is currently applied
---- @field private existing_keymaps_by_mode table the keymaps to restore when exiting the mode; generated automatically
---- @field private layer_keymaps_by_mode table the keymaps to apply when entering the mode; provided by user
+--- @field private existing_keymaps_by_mode libmodal.layer.keymap.options_by_mode the keymaps to restore when exiting the mode; generated automatically
+--- @field private layer_keymaps_by_mode libmodal.layer.keymap.options_by_mode the keymaps to apply when entering the mode; provided by user
 local Layer = require('libmodal.utils.classes').new()
 
 --- apply the `Layer`'s keymaps buffer.
@@ -137,12 +144,14 @@ end
 --- @param mode string the mode that this keymap for.
 --- @param lhs string the left hand side of the keymap.
 --- @param rhs fun()|string the right hand side of the keymap.
---- @param options table options for the keymap.
+--- @param options vim.keymap.set.Opts options for the keymap.
 --- @return nil
 --- @see vim.keymap.set
 function Layer:map(mode, lhs, rhs, options)
 	lhs = utils.api.replace_termcodes(lhs)
 	options.buffer = normalize_buffer(options.buffer)
+
+	--- @cast options libmodal.layer.keymap.options
 
 	if self.active then -- the layer has been activated
 		if not self.existing_keymaps_by_mode[mode] then -- this is the first time that a keymap with this mode is being set
@@ -174,7 +183,7 @@ function Layer:map(mode, lhs, rhs, options)
 	end
 end
 
---- @param keymaps_by_mode table the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
+--- @param keymaps_by_mode libmodal.layer.keymap.options_by_mode the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
 --- @return libmodal.Layer
 function Layer.new(keymaps_by_mode)
 	return setmetatable({existing_keymaps_by_mode = {}, layer_keymaps_by_mode = keymaps_by_mode, active = false}, Layer)
