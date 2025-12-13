@@ -176,11 +176,11 @@ function Layer:map(mode, lhs, rhs, options)
 
 	-- add the new mapping to the layer's keymap
 	options.rhs = rhs
-	if self.layer_keymaps_by_mode[mode] then
-		self.layer_keymaps_by_mode[mode][lhs] = options
-	else
-		self.layer_keymaps_by_mode[mode] = {[lhs] = options}
+	if self.layer_keymaps_by_mode[mode] == nil then
+		self.layer_keymaps_by_mode[mode] = {}
 	end
+
+	self.layer_keymaps_by_mode[mode][lhs] = options
 end
 
 --- @param keymaps_by_mode libmodal.layer.keymap.options_by_mode the keymaps (e.g. `{n = {gg = {rhs = 'G', silent = true}}}`)
