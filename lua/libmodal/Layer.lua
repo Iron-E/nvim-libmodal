@@ -1,6 +1,12 @@
 local globals = require 'libmodal.globals'
 local utils = require 'libmodal.utils' --- @type libmodal.utils
 
+--- @class libmodal.layer.keymap.options: vim.keymap.set.Opts
+--- @field rhs string|fun()
+--- @field buffer integer
+
+--- @alias libmodal.layer.keymap.options_by_mode { [string]: { [string]: libmodal.layer.keymap.options } }
+
 --- Normalizes a `buffer = true|false|0` argument into a number.
 --- @param buffer boolean|number the argument to normalize
 --- @return nil|number
@@ -78,12 +84,6 @@ local function restore_map(layer, buffer, mode, lhs)
 
 	return true
 end
-
---- @class libmodal.layer.keymap.options: vim.keymap.set.Opts
---- @field rhs string|fun()
---- @field buffer integer
-
---- @alias libmodal.layer.keymap.options_by_mode { [string]: { [string]: libmodal.layer.keymap.options } }
 
 --- @class libmodal.Layer
 --- @field private active boolean whether the layer is currently applied
