@@ -3,9 +3,20 @@ local utils = require 'libmodal.utils' --- @type libmodal.utils
 
 --- @class libmodal.layer.keymap.options: vim.keymap.set.Opts
 --- @field rhs string|fun()
---- @field buffer integer
+--- @field buffer? integer
 
 --- @alias libmodal.layer.keymap.options_by_mode { [string]: { [string]: libmodal.layer.keymap.options } }
+
+--- Gets the global or buffer-local keymaps for `mode`, depending on the `options`.
+--- @param options libmodal.layer.keymap.options
+--- @return vim.api.keyset.get_keymap[]
+local function get_keymaps_for_options(mode, options)
+	if options.buffer then
+		return vim.api.nvim_buf_get_keymap(options.buffer, mode)
+	end
+
+	return vim.api.nvim_get_keymap(mode)
+end
 
 --- Normalizes a `buffer = true|false|0` argument into a number.
 --- @param buffer boolean|number the argument to normalize
@@ -159,11 +170,8 @@ function Layer:map(mode, lhs, rhs, options)
 		end
 
 		if self.existing_keymaps_by_mode[mode][lhs] == nil then -- the keymap's state has not been saved.
-			for _, existing_keymap in ipairs(
-				options.buffer and
-				vim.api.nvim_buf_get_keymap(options.buffer, mode) or
-				vim.api.nvim_get_keymap(mode)
-			) do -- check if this keymap will overwrite something
+			local keymaps = get_keymaps_for_options(mode, options)
+			for _, existing_keymap in ipairs(keymaps) do -- check if this keymap will overwrite something
 				if utils.api.replace_termcodes(existing_keymap.lhs) == lhs then -- mapping this will overwrite something; log the old mapping
 					self.existing_keymaps_by_mode[mode][lhs] = normalize_keymap(existing_keymap)
 					break
