@@ -154,11 +154,11 @@ function Layer:map(mode, lhs, rhs, options)
 	--- @cast options libmodal.layer.keymap.options
 
 	if self.active then -- the layer has been activated
-		if not self.existing_keymaps_by_mode[mode] then -- this is the first time that a keymap with this mode is being set
+		if self.existing_keymaps_by_mode[mode] == nil then -- this is the first time that a keymap with this mode is being set
 			self.existing_keymaps_by_mode[mode] = {}
 		end
 
-		if not self.existing_keymaps_by_mode[mode][lhs] then -- the keymap's state has not been saved.
+		if self.existing_keymaps_by_mode[mode][lhs] == nil then -- the keymap's state has not been saved.
 			for _, existing_keymap in ipairs(
 				options.buffer and
 				vim.api.nvim_buf_get_keymap(options.buffer, mode) or
